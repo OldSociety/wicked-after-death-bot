@@ -3,10 +3,33 @@ require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
 const { Op } = require('sequelize')
-const { Client, Collection, GatewayIntentBits } = require('discord.js')
+const { Users, CurrencyShop } = require('./dbObjects.js');
+const { Client, codeBlock, Collection, GatewayIntentBits } = require('discord.js')
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] })
+
+// Store balances
+const currency = new Collection();
+
+async function addBalance(id, amount) {
+	const user = currency.get(id);
+
+	if (user) {
+		user.balance += Number(amount);
+		return user.save();
+	}
+
+	const newUser = await Users.create({ user_id: id, balance: amount });
+	currency.set(id, newUser);
+
+	return newUser;
+}
+
+function getBalance(id) {
+	const user = currency.get(id);
+	return user ? user.balance : 0;
+}
 
 client.cooldowns = new Collection()
 client.commands = new Collection()
