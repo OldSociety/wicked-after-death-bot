@@ -1,12 +1,11 @@
 module.exports = (sequelize, DataTypes) => {
-	return sequelize.define('users', {
-		user_id: {
+	return sequelize.define('currency_shop', {
+		name: {
 			type: DataTypes.STRING,
-			primaryKey: true,
+			unique: true,
 		},
-		balance: {
+		cost: {
 			type: DataTypes.INTEGER,
-			defaultValue: 0,
 			allowNull: false,
 		},
 	}, {
