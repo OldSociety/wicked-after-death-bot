@@ -2,7 +2,7 @@
 require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
-const { Op } = require('sequelize')
+const { Sequelize } = require('sequelize')
 const { Users, CurrencyShop } = require('./dbObjects.js');
 const { Client, codeBlock, Collection, GatewayIntentBits } = require('discord.js')
 
