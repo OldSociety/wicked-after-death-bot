@@ -51,33 +51,14 @@ for (const file of eventFiles) {
   }
 }
 
-// Connection information Sequelize/Sqlite
-const sequelize = new Sequelize('database', 'user', 'password', {
+// Create a Sequelize instance with your configuration
+const sequelize = new Sequelize('database', 'username', 'password', {
   host: 'localhost',
   dialect: 'sqlite',
   logging: false,
-  // SQLite only
   storage: 'database.sqlite',
-  user: 'root',
-  password: 'root'
-})
+});
 
-// Attempt to connect with sequelize tables and then then sync/create those tables.
-async function authenticateAndSync() {
-  try {
-    // Authenticate the connection
-    await sequelize.authenticate();
-    console.log('Connection established successfully.');
-
-    // Synchronize your models (assuming you have defined models)
-    await sequelize.sync();
-    console.log('Models synchronized successfully.');
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-authenticateAndSync()
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
