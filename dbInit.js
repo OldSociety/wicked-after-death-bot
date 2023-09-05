@@ -1,13 +1,9 @@
 const Sequelize = require('sequelize')
+const sequelize = require('./Utils/sequelize');
 
-const sequelize = new Sequelize('database', 'username', 'password', {
-  host: 'localhost',
-  dialect: 'sqlite',
-  logging: false,
-  storage: 'database.sqlite',
-})
-
-const Users = require('./Models/Users.js')(sequelize, Sequelize.DataTypes)
+const User = require('./Models/User.js')(sequelize, Sequelize.DataTypes)
+//verify Users
+console.log(User === sequelize.models.User)
 
 sequelize
   .authenticate()
@@ -16,8 +12,15 @@ sequelize
   })
   .catch(console.error)
 
+  // sequelize
+  // .drop()
+  // .then(async () => {
+  //   console.log('Tables have been dropped.')
+  // })
+  // .catch(console.error)
+
 sequelize
-  .sync({ alter: true })
+  .sync({ force: true })
   .then(async () => {
     console.log('All databases synced')
     sequelize.close()
@@ -33,4 +36,4 @@ sequelize
 //   },
 // });
 
-module.exports = { Users }
+module.exports = { User }

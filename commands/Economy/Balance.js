@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js')
 // const sequelize = require('../../app'); // Import the Sequelize instance from your app.js
-const User = require('../../Models/Users') // Import the User model
+const User = require('../../Models/User') // Import the User model
 
 module.exports = {
   cooldown: 5,

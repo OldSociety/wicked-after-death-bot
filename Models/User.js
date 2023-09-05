@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         primaryKey: true,
       },
-      coins: {
+      balance: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
         allowNull: false,
