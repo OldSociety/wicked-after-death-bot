@@ -3,7 +3,7 @@ require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
 const { Sequelize } = require('sequelize')
-const { Users, CurrencyShop } = require('./dbObjects.js');
+const { Users, CurrencyShop } = require('./db/dbObjects.js');
 const { Client, codeBlock, Collection, GatewayIntentBits } = require('discord.js')
 
 // Create a new client instance

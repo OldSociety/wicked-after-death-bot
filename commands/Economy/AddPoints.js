@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
 	cooldown: 5,
 	data: new SlashCommandBuilder()
-		.setName('addpoints')
+		.setName('addcoins')
 		.setDescription('Adds fate points to account.'),
 	async execute(interaction) {
         async function addBalance(id, amount) {
