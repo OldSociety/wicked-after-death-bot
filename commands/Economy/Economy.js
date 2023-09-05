@@ -11,7 +11,7 @@ const {
     data: new SlashCommandBuilder()
       .setName('economy')
       .setDescription('Create your economy account!'),
-    async exectute(interaction) {
+    async execute(interaction) {
   
       const embed = new EmbedBuilder()
         .setColor('Blue')
