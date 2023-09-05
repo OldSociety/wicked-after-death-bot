@@ -19,14 +19,6 @@ const client = new Client({
 // Store balances
 const currency = new Collection()
 
-// Restart bot
-if (message.content === 'restartthebot') {
-  if (message.author.id !== 'Owners ID') return
-  message.channel.send('Restarted.').then(() => {
-    process.exit(1)
-  })
-}
-
 // function getBalance(id) {
 // 	const user = currency.get(id);
 // 	return user ? user.balance : 0;
