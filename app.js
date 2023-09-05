@@ -3,26 +3,14 @@ require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
 const { Sequelize } = require('sequelize')
-const { Users } = require('./db/dbObjects.js')
-const {
-  Client,
-  codeBlock,
-  Collection,
-  GatewayIntentBits,
-} = require('discord.js')
+
+const { Client, Collection, GatewayIntentBits } = require('discord.js')
+const { userInfo } = require('node:os')
 
 // Create a new client instance
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 })
-
-// Store balances
-const currency = new Collection()
-
-// function getBalance(id) {
-// 	const user = currency.get(id);
-// 	return user ? user.balance : 0;
-// }
 
 client.cooldowns = new Collection()
 client.commands = new Collection()
@@ -47,8 +35,6 @@ for (const folder of commandFolders) {
   }
 }
 
-console.log(client.commands)
-
 // Dynamically Read file paths
 const eventsPath = path.join(__dirname, 'events')
 const eventFiles = fs
@@ -72,7 +58,27 @@ const sequelize = new Sequelize('database', 'user', 'password', {
   logging: false,
   // SQLite only
   storage: 'database.sqlite',
+  user: 'root',
+  password: 'root'
 })
+
+// Attempt to connect with sequelize tables and then then sync/create those tables.
+async function authenticateAndSync() {
+  try {
+    // Authenticate the connection
+    await sequelize.authenticate();
+    console.log('Connection established successfully.');
+
+    // Synchronize your models (assuming you have defined models)
+    await sequelize.sync();
+    console.log('Models synchronized successfully.');
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+authenticateAndSync()
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
+module.exports = sequelize // Export the Sequelize instance

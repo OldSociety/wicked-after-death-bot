@@ -2,17 +2,18 @@
   "name": "fatepoints-project",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "nodemon app.js"
   },
-  "author": "",
+  "author": "Natural20 Media",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^18.0.6",
     "discord.js": "^14.12.1",
     "node-fetch": "^3.2.6",
+    "nodemon": "^3.0.1",
     "sequelize": "^6.32.1",
     "sqlite3": "^5.1.6"
   }
