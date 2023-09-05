@@ -3,19 +3,34 @@ require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
 const { Sequelize } = require('sequelize')
-const { Users, CurrencyShop } = require('./db/dbObjects.js');
-const { Client, codeBlock, Collection, GatewayIntentBits } = require('discord.js')
+const { Users } = require('./db/dbObjects.js')
+const {
+  Client,
+  codeBlock,
+  Collection,
+  GatewayIntentBits,
+} = require('discord.js')
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] })
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+})
 
 // Store balances
-const currency = new Collection();
+const currency = new Collection()
 
-function getBalance(id) {
-	const user = currency.get(id);
-	return user ? user.balance : 0;
+// Restart bot
+if (message.content === 'restartthebot') {
+  if (message.author.id !== 'Owners ID') return
+  message.channel.send('Restarted.').then(() => {
+    process.exit(1)
+  })
 }
+
+// function getBalance(id) {
+// 	const user = currency.get(id);
+// 	return user ? user.balance : 0;
+// }
 
 client.cooldowns = new Collection()
 client.commands = new Collection()
@@ -58,13 +73,12 @@ for (const file of eventFiles) {
 
 // Connection information Sequelize/Sqlite
 const sequelize = new Sequelize('database', 'user', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: false,
-	// SQLite only
-	storage: 'database.sqlite',
-});
-
+  host: 'localhost',
+  dialect: 'sqlite',
+  logging: false,
+  // SQLite only
+  storage: 'database.sqlite',
+})
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
