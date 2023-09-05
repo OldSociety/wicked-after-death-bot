@@ -5,9 +5,9 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require('discord.js')
-const { DataTypes } = require('sequelize'); 
-const sequelize = require('../../Utils/sequelize');
-const User = require('../../Models/User')(sequelize, DataTypes);
+const { DataTypes } = require('sequelize')
+const sequelize = require('../../Utils/sequelize')
+const User = require('../../Models/User')(sequelize, DataTypes)
 
 module.exports = {
   cooldown: 5,
@@ -21,19 +21,34 @@ module.exports = {
 
     try {
       // equivalent to: INSERT INTO tags (name, description, username) values (?, ?, ?);
-      const user = await User.create({
-        user_id: userId,
-        balance: 730,
+
+      const [user, created] = await User.findOrCreate({
+        where: { user_id: userId },
+        defaults: {
+          balance: 730,
+        },
       })
-      
-      return interaction.reply(`You economy account for has been created. You have 730 credits in your balance.`)
+
+      console.log(user.user_id) // 'sdepold'
+      console.log(user.balance) // This may or may not be 'Technical Lead JavaScript'
+      console.log(created) // The boolean indicating whether this instance was just created
+
+      if (created) {
+        console.log(user) // This will certainly be 'Technical Lead JavaScript'
+        return interaction.reply(
+          `You economy account for has been created. You have 730 credits in your balance.`
+        )
+      } else {
+        return interaction.reply(
+          `You currently have ${user.balance} coins.`
+        )
+      }
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
         return interaction.reply('Account already exists.')
       }
-      console.error(error);
+      console.error(error)
       return interaction.reply('Something went wrong with adding an account.')
-    } 
+    }
   },
-  
 }
