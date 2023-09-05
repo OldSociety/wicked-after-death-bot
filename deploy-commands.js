@@ -3,9 +3,11 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 
+// USE THIS CODE TO REFRESH COMMAND LIST IN DISCORD!!!!
+
 const commands = [];
 // Grab all the command files from the commands directory you created earlier
-const foldersPath = path.join(__dirname, 'Commands');
+const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {

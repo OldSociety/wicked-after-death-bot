@@ -47,6 +47,8 @@ for (const folder of commandFolders) {
   }
 }
 
+console.log(client.commands)
+
 // Dynamically Read file paths
 const eventsPath = path.join(__dirname, 'events')
 const eventFiles = fs
