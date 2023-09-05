@@ -26,7 +26,7 @@ const currency = new Collection()
 
 client.cooldowns = new Collection()
 client.commands = new Collection()
-const foldersPath = path.join(__dirname, 'Commands')
+const foldersPath = path.join(__dirname, 'commands')
 const commandFolders = fs.readdirSync(foldersPath)
 
 for (const folder of commandFolders) {
