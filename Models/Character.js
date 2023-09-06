@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('TradingCard', {
+  return sequelize.define('character', {
     character_id: {
       type: DataTypes.STRING,
       allowNull: false,
