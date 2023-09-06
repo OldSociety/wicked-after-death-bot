@@ -7,7 +7,7 @@ module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
     .setName('reset_balance')
-    .setDescription('Reset your or another user\'s economy balance (DM ONLY)')
+    .setDescription('Reset economy balance (DM ONLY) Exp: /reset_balance 100')
     .addIntegerOption(option =>
       option.setName('amount')
         .setDescription('The amount to reset the balance to')
