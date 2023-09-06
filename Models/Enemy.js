@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       unique_skill: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Allow null for this column
       },
       base_damage: {
         type: DataTypes.INTEGER,

@@ -1,20 +1,31 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    'User',
-    {
-      user_id: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-      },
-      balance: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-        allowNull: false,
-      },
+  const User = sequelize.define('User', {
+    user_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      primaryKey: true,
     },
-    {
-      timestamps: false,
+    balance: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
-    { freezeTableName: true }
-  )
-}
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: true, // Allow NULL for this column
+    },
+    // ...other user properties
+  });
+
+  User.associate = (models) => {
+    User.hasMany(models.Collection, {
+      foreignKey: 'user_id',
+      onDelete: 'CASCADE',
+    });
+  };
+
+  return User;
+};
