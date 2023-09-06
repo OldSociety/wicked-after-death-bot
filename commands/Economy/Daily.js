@@ -1,22 +1,55 @@
-const {
-  SlashCommandBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../Utils/sequelize');
 const User = require('../../Models/User')(sequelize, DataTypes);
 
 module.exports = {
-  cooldown: 5, // Set a cooldown for this command (in seconds)
+  cooldown: 86400, // Set a cooldown for this command (in seconds), 86400 seconds = 24 hours
   data: new SlashCommandBuilder()
     .setName('daily')
-    .setDescription('Get your daily coins'),
+    .setDescription('Get your daily coins')
+    .addBooleanOption(option =>
+      option.setName('test')
+        .setDescription('Add daily coins for testing (Admin only)')
+    ),
   async execute(interaction) {
     try {
+      const isTest = interaction.options.getBoolean('test');
+
+      if (isTest && interaction.user.id !== process.env.BOTADMINID) {
+        // If it's a test and the user is not the admin, deny access
+        await interaction.reply({
+          content: 'You are not authorized to use this command for testing.',
+          ephemeral: true,
+        });
+        return;
+      }
+
+      // Check if the user has already claimed their daily coins today
+      const hasClaimed = claimedDaily.has(interaction.user.id);
+
+      if (hasClaimed && !isTest) {
+        // If the user has already claimed and it's not a test, inform them
+        await interaction.reply({
+          content: 'You have already claimed your daily coins today.',
+          ephemeral: true,
+        });
+        return;
+      }
+
+      // Get the current UTC hour
+      const currentUTCHour = new Date().getUTCHours();
+
+      // Calculate the time until the next reset (in seconds)
+      let timeUntilReset = (resetHourUTC - currentUTCHour) * 3600; // Convert hours to seconds
+
+      // Adjust for cases where the reset time has already passed today
+      if (timeUntilReset <= 0) {
+        timeUntilReset += 24 * 3600; // Add 24 hours in seconds for the next day's reset
+      }
+
       // Find the user in the database using their Discord ID
       const user = await User.findOne({ where: { user_id: interaction.user.id } });
-      console.log(user.user_id)
 
       if (!user) {
         // If the user doesn't exist in the database, inform them to create an account
@@ -38,7 +71,7 @@ module.exports = {
 
       if (!balance) {
         console.log('Not found!');
-      } else if (daily_coins === 0) {
+      } else if (daily_coins === 0 || isTest) {
         // Generate a random number of daily coins
         daily_coins = getRandomInt(5) + 3;
         console.log(`You come across ${daily_coins} on the floor!`);
@@ -46,14 +79,25 @@ module.exports = {
 
         // Update the user's balance in the database
         await user.update({ balance });
+
+        // If it's a test, inform the user
+        if (isTest) {
+          await interaction.reply({
+            content: `You come across ${daily_coins} on the floor! Your balance: ${balance} coins (Test Mode)`,
+          });
+        } else {
+          // Mark the user as having claimed their daily coins for today
+          claimedDaily.add(interaction.user.id);
+
+          // Reply to the user with the result
+          await interaction.reply({
+            content: `You come across ${daily_coins} on the floor! Your balance: ${balance} coins`,
+          });
+        }
       }
 
-      // Reply to the user with the result
-      await interaction.reply({
-        content: `You come across ${daily_coins} on the floor! Your balance: ${balance} coins`,
-      });
-
-      daily_coins = 0; // Reset daily_coins for the next day
+      // Reset daily_coins for the next day
+      daily_coins = 0;
     } catch (error) {
       console.error('Error fetching or updating user:', error);
       // Handle errors and inform the user

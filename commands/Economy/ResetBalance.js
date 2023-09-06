@@ -19,7 +19,7 @@ module.exports = {
     ),
   async execute(interaction) {
     // Check if the command is being used by the specific account with ID 138131238803210240
-    if (interaction.user.id !== '138131238803210240') {
+    if (interaction.user.id !== process.env.BOTADMINID) {
       await interaction.reply({
         content: 'You are not authorized to use this command.',
         ephemeral: true, // Make the response only visible to the user
