@@ -3,6 +3,34 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../../Utils/sequelize');
 const User = require('../../Models/User')(sequelize, DataTypes);
 
+// Function to calculate and return the time remaining until the same time tomorrow
+function calculateTimeRemainingUntilTomorrow(targetHour) {
+  const currentTime = new Date();
+  
+  // Create a new date object for tomorrow
+  const tomorrow = new Date(currentTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  // Set the target time on tomorrow's date
+  tomorrow.setHours(targetHour, 0, 0, 0);
+  
+  // Calculate the time difference
+  const timeDifference = tomorrow - currentTime;
+
+  // Convert the time difference to hours and minutes
+  const hoursRemaining = Math.floor(timeDifference / (1000 * 60 * 60));
+  const minutesRemaining = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+
+  return { hours: hoursRemaining, minutes: minutesRemaining };
+}
+
+// Example usage:
+const targetHourPST = 6; // 6:00 AM PST
+// const remainingTime = calculateTimeRemainingUntilTomorrow(targetHourPST);
+
+// console.log(`Hours remaining: ${remainingTime.hours}`);
+// console.log(`Minutes remaining: ${remainingTime.minutes}`);
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('daily')
@@ -22,11 +50,11 @@ module.exports = {
       }
 
       const { balance, last_daily_claim } = user;
-      const currentTime = new Date().getTime();
-      const resetHourUTC = 14; // 6am Pacific Time is 14:00 UTC
-
-      // Calculate the time elapsed since the last claim in milliseconds
+      const currentTime = new Date();
       const timeElapsed = currentTime - last_daily_claim;
+
+      // Calculate the time remaining until the next daily reset (6am Pacific Time)
+      const { hours, minutes } = calculateTimeRemainingUntilTomorrow(targetHourPST);
 
       if (timeElapsed >= 24 * 60 * 60 * 1000) {
         // If it has been at least 24 hours since the last claim
@@ -41,22 +69,14 @@ module.exports = {
 
         // Reply to the user with the result
         await interaction.reply({
-          content: `You come across ${dailyCoins} on the floor! Your balance: ${newBalance} coins`,
+          content: `You come across ${dailyCoins} on the floor! Your balance: ${newBalance} coins. You can claim more daily rewards in ${hours} hours and ${minutes} minutes.`,
         });
       } else {
-        // Calculate the time remaining until the next daily reset (6am Pacific Time)
-        const nextResetTimeUTC = resetHourUTC - (currentTime % (24 * 60 * 60 * 1000));
-        const hoursRemaining = Math.floor(nextResetTimeUTC / (60 * 60 * 1000));
-        const minutesRemaining = Math.floor((nextResetTimeUTC % (60 * 60 * 1000)) / (60 * 1000));
-
-        // Inform the user about the remaining time
+        // If the user can't claim yet, inform them about the remaining time
         await interaction.reply({
-          content: `You have already claimed your daily coins today. Claim more daily rewards in ${Math.abs(hoursRemaining)} h ${Math.abs(minutesRemaining)} m.`,
+          content: `You have already claimed your daily coins today. You have ${hours} h ${minutes} m remaining until your next claim.`,
           ephemeral: true,
         });
-
-        // Console log the remaining time
-        console.log(`Time remaining until next daily reset: ${Math.abs(hoursRemaining)} h ${Math.abs(minutesRemaining)} m`);
       }
     } catch (error) {
       console.error('Error fetching or updating user:', error);
