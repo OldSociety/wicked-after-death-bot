@@ -1,0 +1,47 @@
+const cardList = [
+  {
+    character_id: '0',
+    character_name: 'Urn Clara',
+    cost: 0,
+    rarity: 'Common',
+    description: 'High cleric of Resolute, Clara fled her former life as a soldier of the Wren nation to serve and protect her found family.',
+    type: 'Character',
+    unique_skill: 'Unknown',
+    damage: 5,
+    health: 10,
+    chance_to_hit: 0.8,
+    crit_chance: 0.2,
+    crit_damage: 2,
+  },
+  {
+    character_id: '1',
+    character_name: 'Aja Hyrum',
+    cost: 0,
+    rarity: 'Common',
+    description: 'Chief of Resolute, Hyrum has led his people successfully since the death of Zephyr-sol. A skilled hunter in his youth, he has the passion to protect his people.',
+    type: 'Character',
+    unique_skill: 'Unknown',
+    damage: null,
+    health: null,
+    chance_to_hit: null,
+    crit_chance: null,
+    crit_damage: null,
+  },
+  {
+    character_id: '2',
+    character_name: 'Daetoris',
+    cost: 0,
+    rarity: 'Common',
+    description: 'Ex-professor of the Blueshore Conservator, Daetoris has a checkered past.',
+    type: 'Character',
+    unique_skill: 'Unknown',
+    damage: null,
+    health: null,
+    chance_to_hit: null,
+    crit_chance: null,
+    crit_damage: null,
+  },
+  // Add more card objects as needed
+];
+
+module.exports = cardList;

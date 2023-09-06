@@ -1,50 +1,53 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define(
-      'character',
-      {
-        character_id: {
-          type: DataTypes.STRING,
-          primaryKey: true,
-        },
-        character_name: {
-            type: DataTypes.STRING,
-            primaryKey: true,
-          },
-        damage: {
-          type: DataTypes.INTEGER,
-          defaultValue: 0,
-          allowNull: false,
-        },
-        health: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-            allowNull: false,
-          },
-        chance_to_hit: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-            allowNull: false,
-        },
-        crit_chance: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-            allowNull: false,
-        },
-        crit_damage: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-            allowNull: false,
-        },
-        special_1: {
-            type: DataTypes.INTEGER,
-            defaultValue: 0,
-            allowNull: false,
-        },
-      },
-      {
-        timestamps: false,
-      },
-      { freezeTableName: true }
-    )
-  }
-  
+  return sequelize.define('TradingCard', {
+    character_id: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      primaryKey: true,
+    },
+    character_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    cost: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    rarity: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    unique_skill: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    damage: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    health: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    chance_to_hit: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    crit_chance: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    crit_damage: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+  })
+}
