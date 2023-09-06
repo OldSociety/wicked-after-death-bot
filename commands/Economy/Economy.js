@@ -12,8 +12,8 @@ const User = require('../../Models/User')(sequelize, DataTypes)
 module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
-    .setName('economy')
-    .setDescription('Create your economy account!'),
+    .setName('account')
+    .setDescription('Create your economy account or check its balance!'),
   async execute(interaction) {
     // Get the user's ID (you can adapt this based on how Discord.js provides user IDs)
 
