@@ -29,11 +29,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    damage: {
+    base_damage: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    health: {
+    base_health: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
