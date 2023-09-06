@@ -1,47 +1,50 @@
 const CharacterList = [
   {
     character_id: '0',
-    character_name: 'Urn Clara',
+    character_name: 'Huntsman Hyrum',
     cost: 0,
     rarity: 'Common',
-    description: 'High cleric of Resolute, Clara fled her former life as a soldier of the Wren nation to serve and protect her found family.',
+    description:
+      'Chief of Resolute, Hyrum has led his people successfully since the death of Zephyr-sol. A skilled hunter in his youth, he has the passion to protect his people.',
     type: 'Character',
     unique_skill: 'Unknown',
-    base_damage: 5,
-    base_health: 10,
+    base_damage: 275,
+    base_health: 180,
     chance_to_hit: 0.8,
-    crit_chance: 0.2,
-    crit_damage: 2,
+    crit_chance: 0,
+    crit_damage: 1.5,
   },
   {
     character_id: '1',
-    character_name: 'Aja Hyrum',
+    character_name: 'Urn Clara',
     cost: 0,
     rarity: 'Common',
-    description: 'Chief of Resolute, Hyrum has led his people successfully since the death of Zephyr-sol. A skilled hunter in his youth, he has the passion to protect his people.',
+    description:
+      'High cleric of Resolute, Clara fled her former life as a soldier of the Wren nation to serve and protect her found family.',
     type: 'Character',
     unique_skill: 'Unknown',
-    base_damage: 280,
-    base_health: 180,
-    chance_to_hit: .85,
+    base_damage: 225,
+    base_health: 230,
+    chance_to_hit: 0.8,
     crit_chance: 0,
-    crit_damage: 1.5,
+    crit_damage: 2,
   },
   {
     character_id: '2',
     character_name: 'Daetoris',
     cost: 0,
     rarity: 'Common',
-    description: 'Ex-professor of the Blueshore Conservator, Daetoris has a checkered past.',
+    description:
+      'Ex-professor of the Blueshore Conservator, Daetoris has a checkered past.',
     type: 'Character',
     unique_skill: 'Unknown',
-    base_damage: null,
-    base_health: null,
-    chance_to_hit: null,
-    crit_chance: null,
-    crit_damage: null,
+    base_damage: 250,
+    base_health: 185,
+    chance_to_hit: 0.85,
+    crit_chance: 0,
+    crit_damage: 1.5,
   },
   // Add more card objects as needed
-];
+]
 
-module.exports = CharacterList;
+module.exports = CharacterList
