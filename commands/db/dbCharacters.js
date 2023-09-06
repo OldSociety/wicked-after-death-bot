@@ -1,4 +1,4 @@
-const cardList = [
+const CharacterList = [
   {
     character_id: '0',
     character_name: 'Urn Clara',
@@ -21,11 +21,11 @@ const cardList = [
     description: 'Chief of Resolute, Hyrum has led his people successfully since the death of Zephyr-sol. A skilled hunter in his youth, he has the passion to protect his people.',
     type: 'Character',
     unique_skill: 'Unknown',
-    damage: null,
-    health: null,
-    chance_to_hit: null,
-    crit_chance: null,
-    crit_damage: null,
+    damage: 280,
+    health: 180,
+    chance_to_hit: .85,
+    crit_chance: 0,
+    crit_damage: 1.5,
   },
   {
     character_id: '2',
@@ -44,4 +44,4 @@ const cardList = [
   // Add more card objects as needed
 ];
 
-module.exports = cardList;
+module.exports = CharacterList;
