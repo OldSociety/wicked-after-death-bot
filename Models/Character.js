@@ -1,53 +1,38 @@
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('character', {
+  const Character = sequelize.define('Character', {
     character_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
     },
-    character_name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    cost: {
+    collection_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    rarity: {
-      type: DataTypes.STRING,
+    master_character_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    description: {
-      type: DataTypes.TEXT,
+    level: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 1,
     },
-    type: {
-      type: DataTypes.STRING,
+    experience: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
     },
-    unique_skill: {
-      type: DataTypes.STRING,
-      allowNull: true, // Allow null for this column
-    },
-    base_damage: {
+    xp_needed: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
+      defaultValue: 1000,
     },
-    base_health: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    chance_to_hit: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    crit_chance: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
-    crit_damage: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-  })
-}
+    // ... other unique attributes for each player's instance
+  }, {
+    timestamps: false,
+  });
+
+  return Character;
+};

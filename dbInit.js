@@ -9,12 +9,14 @@ const Enemy = require('./Models/Enemy.js')(sequelize, Sequelize.DataTypes);
 const Character = require('./Models/Character.js')(sequelize, Sequelize.DataTypes);  
 
 // Model connections
-User.hasMany(Collection, { as: 'collections' });
-Collection.belongsTo(User);
+User.hasOne(Collection, { foreignKey: 'user_id', as: 'collections' });
+Collection.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
-Character.hasMany(Collection);
-Collection.belongsTo(Character);
+Collection.hasMany(Character, { foreignKey: 'collection_id', as: 'characters' });
+Character.belongsTo(Collection, { foreignKey: 'collection_id' });
 
+Character.belongsTo(MasterCharacter, { foreignKey: 'master_character_id', as: 'masterCharacter' });
+MasterCharacter.hasMany(Character, { foreignKey: 'master_character_id', as: 'instances' });
 
 const shopData = require('./db/dbShop');
 const characterData = require('./db/dbCharacters');
