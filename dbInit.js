@@ -1,11 +1,20 @@
 const Sequelize = require('sequelize');
 const sequelize = require('./Utils/sequelize');
-const retry = require('retry'); // Import the 'retry' library
+const retry = require('retry');
 
 const User = require('./Models/User.js')(sequelize, Sequelize.DataTypes);
 const Shop = require('./Models/Shop.js')(sequelize, Sequelize.DataTypes);
 const Collection = require('./Models/Collection.js')(sequelize, Sequelize.DataTypes);
 const Enemy = require('./Models/Enemy.js')(sequelize, Sequelize.DataTypes);
+const Character = require('./Models/Character.js')(sequelize, Sequelize.DataTypes);  
+
+// Model connections
+User.hasMany(Collection, { as: 'collections' });
+Collection.belongsTo(User);
+
+Character.hasMany(Collection);
+Collection.belongsTo(Character);
+
 
 const shopData = require('./db/dbShop');
 const characterData = require('./db/dbCharacters');
@@ -14,7 +23,7 @@ const enemyData = require('./db/dbEnemies');
 // Authenticates connection to the database.
 sequelize
   .authenticate()
-  .then(async () => {
+  .then(() => {
     console.log('Connection has been established successfully.');
   })
   .catch(console.error);
@@ -34,13 +43,11 @@ async function retryDatabaseOperation(operation, maxRetries = 5, retryDelay = 10
     operationRetry.attempt(async (currentAttempt) => {
       try {
         const result = await operation();
-        resolve(result); // Resolve the promise with the result
+        resolve(result);
       } catch (error) {
         if (operationRetry.retry(error)) {
-          // Retry the operation if it's a retryable error
           console.error(`Retry attempt #${currentAttempt} due to error: ${error.message}`);
         } else {
-          // Reject the promise if max retries reached
           reject(error);
         }
       }
@@ -50,23 +57,19 @@ async function retryDatabaseOperation(operation, maxRetries = 5, retryDelay = 10
   return operationPromise;
 }
 
-// Syncs changes to the database for all models using the retry mechanism
+// Sync changes and populate database
 sequelize
   .sync({ alter: true })
   .then(async () => {
-    // Sync Shop
     const shop = shopData.map((item) => {
       return retryDatabaseOperation(() => Shop.upsert(item));
     });
 
-    // Sync Character Collection with conflict resolution
     const character = characterData.map(async (item) => {
-      // Use try-catch to handle any errors during upsert
       try {
         await retryDatabaseOperation(() => Collection.findCreateFind({
           where: { id: item.character_id },
           defaults: item,
-          // Use SQLite-specific conflict resolution
           onDuplicate: ['id'],
         }));
       } catch (error) {
@@ -74,7 +77,6 @@ sequelize
       }
     });
 
-    // Sync Enemies
     const enemy = enemyData.map((item) => {
       return retryDatabaseOperation(() => Enemy.upsert(item));
     });
@@ -86,9 +88,50 @@ sequelize
   })
   .catch((error) => {
     console.error('Error syncing databases:', error);
-  })
-  .finally(() => {
-    sequelize.close();
   });
 
-module.exports = { User, Shop, Collection, Enemy };
+  const character = characterData.map(async (item) => {
+    try {
+      await retryDatabaseOperation(() => Character.findCreateFind({  // Changed Collection to Character
+        where: { id: item.character_id },
+        defaults: item,
+        onDuplicate: ['id'],
+      }));
+    } catch (error) {
+      console.error('Error syncing Character:', error);  // Updated the error message
+    }
+    try {
+      await retryDatabaseOperation(() => Character.findCreateFind({
+        where: { character_id: item.character_id },
+        defaults: item,
+        onDuplicate: ['character_id'],
+      }));
+      console.log(`Successfully inserted character ${item.character_name}`);
+    } catch (error) {
+      console.error(`Error syncing Character: ${error}`);
+    }
+  });
+
+
+  
+
+// Add this function at the end of your file
+async function fetchUserWithCollections(userId) {
+  try {
+    const user = await User.findOne({
+      where: { user_id: userId },
+      include: [{
+        model: Collection,
+        as: 'collections' // must match the 'as' in your association
+      }],
+    });
+    return user;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
+
+// Make sure to export this function if you're going to use it in another file
+module.exports = { User, Shop, Collection, Enemy, fetchUserWithCollections };
+

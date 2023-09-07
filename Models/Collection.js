@@ -1,18 +1,23 @@
 module.exports = (sequelize, DataTypes) => {
-	const Collection = sequelize.define('Collection', {
+	const Collection = sequelize.define('collection', {
 	  user_id: DataTypes.STRING,
-	  card_id: DataTypes.INTEGER,
+	  character_id: DataTypes.INTEGER,
+	  level: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	  },
+	  current_xp: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	  },
+	  xp_needed: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+	  },
+	  // other attributes that are unique to each player's instance of a character
 	}, {
 	  timestamps: false,
 	});
   
-	Collection.associate = (models) => {
-	  Collection.belongsTo(models.User, {
-		foreignKey: 'user_id',
-		onDelete: 'CASCADE',
-	  });
-	};
-  
 	return Collection;
   };
-  

@@ -9,18 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    level: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    current_xp : {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    xp_needed : {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     cost: {
       type: DataTypes.INTEGER,
       allowNull: false,

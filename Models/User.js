@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define('User', {
+  const User = sequelize.define('user', {
     user_id: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -15,17 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     updatedAt: {
       type: DataTypes.DATE,
-      allowNull: true, // Allow NULL for this column
+      allowNull: true,
     },
-    // ...other user properties
   });
-
-  User.associate = (models) => {
-    User.hasMany(models.Collection, {
-      foreignKey: 'user_id',
-      onDelete: 'CASCADE',
-    });
-  };
 
   return User;
 };
