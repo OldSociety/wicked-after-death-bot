@@ -64,7 +64,7 @@ sequelize
       // Use try-catch to handle any errors during upsert
       try {
         await retryDatabaseOperation(() => Collection.findCreateFind({
-          where: { id: item.id },
+          where: { id: item.character_id },
           defaults: item,
           // Use SQLite-specific conflict resolution
           onDuplicate: ['id'],
