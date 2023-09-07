@@ -1,40 +1,40 @@
-const {
-  SlashCommandBuilder,
-} = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../Utils/sequelize');
 const User = require('../../Models/User')(sequelize, DataTypes);
 const Collection = require('../../Models/Collection')(sequelize, DataTypes);
 const CharacterList = require('../../db/dbCharacters'); // Import your character data
 
-module.exports = {
-  cooldown: 5,
-  data: new SlashCommandBuilder()
-    .setName('account')
-    .setDescription('Create your economy account or check its balance!'),
-  async execute(interaction) {
-    const userId = interaction.user.id;
+// Define an array of specific character_ids to be added to the new user's collection
+const specificCharacterIds = [0, 1, 2];
 
-    try {
-      // Create or find a user record with a default balance
-      const [user, created] = await User.findOrCreate({
-        where: { user_id: userId },
-        defaults: {
-          balance: 730, // Default balance if the user doesn't exist
-        },
+// Function to add collection to existing accounts
+async function addCollectionToExistingAccounts() {
+  try {
+    // Find all existing users
+    const existingUsers = await User.findAll();
+
+    // Loop through existing users and add the collection with specific characters
+    for (const user of existingUsers) {
+      const userId = user.user_id;
+
+      // Check if the user already has a collection, and if not, create one
+      const [collection, created] = await user.getCollection({
+        include: User,
       });
 
-      console.log(user.user_id); // User's unique ID
-      console.log(user.balance); // User's balance
-      console.log(created); // A boolean indicating whether this user was just created
+      if (!collection) {
+        await Collection.create({
+          user_id: userId,
+        });
+      }
 
-      if (created) {
-        console.log(user); // This user record was just created
-
-        // Create the initial collection of characters for the user
-        await Promise.all(CharacterList.map(async (character) => {
-          await Collection.create({
-            user_id: userId,
+      // Add specific characters to the user's collection
+      await Promise.all(
+        CharacterList.filter((character) =>
+          specificCharacterIds.includes(character.character_id)
+        ).map(async (character) => {
+          await collection.addCharacter({
             character_id: character.character_id,
             character_name: character.character_name,
             level: 1, // Set the initial level
@@ -51,10 +51,42 @@ module.exports = {
             crit_chance: character.crit_chance,
             crit_damage: character.crit_damage,
           });
-        }));
+        })
+      );
 
+      console.log(`Collection added to user with ID ${userId}`);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+module.exports = {
+  cooldown: 5,
+  data: new SlashCommandBuilder()
+    .setName('account')
+    .setDescription('Create your economy account or check its balance!'),
+  async execute(interaction) {
+    const userId = interaction.user.id;
+
+    try {
+      // Create or find a user record with a default balance
+      const [user, created] = await User.findOrCreate({
+        where: { user_id: userId },
+        defaults: {
+          balance: 730, // Default balance if the user doesn't exist
+        },
+        include: Collection, // Include the user's collection in the query
+      });
+
+      console.log(user.user_id); // User's unique ID
+      console.log(user.balance); // User's balance
+      console.log(created); // A boolean indicating whether this user was just created
+
+      if (created) {
+        console.log(user); // This user record was just created
         return interaction.reply(
-          `Your economy account has been created. You have 730 credits in your balance, and you've received your initial collection of characters.`
+          `Your economy account has been created. You have 730 credits in your balance.`
         );
       } else {
         return interaction.reply(
@@ -70,3 +102,6 @@ module.exports = {
     }
   },
 };
+
+// Call the function to add the collection to existing accounts
+addCollectionToExistingAccounts();
