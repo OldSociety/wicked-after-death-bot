@@ -1,7 +1,7 @@
 const EnemyList = [
     {
-      enemy_id: '0',
-      enemy_name: 'Bandit',
+      id: '0',
+      name: 'Bandit',
       description: 'Bandit in the high hills.',
       type: 'Enemy',
       unique_skill: null,

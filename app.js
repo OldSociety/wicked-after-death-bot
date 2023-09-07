@@ -51,6 +51,34 @@ for (const file of eventFiles) {
   }
 }
 
+// Set the prefix - NOT WORKING
+const prefix = "!";
+getPrefix = (client, message) => {
+  // try {
+  //   const data = fs.readFileSync('prefixes.json', 'utf-8');
+  //   const prefixes = JSON.parse(data);
+  //   if (prefixes.hasOwnProperty(message.guild.id)) {
+  //     return prefixes[message.guild.id];
+  //   }
+  // } catch (error) {
+  //   console.error('Error reading prefixes.json:', error);
+  // }
+
+  // If the prefix is not found, set a default prefix and save it to the file
+  const defaultPrefix = '!';
+  try {
+    const data = fs.readFileSync('prefixes.json', 'utf-8');
+    const prefixes = JSON.parse(data);
+    prefixes[message.guild.id] = defaultPrefix;
+    fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 2));
+  } catch (error) {
+    console.error('Error writing prefixes.json:', error);
+  }
+
+  return defaultPrefix;
+}
+
+
 // Create a Sequelize instance with your configuration
 const sequelize = new Sequelize('database', 'username', 'password', {
   host: 'localhost',

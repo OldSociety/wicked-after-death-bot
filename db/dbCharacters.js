@@ -5,7 +5,7 @@ const CharacterList = [
     cost: 0,
     rarity: 'Common',
     description:
-      'Chief of Resolute, Hyrum has led his people successfully since the death of Zephyr-sol. A skilled hunter in his youth, he has the passion to protect his people.',
+      'Before Hyrum was Aja of Resolute, he was a skilled warrior and folk hero of his people.',
     type: 'Character',
     unique_skill: 'Unknown',
     base_damage: 275,
