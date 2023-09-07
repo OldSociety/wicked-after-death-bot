@@ -3,6 +3,7 @@ require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
 const { Sequelize } = require('sequelize')
+const sequelize = require('./Utils/sequelize')
 
 const { Client, Collection, GatewayIntentBits } = require('discord.js')
 const { userInfo } = require('node:os')
@@ -77,16 +78,6 @@ getPrefix = (client, message) => {
 
   return defaultPrefix;
 }
-
-
-// Create a Sequelize instance with your configuration
-const sequelize = new Sequelize('database', 'username', 'password', {
-  host: 'localhost',
-  dialect: 'sqlite',
-  logging: false,
-  storage: 'database.sqlite',
-});
-
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
