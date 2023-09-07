@@ -1,7 +1,10 @@
 const CharacterList = [
   {
-    character_id: '0',
+    character_id: 0,
     character_name: 'Huntsman Hyrum',
+    level: 0,
+    current_xp: 0,
+    xp_needed: 0,
     cost: 0,
     rarity: 'Common',
     description:
@@ -15,8 +18,11 @@ const CharacterList = [
     crit_damage: 1.5,
   },
   {
-    character_id: '1',
+    character_id: 1,
     character_name: 'Urn Clara',
+    level: 0,
+    current_xp: 0,
+    xp_needed: 0,
     cost: 0,
     rarity: 'Common',
     description:
@@ -30,8 +36,11 @@ const CharacterList = [
     crit_damage: 2,
   },
   {
-    character_id: '2',
+    character_id: 2,
     character_name: 'Daetoris',
+    level: 0,
+    current_xp: 0,
+    xp_needed: 0,
     cost: 0,
     rarity: 'Common',
     description:

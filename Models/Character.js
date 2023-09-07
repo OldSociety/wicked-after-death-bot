@@ -1,12 +1,24 @@
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define('character', {
     character_id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
     },
     character_name: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    level: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    current_xp : {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    xp_needed : {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     cost: {

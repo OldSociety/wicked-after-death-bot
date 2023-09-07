@@ -1,6 +1,6 @@
 const EnemyList = [
     {
-      id: '0',
+      id: 0,
       name: 'Bandit',
       description: 'Bandit in the high hills.',
       type: 'Enemy',

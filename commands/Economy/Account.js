@@ -4,6 +4,8 @@ const {
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../Utils/sequelize');
 const User = require('../../Models/User')(sequelize, DataTypes);
+const Collection = require('../../Models/Collection')(sequelize, DataTypes);
+const CharacterList = require('../../db/dbCharacters'); // Import your character data
 
 module.exports = {
   cooldown: 5,
@@ -11,7 +13,6 @@ module.exports = {
     .setName('account')
     .setDescription('Create your economy account or check its balance!'),
   async execute(interaction) {
-    // Get the user's ID (you can adapt this based on how Discord.js provides user IDs)
     const userId = interaction.user.id;
 
     try {
@@ -29,8 +30,31 @@ module.exports = {
 
       if (created) {
         console.log(user); // This user record was just created
+
+        // Create the initial collection of characters for the user
+        await Promise.all(CharacterList.map(async (character) => {
+          await Collection.create({
+            user_id: userId,
+            character_id: character.character_id,
+            character_name: character.character_name,
+            level: 1, // Set the initial level
+            current_xp: 0, // Set the initial XP
+            xp_needed: 100, // Set the XP needed to level up
+            cost: character.cost,
+            rarity: character.rarity,
+            description: character.description,
+            type: character.type,
+            unique_skill: character.unique_skill,
+            base_damage: character.base_damage,
+            base_health: character.base_health,
+            chance_to_hit: character.chance_to_hit,
+            crit_chance: character.crit_chance,
+            crit_damage: character.crit_damage,
+          });
+        }));
+
         return interaction.reply(
-          `Your economy account has been created. You have 730 credits in your balance.`
+          `Your economy account has been created. You have 730 credits in your balance, and you've received your initial collection of characters.`
         );
       } else {
         return interaction.reply(
