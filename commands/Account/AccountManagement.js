@@ -49,15 +49,21 @@ module.exports = {
         // ...
       } else if (subcommand === 'delete_account') {
         const targetUser = interaction.options.getUser('user');
-
+      
         if (!targetUser) {
           await interaction.reply('Invalid input. Please provide a user.');
           return;
         }
-
+      
+        // Check if the target user is the bot itself
+        if (targetUser.id === interaction.client.user.id) {
+          await interaction.reply('You cannot delete the bot\'s account.');
+          return;
+        }
+      
         // Find the target user by their ID
         const targetUserAccount = await User.findOne({ where: { user_id: targetUser.id } });
-
+      
         if (!targetUserAccount) {
           await interaction.reply({
             content: `The specified user doesn't have an account.`,
@@ -65,7 +71,7 @@ module.exports = {
           });
           return;
         }
-
+      
         // Ask for confirmation before deleting the account
         await interaction.reply({
           content: `Are you sure you want to delete the account for ${targetUser.tag}?`,
@@ -90,6 +96,7 @@ module.exports = {
           ],
         });
       }
+      
     } catch (error) {
       console.error('Error in account management command:', error);
       await interaction.reply({
