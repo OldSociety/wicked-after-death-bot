@@ -49,13 +49,24 @@ module.exports = {
       const { hours, minutes } =
         calculateTimeRemainingUntilTomorrow(targetHourPST)
 
-      if (timeElapsed >= 24 * 60 * 60 * 1000) {
-        const dailyCoins = Math.floor(Math.random() * (8 - 3 + 1)) + 3
+      if (timeElapsed >= 86400000) {
+        let updatedStreak = timeElapsed < 172800000 ? daily_streak + 1 : 0
+
+        let randomBase = Math.floor(Math.random() * (500 - 300 + 1)) + 300
+        let dailyCoins = randomBase + updatedStreak * 100 // Incremented the streak bonus
+
+        if (updatedStreak < 7) {
+          dailyCoins = Math.min(dailyCoins, 3500)
+        } else {
+          dailyCoins = Math.min(dailyCoins, 12000)
+        }
+
         const newBalance = balance + dailyCoins
 
         await user.update({
           balance: newBalance,
           last_daily_claim: currentTime,
+          daily_streak: updatedStreak,
         })
 
         await interaction.reply({

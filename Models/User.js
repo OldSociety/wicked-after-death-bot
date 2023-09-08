@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
     last_daily_claim: {
       type: DataTypes.DATE,
       allowNull: true,
+    },
+    daily_streak: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     }
   });
 
