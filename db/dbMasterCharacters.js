@@ -31,11 +31,25 @@ const CharacterList = [
   },
   {
     master_character_id: 2,
-    character_name: 'Daetoris',
+    character_name: `Hand's Daetoris`,
     cost: 0,
     rarity: 'Commoner',
     description:
-      'Ex-professor of the Blueshore Conservator, Daetoris has a checkered past.',
+      `Ex-professor of the Blueshore Conservatory, the shadow of Daetoris' past dealings with the Guiding Hand still haunt him.`,
+    type: 'Character',
+    unique_skill: 'Unknown',
+    base_damage: 250,
+    base_health: 185,
+    chance_to_hit: 0.85,
+    crit_chance: 0,
+    crit_damage: 1.5,
+  },{
+    master_character_id: 3,
+    character_name: 'Artificer Rennex',
+    cost: 0,
+    rarity: 'Commoner',
+    description:
+      'Skilled in both invention and artillery, Rennex has few scruples about who he deals with, having deep connections with Helena Currey.',
     type: 'Character',
     unique_skill: 'Unknown',
     base_damage: 250,

@@ -26,7 +26,7 @@ module.exports = {
               {
                 model: MasterCharacter,
                 as: 'masterCharacter',
-                attributes: { exclude: ['cost', 'master_character_id'] },
+                attributes: { exclude: ['master_character_id'] },
               },
             ],
           },
