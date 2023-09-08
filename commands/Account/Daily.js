@@ -1,7 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { DataTypes } = require('sequelize');
-const sequelize = require('../../Utils/sequelize');
-const User = require('../../Models/User')(sequelize, DataTypes);
+const { User, Character, MasterCharacter } = require('../../Models/models.js');
 
 // Function to calculate and return the time remaining until the same time tomorrow
 function calculateTimeRemainingUntilTomorrow(targetHour) {

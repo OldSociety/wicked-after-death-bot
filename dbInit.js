@@ -13,26 +13,6 @@ const MasterCharacter = require('./Models/MasterCharacter.js')(
   Sequelize.DataTypes
 )
 
-// Model connections
-User.hasMany(Character, {
-  foreignKey: 'user_id',
-  as: 'characters',
-})
-
-Character.belongsTo(User, {
-  foreignKey: 'user_id',
-})
-
-Character.belongsTo(MasterCharacter, {
-  foreignKey: 'master_character_id',
-  as: 'masterCharacter',
-})
-
-MasterCharacter.hasMany(Character, {
-  foreignKey: 'master_character_id',
-  as: 'instances',
-})
-
 const shopData = require('./db/dbShop')
 const characterData = require('./db/dbMasterCharacters')
 const enemyData = require('./db/dbEnemies')

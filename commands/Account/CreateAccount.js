@@ -1,8 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
 const sequelize = require('../../Utils/sequelize')
-const User = require('../../Models/User')(sequelize, DataTypes)
-const Character = require('../../Models/Character')(sequelize, DataTypes) // Assuming you have a Character model
+const { User, Character, MasterCharacter } = require('../../Models/models.js');
 
 const startingCharacterIds = [0, 1, 2]
 
