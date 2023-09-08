@@ -8,7 +8,7 @@ const { User, Character, MasterCharacter } = require('../../Models/models.js')
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('roster')
+    .setName('collection')
     .setDescription('View the characters in your roster'),
 
   async execute(interaction) {
@@ -26,7 +26,7 @@ module.exports = {
               {
                 model: MasterCharacter,
                 as: 'masterCharacter',
-                attributes: { exclude: ['master_character_id'] },
+                attributes: { exclude: ['cost', 'master_character_id'] },
               },
             ],
           },

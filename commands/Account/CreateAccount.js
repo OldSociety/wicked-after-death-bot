@@ -37,7 +37,7 @@ module.exports = {
         await t.commit()
 
         return interaction.reply(
-          `Your economy account has been created with a balance of 730 gold. You've unlocked three new characters! Use /roster to view your character roster.`
+          `Your economy account has been created with a balance of 730 gold. You've unlocked three new characters! Use /collection to view your character roster.`
         )
       } else {
         await t.rollback()

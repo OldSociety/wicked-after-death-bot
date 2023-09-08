@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    last_daily_claim: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    }
   });
 
   return User;
