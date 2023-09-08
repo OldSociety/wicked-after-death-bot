@@ -3,7 +3,7 @@ const CharacterList = [
     master_character_id: 0,
     character_name: 'Huntsman Hyrum',
     cost: 0,
-    rarity: 'Common',
+    rarity: 'Commoner',
     description:
       'Before Hyrum was Aja of Resolute, he was a skilled warrior and folk hero of his people.',
     type: 'Character',
@@ -16,11 +16,11 @@ const CharacterList = [
   },
   {
     master_character_id: 1,
-    character_name: 'Urn Clara',
+    character_name: 'Blackguard Clara',
     cost: 0,
-    rarity: 'Common',
+    rarity: 'Commoner',
     description:
-      'High cleric of Resolute, Clara fled her former life as a soldier of the Wren nation to serve and protect her found family.',
+      'Servants of the nation, Clara served as a Wren Blackguard for decade, before deserting her post and discovering her cleric power.',
     type: 'Character',
     unique_skill: 'Unknown',
     base_damage: 225,
@@ -33,7 +33,7 @@ const CharacterList = [
     master_character_id: 2,
     character_name: 'Daetoris',
     cost: 0,
-    rarity: 'Common',
+    rarity: 'Commoner',
     description:
       'Ex-professor of the Blueshore Conservator, Daetoris has a checkered past.',
     type: 'Character',
