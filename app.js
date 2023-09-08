@@ -78,7 +78,7 @@ getPrefix = (client, message) => {
 
   return defaultPrefix;
 }
-console.log(Object.keys(sequelize.models));
+// console.log(Object.keys(sequelize.models));
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
 module.exports = sequelize // Export the Sequelize instance

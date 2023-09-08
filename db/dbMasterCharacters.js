@@ -1,6 +1,6 @@
 const CharacterList = [
   {
-    character_id: 0,
+    master_character_id: 0,
     character_name: 'Huntsman Hyrum',
     cost: 0,
     rarity: 'Common',
@@ -15,7 +15,7 @@ const CharacterList = [
     crit_damage: 1.5,
   },
   {
-    character_id: 1,
+    master_character_id: 1,
     character_name: 'Urn Clara',
     cost: 0,
     rarity: 'Common',
@@ -30,7 +30,7 @@ const CharacterList = [
     crit_damage: 2,
   },
   {
-    character_id: 2,
+    master_character_id: 2,
     character_name: 'Daetoris',
     cost: 0,
     rarity: 'Common',
