@@ -1,5 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
-    const MasterCharacter = sequelize.define('MasterCharacter', {
+  const MasterCharacter = sequelize.define(
+    'MasterCharacter',
+    {
       master_character_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -29,11 +31,36 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      // ... other shared attributes
-    }, {
+      base_damage: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      base_health: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      chance_to_hit: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: 0.0,
+      },
+      crit_chance: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: 0.0,
+      },
+      crit_damage: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+        defaultValue: 0.0,
+      },
+    },
+    {
       timestamps: false,
-    });
-  
-    return MasterCharacter;
-  };
-  
+    }
+  )
+
+  return MasterCharacter
+}

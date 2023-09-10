@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { User, Character, MasterCharacter } = require('../../Models/models.js');
 
 module.exports = {
   cooldown: 5,

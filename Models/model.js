@@ -4,6 +4,8 @@ const sequelize = require('../Utils/sequelize')
 const User = require('./User')(sequelize, DataTypes)
 const Character = require('./Character')(sequelize, DataTypes)
 const MasterCharacter = require('./MasterCharacter')(sequelize, DataTypes)
+const Enemy = require('./Enemy')(sequelize, DataTypes)
+const Shop = require('./Shop')(sequelize, DataTypes)
 
 console.log('Setting up associations')
 
@@ -37,4 +39,6 @@ module.exports = {
   User,
   Character,
   MasterCharacter,
+  Enemy,
+  Shop
 }

@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { User, Character, MasterCharacter } = require('../../Models/models.js')
+const { User, Character, MasterCharacter } = require('../../Models/model.js')
 
 // Function to calculate and return the time remaining until the same time tomorrow
 function calculateTimeRemainingUntilTomorrow(targetHour) {
