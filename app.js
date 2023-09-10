@@ -52,33 +52,6 @@ for (const file of eventFiles) {
   }
 }
 
-// Set the prefix - NOT WORKING
-const prefix = "!";
-getPrefix = (client, message) => {
-  // try {
-  //   const data = fs.readFileSync('prefixes.json', 'utf-8');
-  //   const prefixes = JSON.parse(data);
-  //   if (prefixes.hasOwnProperty(message.guild.id)) {
-  //     return prefixes[message.guild.id];
-  //   }
-  // } catch (error) {
-  //   console.error('Error reading prefixes.json:', error);
-  // }
-
-  // If the prefix is not found, set a default prefix and save it to the file
-  const defaultPrefix = '!';
-  try {
-    const data = fs.readFileSync('prefixes.json', 'utf-8');
-    const prefixes = JSON.parse(data);
-    prefixes[message.guild.id] = defaultPrefix;
-    fs.writeFileSync('prefixes.json', JSON.stringify(prefixes, null, 2));
-  } catch (error) {
-    console.error('Error writing prefixes.json:', error);
-  }
-
-  return defaultPrefix;
-}
-// console.log(Object.keys(sequelize.models));
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
 module.exports = sequelize // Export the Sequelize instance

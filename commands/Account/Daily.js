@@ -1,15 +1,11 @@
-const { SlashCommandBuilder } = require('@discordjs/builders')
+const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders')
 const { User, Character, MasterCharacter } = require('../../Models/model.js')
 
-// Function to calculate and return the time remaining until the same time tomorrow
 function calculateTimeRemainingUntilTomorrow(targetHour) {
   const currentTime = new Date()
-
   const tomorrow = new Date(currentTime)
   tomorrow.setDate(tomorrow.getDate() + 1)
-
   tomorrow.setHours(targetHour, 0, 0, 0)
-
   const timeDifference = tomorrow - currentTime
 
   const hoursRemaining = Math.floor(timeDifference / (1000 * 60 * 60))
@@ -20,7 +16,7 @@ function calculateTimeRemainingUntilTomorrow(targetHour) {
   return { hours: hoursRemaining, minutes: minutesRemaining }
 }
 
-const targetHourPST = 6 // Define targetHourPST here
+const targetHourPST = 6
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -40,20 +36,24 @@ module.exports = {
         return
       }
 
-      const { balance, last_daily_claim } = user
+      const color = parseInt('0099ff', 16)
+      const embed = new EmbedBuilder().setTitle('Daily Reward').setColor(color)
+
+      const { balance, last_daily_claim, daily_streak } = user
       const lastClaimDate = last_daily_claim ? new Date(last_daily_claim) : null
       const currentTime = new Date()
       const timeElapsed = lastClaimDate
         ? currentTime - lastClaimDate
-        : 24 * 60 * 60 * 1000 // set to 24 hours if last_daily_claim is null
+        : 24 * 60 * 60 * 1000
       const { hours, minutes } =
         calculateTimeRemainingUntilTomorrow(targetHourPST)
 
+      let fields = []
+
       if (timeElapsed >= 86400000) {
         let updatedStreak = timeElapsed < 172800000 ? daily_streak + 1 : 0
-
         let randomBase = Math.floor(Math.random() * (500 - 300 + 1)) + 300
-        let dailyCoins = randomBase + updatedStreak * 100 // Incremented the streak bonus
+        let dailyCoins = randomBase + updatedStreak * 100
 
         if (updatedStreak < 7) {
           dailyCoins = Math.min(dailyCoins, 3500)
@@ -69,19 +69,27 @@ module.exports = {
           daily_streak: updatedStreak,
         })
 
-        await interaction.reply({
-          content: `You come across ${dailyCoins} on the floor! Your balance: ${newBalance} coins. You can claim more daily rewards in ${hours} hours and ${minutes} minutes.`,
+        fields.push({
+          name: 'Reward',
+          value: `You come across ${dailyCoins} on the floor! Your balance: ${newBalance} coins.`,
         })
+        fields.push({
+          name: 'Next Claim',
+          value: `You can claim more daily rewards in ${hours} hours and ${minutes} minutes.`,
+        })
+
+        embed.addFields(fields)
+
+        await interaction.reply({ embeds: [embed] })
       } else {
-        console.log(
-          `Last claim was on: ${
-            last_daily_claim ? last_daily_claim : 'Never claimed'
-          }`
-        )
-        await interaction.reply({
-          content: `You have already claimed your daily coins today. You have ${hours} h ${minutes} m remaining until your next claim.`,
-          ephemeral: true,
+        fields.push({
+          name: 'Next Claim',
+          value: `You have ${hours} h ${minutes} m remaining until your next claim.`,
         })
+
+        embed.addFields(fields)
+
+        await interaction.reply({ embeds: [embed], ephemeral: true })
       }
     } catch (error) {
       console.error('Error fetching or updating user:', error)

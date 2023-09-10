@@ -1,5 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { MessageEmbed } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { User, Character, MasterCharacter } = require('../../Models/model.js');
 
 module.exports = {
@@ -38,11 +37,11 @@ module.exports = {
         return interaction.reply('Your roster is empty.');
       }
 
-      const embed = new MessageEmbed()
+      const embed = new EmbedBuilder()
         .setTitle('Character Collection')
         .setColor('#0099ff');
 
-      characters.forEach((character) => {
+      const fields = characters.map((character) => {
         const masterInfo = character.masterCharacter;
         let rarityColor;
 
@@ -62,11 +61,13 @@ module.exports = {
         }
 
         const characterInfo = `${rarityColor} ${masterInfo.character_name} | Lvl ${character.level} | XP: ${character.experience} | ⚔️: ${masterInfo.base_damage} | 🧡 ${masterInfo.base_health}`;
-
-        embed.addField('\u200B', characterInfo);
+        return { name: '\u200B', value: characterInfo };
       });
 
+      embed.addFields(fields);
+
       return interaction.reply({ embeds: [embed] });
+
     } catch (error) {
       console.error(error);
       return interaction.reply(
