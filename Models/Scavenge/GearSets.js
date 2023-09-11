@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       gear_name: {
         type: DataTypes.STRING,
       },
-      gear_rarity: {
+      rarity: {
         type: DataTypes.INTEGER,
       },
     },

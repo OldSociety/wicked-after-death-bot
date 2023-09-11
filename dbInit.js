@@ -1,10 +1,19 @@
 const sequelize = require('./Utils/sequelize')
 
-const { User, MasterCharacter, Enemy, Gear, Shop } = require('./Models/model')
+const {
+  User,
+  MasterCharacter,
+  Enemy,
+  GearSets,
+  GearParts,
+  Shop,
+} = require('./Models/model')
 
 const shopData = require('./db/dbShop')
 const characterData = require('./db/dbMasterCharacters')
 const enemyData = require('./db/dbEnemies')
+const gearPartsData = require('./db/dbGearParts')
+const gearSetsData = require('./db/dbGearSets')
 
 // Authenticates connection to the database.
 sequelize
@@ -15,34 +24,53 @@ sequelize
   .catch(console.error)
 
 // Sync changes and populate database
-sequelize
-  .sync({ force: true })
-  .then(async () => {
-    const shopPromises = shopData.map((item) => Shop.upsert(item))
-    const masterCharacterPromises = characterData.map(async (item) => {
-      try {
-        await MasterCharacter.upsert(item)
-      } catch (error) {
-        console.error('Error syncing MasterCharacter:', error)
-      }
+sequelize.sync({ force: true }).then(async () => {
+  try {
+    await Shop.bulkCreate(shopData, { updateOnDuplicate: ['name', 'cost'] }) // Replace field1 and field2 with the actual field names
+
+    for (const item of characterData) {
+      await MasterCharacter.findOrCreate({
+        where: { master_character_id: item.master_character_id },
+        defaults: item,
+      })
+    }
+
+    await Enemy.bulkCreate(enemyData, {
+      updateOnDuplicate: [
+        'id',
+        'name',
+        'description',
+        'type',
+        'unique_skill',
+        'base_damage',
+        'base_health',
+        'chance_to_hit',
+        'crit_chance',
+        'crit_damage',
+      ],
     })
-    const enemyPromises = enemyData.map((item) => Enemy.upsert(item))
-    const gearPromises = gearData.map((item) => Gear.upsert(item))
-    const userGearPromises = userGearData.map((item) => UserGear.upsert(item));
+    await GearSets.bulkCreate(gearSetsData, {
+      updateOnDuplicate: ['name', 'rarity'],
+    })
+    await GearParts.bulkCreate(gearPartsData, {
+      updateOnDuplicate: ['parts_id', 'type', 'rarity'],
+    }) 
 
-    return Promise.all([
-      ...masterCharacterPromises,
-      ...enemyPromises,
-      ...gearPromises,
-      ...shopPromises,
-      ...userGearPromises
-    ])
-  })
-  .then(() => {
+
+    // await UserGear.bulkCreate(userGearData, {
+    //   updateOnDuplicate: [
+    //     'character_id',
+    //     'user_id',
+    //     'gear_id',
+    //     'name',
+    //     'rarity',
+    //     'level',
+    //     'ability',
+    //   ],
+    // }) 
+
     console.log('All databases synced successfully.')
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error('Error syncing databases:', error)
-  })
-
-module.exports = { User, Shop, Enemy }
+  }
+})

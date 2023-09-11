@@ -1,11 +1,9 @@
-// GearPieces model
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
-    'gear_pieces',
+    'gear_parts',
     {
       parts_id: {
         type: DataTypes.INTEGER,
-
         primaryKey: true,
         autoIncrement: true,
       },
