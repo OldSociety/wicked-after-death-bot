@@ -1,6 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+} = require('discord.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
-const { createCharacterSelectMenu } = require('./helpers/characterSelection')
 const { selectEnemy } = require('./helpers/enemySelection')
 
 module.exports = {
@@ -10,48 +15,100 @@ module.exports = {
     .setDescription('Engage in combat'),
 
   async execute(interaction) {
-    const userId = interaction.user.id
-    const characterRetrieved = false
-
-    // User character selection
-    const userCharacters = await retrieveCharacters(userId)
-    if (!userCharacters.length) {
-      await interaction.reply('You have no characters to select.')
-      return
-    }
-
-    const actionRow = createCharacterSelectMenu(userCharacters)
-
-    const characterEmbed = new EmbedBuilder()
-      .setColor('#0099ff')
-      .setTitle('Character Selection')
-      .setDescription('Please select a character for the fight:')
-
-    await interaction.reply({
-      embeds: [characterEmbed],
-      components: [actionRow],
-      ephemeral: true,
-    })
-
-    // Enemy selection
-    let enemy
     try {
-      enemy = await selectEnemy()
-    } catch (err) {
-      await interaction.followUp('No enemies available for selection.')
-      return
+      const userId = interaction.user.id
+
+      // User character selection
+      const userCharacters = await retrieveCharacters(userId)
+      if (!userCharacters.length) {
+        await interaction.reply('You have no characters to select.')
+        return
+      }
+
+      const options = userCharacters.map((char) => {
+        const {
+          dataValues: { character_id },
+          masterCharacter: {
+            dataValues: { character_name, description },
+          },
+        } = char
+        // console.log(
+        //   `Character ID: ${character_id}, Character Name: ${character_name}, Description: ${description}`
+        // )
+
+        return new StringSelectMenuOptionBuilder()
+          .setLabel(character_name) // Corrected the reference here
+          .setValue(character_id.toString())
+      })
+
+      const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('characterSelect')
+        .setPlaceholder('Select a character...')
+        .addOptions(options)
+
+      const actionRow = new ActionRowBuilder().addComponents(selectMenu)
+
+      const characterEmbed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle('Character Selection')
+        .setDescription('Please select a character for the fight:')
+
+      await interaction.reply({
+        embeds: [characterEmbed],
+        components: [actionRow],
+        ephemeral: true,
+      })
+
+      const filter = (i) => {
+        i.deferUpdate()
+        return i.customId === 'characterSelect'
+      }
+
+      const collector = interaction.channel.createMessageComponentCollector({
+        filter,
+        time: 30000,
+      })
+
+      collector.on('collect', async (i) => {
+        console.log('custom id: ' + i.customId)
+        if (i.customId === 'characterSelect') {
+          const selectedMasterCharacterID = i.values[0]
+          console.log(selectedMasterCharacterID)
+          const selectedCharacter = userCharacters.find((char) => {
+            const {
+              dataValues: { character_id },
+              masterCharacter: {
+                dataValues: { character_name },
+              },
+            } = char
+            return character_id.toString() === selectedMasterCharacterID
+          })
+          if (selectedCharacter) {
+            const {
+              masterCharacter: {
+                dataValues: { character_name },
+              },
+            } = selectedCharacter
+            await interaction.followUp(
+              `${i.user.tag}'s **${character_name}** is looking for a fight.`
+            )
+            // Enemy selection code can go here
+          } else {
+            await interaction.followUp(
+              `No character found for ID ${selectedMasterCharacterID}.`
+            )
+          }
+        }
+      })
+
+      collector.on('end', (collected) => {
+        if (collected.size === 0) {
+          interaction.followUp('Time has run out, no character selected.')
+        }
+      })
+    } catch (error) {
+      console.error('Error in execute:', error)
+      await interaction.reply('An error occurred while executing the command.')
     }
-
-    const enemyEmbed = new EmbedBuilder()
-      .setColor('#ff0000')
-      .setTitle('Enemy Selection')
-      .setDescription(`Your opponent is ${enemy.name}`)
-    // .addField('Description', enemy.description)
-
-    await interaction.followUp({
-      embeds: [enemyEmbed],
-    })
-
-    // Further code can go here to initiate the actual fight.
   },
 }
