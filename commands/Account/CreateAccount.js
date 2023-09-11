@@ -8,6 +8,8 @@ const {
   UserGear,
 } = require('../../Models/model.js')
 
+const { startScavengingForUser } = require('./scavengingHelper');
+
 const startingCharacterIds = [0, 1, 2]
 
 module.exports = {
@@ -50,6 +52,8 @@ module.exports = {
           },
           { transaction: t }
         )
+
+        startScavengingForUser(newUser.id);
 
         await t.commit()
 

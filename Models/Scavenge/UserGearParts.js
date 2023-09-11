@@ -1,25 +1,27 @@
-  // UserGearPieces model
-  module.exports = (sequelize, DataTypes) => {
-    return sequelize.define(
-      'user_gear_parts',
-      {
-        user_id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-        },
-        parts_id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-        },
-        quantity: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-          defaultValue: 0,
-        },
+// UserGearParts model
+module.exports = (sequelize, DataTypes) => {
+  return sequelize.define(
+    'user_gear_parts',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
       },
-      {
-        timestamps: false,
-      }
-    )
-  }
-  
+      user_id: {
+        type: DataTypes.INTEGER,
+      },
+      parts_id: {
+        type: DataTypes.INTEGER,
+      },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+    },
+    {
+      timestamps: false,
+    }
+  );
+};
