@@ -3,7 +3,7 @@ const { User, Character, MasterCharacter } = require('../../Models/model.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('collection')
+    .setName('scavenge')
     .setDescription('View the characters in your roster'),
 
   async execute(interaction) {
