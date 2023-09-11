@@ -14,24 +14,26 @@ class CharacterData {
     }
 
     // Character health calculation
-    const artifice_health_modifier = 1
+    const enhancements_health_bonus = 0
+    const enhancements_health_modifier = masterCharacter.dataValues.base_health * enhancements_health_bonus
     const level_health_modifier = 1
     const rank_health_modifier = 1
     const support_health_modifier = 1
 
-    const character_health = Math.floor(
-      (masterCharacter.dataValues.base_health + artifice_health_modifier) *
+    const effective_health = Math.floor(
+      (masterCharacter.dataValues.base_health + enhancements_health_modifier) *
         (level_health_modifier * rank_health_modifier * support_health_modifier)
     )
 
     // Character damage calculation
-    const artifice_damage_modifier = 1
+    const enhancements_damage_bonus = 0
+    const enhancements_damage_modifier = masterCharacter.dataValues.base_damage * enhancements_damage_bonus
     const level_damage_modifier = 1
     const rank_damage_modifier = 1
     const support_damage_modifier = 1
 
-    const character_damage = Math.floor(
-      (masterCharacter.dataValues.base_damage + artifice_damage_modifier) *
+    const effective_damage = Math.floor(
+      (masterCharacter.dataValues.base_damage + enhancements_damage_modifier) *
         (level_damage_modifier * rank_damage_modifier * support_damage_modifier)
     )
 
@@ -39,8 +41,8 @@ class CharacterData {
     const newCharacter = await Character.create({
       userId: userId,
       masterCharacterId: masterCharacterId,
-      health: character_health,
-      damage: character_damage,
+      health: effective_health,
+      damage: effective_damage,
       // ... any other fields
     })
 

@@ -30,18 +30,18 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 1000,
       },
-      health: {
+      effective_health: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       },
-      damage:{
+      effective_damage:{
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       },
 
-      
+
       // ... other unique attributes for each player's instance
     },
     {

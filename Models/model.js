@@ -1,11 +1,11 @@
 const { DataTypes } = require('sequelize')
 const sequelize = require('../Utils/sequelize')
 
-const User = require('./User')(sequelize, DataTypes)
-const Character = require('./Character')(sequelize, DataTypes)
-const MasterCharacter = require('./MasterCharacter')(sequelize, DataTypes)
-const Enemy = require('./Enemy')(sequelize, DataTypes)
-const Shop = require('./Shop')(sequelize, DataTypes)
+const User = require('./User/User')(sequelize, DataTypes)
+const Character = require('./Character/Character')(sequelize, DataTypes)
+const MasterCharacter = require('./Character/MasterCharacter')(sequelize, DataTypes)
+const Enemy = require('./Enemies/Enemy')(sequelize, DataTypes)
+const Shop = require('./Shop/Shop')(sequelize, DataTypes)
 
 console.log('Setting up associations')
 
