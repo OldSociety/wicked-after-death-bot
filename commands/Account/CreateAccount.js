@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
 const sequelize = require('../../Utils/sequelize')
 const { User, Character, MasterCharacter } = require('../../Models/model.js');
@@ -37,12 +37,12 @@ module.exports = {
         await t.commit()
 
         return interaction.reply(
-          `Your economy account has been created with a balance of 730 gold. You've unlocked three new characters! Use /collection to view your character roster.`
+          `Your Hellbound: Wicked after Death account has been created with a balance of 730 gold. You've unlocked three new characters! Use /collection to view your character roster.`
         )
       } else {
         await t.rollback()
         return interaction.reply(
-          `You already have an account. You currently have ${user.balance} coins in your account.`
+          `You already have an account. You currently have ${user.balance} gold in your account.`
         )
       }
     } catch (error) {

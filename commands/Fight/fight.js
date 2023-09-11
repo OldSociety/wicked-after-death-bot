@@ -1,73 +1,58 @@
-// const { SlashCommandBuilder } = require('discord.js')
-// const { User, Character, MasterCharacter } = require('../../Models/model.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const { User, Character } = require('../../Models/model.js')
 
-// async function getAllPossibleEnemies() {
-//   try {
-//     return await MasterCharacter.findAll()
-//   } catch (error) {
-//     console.error('Error fetching enemies:', error)
-//     return []
-//   }
-// }
+module.exports = {
+  cooldown: 5,
+  data: new SlashCommandBuilder()
+    .setName('fight')
+    .setDescription('Engage in combat')
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('select_character')
+        .setDescription('Choose your character for the fight')
+    ),
+  async execute(interaction) {
+    if (interaction.options.getSubcommand() === 'select_character') {
+      const userId = interaction.user.id
 
-// async function chooseEnemy() {
-//   const enemies = await getAllPossibleEnemies()
+      // Retrieve User's Characters
+      const userCharacters = await Character.findAll({
+        where: { user_id: userId },
+        include: [
+          {
+            model: Character,
+            as: 'characters',
+            include: [
+              {
+                model: MasterCharacter,
+                as: 'masterCharacter',
+              },
+            ],
+          },
+        ],
+      })
 
-//   if (enemies.length === 0) {
-//     console.error('No enemies found to choose from.')
-//     return null
-//   }
+      if (!userCharacters.length) {
+        await interaction.reply('You have no characters to select.')
+        return
+      }
 
-//   const randomIndex = Math.floor(Math.random() * enemies.length)
-//   return enemies[randomIndex]
-// }
+      const characterList = userCharacters.map((character, index) => 
+        `${index + 1}. ${character.masterCharacter.name}`
+      ).join('\n');
 
-// // Function to conduct the fight
-// async function conductFight(interaction, chosenCharacter) {
-//   // Logic to handle the fight
-// }
+      // Character Selection Embed
+      const characterSelectionEmbed = new EmbedBuilder()
+        .setTitle('Choose Your Character')
+        .setDescription(characterList)
+        .setColor('#0099ff')
 
-// module.exports = {
-//   cooldown: 5,
-//   data: new SlashCommandBuilder()
-//     .setName('fight')
-//     .setDescription('Initiate a fight')
-//     .addSubcommand((subcommand) =>
-//       subcommand
-//         .setName('character')
-//         .setDescription('Choose a character for the fight')
-//         .addStringOption((option) =>
-//           option
-//             .setName('name')
-//             .setDescription('The name of the character')
-//             .setRequired(true)
-//         )
-//     ),
-//   async execute(interaction) {
-//     try {
-//       // Extract character name from interaction
-//       const characterName = interaction.options.getString('name')
+      await interaction.reply({
+        embeds: [characterSelectionEmbed],
+        ephemeral: true, // Make it only visible to the user
+      })
 
-//       // Fetch the user's character from the database
-//       const userCharacters = await Character.findAll({
-//         where: { user_id: interaction.user.id },
-//       })
-
-//       // Logic to find the chosen character
-//       const chosenCharacter = userCharacters.find(
-//         (c) => c.name === characterName
-//       )
-
-//       // Choose the enemy character
-//       const enemy = chooseEnemy()
-
-//       // Conduct the fight
-//       await conductFight(interaction, chosenCharacter, enemy)
-//     } catch (error) {
-//       console.error('Error in initiating fight:', error)
-//       return interaction.reply(
-//         'Something went wrong while trying to start the battle.'
-//       )
-//     }
-//   },
-// }
+      // You can later add code here to handle reactions for character selection
+    }
+  },
+}
