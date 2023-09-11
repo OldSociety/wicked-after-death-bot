@@ -13,6 +13,7 @@ const Enemy = require('./Enemy/Enemy')(sequelize, DataTypes)
 
 // Shop Models
 const Shop = require('./Shop/Shop')(sequelize, DataTypes)
+const CharacterPack = require('./Shop/CharacterPack')(sequelize, DataTypes)
 
 // Scavenge Models
 const Gear = require('./Scavenge/Gear')(sequelize, DataTypes)
@@ -58,9 +59,12 @@ UserGear.belongsTo(Gear, { foreignKey: 'gear_id' })
 console.log('Finished setting up associations')
 
 module.exports = {
-  User,
   Character,
   MasterCharacter,
   Enemy,
+  Gear,
   Shop,
+  CharacterPack,
+  User,
+  UserGear,
 }

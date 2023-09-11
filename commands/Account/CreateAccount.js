@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
 const sequelize = require('../../Utils/sequelize')
-const { User, Character, MasterCharacter } = require('../../Models/model.js');
+const { User, Character, MasterCharacter, UserGear } = require('../../Models/model.js');
 
 const startingCharacterIds = [0, 1, 2]
 
@@ -33,11 +33,16 @@ module.exports = {
             )
           })
         )
+          // Create initial UserGear record
+        await UserGear.create({
+          user_id: userId,
+          // any other fields to initialize
+        }, { transaction: t });
 
         await t.commit()
 
         return interaction.reply(
-          `Your Hellbound: Wicked after Death account has been created with a balance of 730 gold. You've unlocked three new characters! Use /collection to view your character roster.`
+          `Your Hellbound: Wicked after Death account has been created with a balance of 730 gold. You've unlocked three new characters and they have begun scavenging for gear! Use /help for more information.`
         )
       } else {
         await t.rollback()

@@ -1,17 +1,6 @@
-const Sequelize = require('sequelize')
 const sequelize = require('./Utils/sequelize')
 
-const User = require('./Models/User.js')(sequelize, Sequelize.DataTypes)
-const Shop = require('./Models/Shop.js')(sequelize, Sequelize.DataTypes)
-const Enemy = require('./Models/Enemy.js')(sequelize, Sequelize.DataTypes)
-const Character = require('./Models/Character.js')(
-  sequelize,
-  Sequelize.DataTypes
-)
-const MasterCharacter = require('./Models/MasterCharacter.js')(
-  sequelize,
-  Sequelize.DataTypes
-)
+const { User, MasterCharacter, Enemy, Gear, Shop } = require('./Models/model')
 
 const shopData = require('./db/dbShop')
 const characterData = require('./db/dbMasterCharacters')
@@ -38,17 +27,19 @@ sequelize
       }
     })
     const enemyPromises = enemyData.map((item) => Enemy.upsert(item))
-
-    console.log('User Associations:', Object.keys(User.associations))
+    const gearPromises = gearData.map((item) => Gear.upsert(item))
+    const userGearPromises = userGearData.map((item) => UserGear.upsert(item));
 
     return Promise.all([
-      ...shopPromises,
       ...masterCharacterPromises,
       ...enemyPromises,
+      ...gearPromises,
+      ...shopPromises,
+      ...userGearPromises
     ])
   })
   .then(() => {
-    console.log('All databases synced')
+    console.log('All databases synced successfully.')
   })
   .catch((error) => {
     console.error('Error syncing databases:', error)

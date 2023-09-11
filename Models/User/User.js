@@ -25,22 +25,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-    resin_total: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    plate_total: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    weave_total: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    core_total: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
   });
 
   return User;
