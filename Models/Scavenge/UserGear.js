@@ -4,17 +4,14 @@ module.exports = (sequelize, DataTypes) => {
     {
       character_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         primaryKey: true,
         autoIncrement: true,
       },
       user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
       },
       gear_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
       },
       name: {
         type: DataTypes.STRING,
@@ -22,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       rarity: {
         type: DataTypes.INTEGER,
-        allowNull: false,
       },
       level: {
         type: DataTypes.INTEGER,
@@ -30,7 +26,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       ability: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
     },
     {

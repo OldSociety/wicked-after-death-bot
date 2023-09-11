@@ -1,7 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
 const sequelize = require('../../Utils/sequelize')
-const { User, Character, MasterCharacter, UserGear } = require('../../Models/model.js');
+const {
+  User,
+  Character,
+  MasterCharacter,
+  UserGear,
+} = require('../../Models/model.js')
 
 const startingCharacterIds = [0, 1, 2]
 
@@ -12,12 +17,16 @@ module.exports = {
     .setDescription('Create your economy account'),
   async execute(interaction) {
     const userId = interaction.user.id
+    const userName = interaction.user.username
+    console.log(interaction.user)
+    console.log("Storing username as: " + userName)
     const t = await sequelize.transaction()
 
     try {
       const [user, created] = await User.findOrCreate({
         where: { user_id: userId },
-        defaults: { balance: 730 },
+        defaults: { balance: 730, user_name: userName },
+
         transaction: t,
       })
 
@@ -33,11 +42,14 @@ module.exports = {
             )
           })
         )
-          // Create initial UserGear record
-        await UserGear.create({
-          user_id: userId,
-          // any other fields to initialize
-        }, { transaction: t });
+        // Create initial UserGear record
+        await UserGear.create(
+          {
+            user_id: userId,
+            // any other fields to initialize
+          },
+          { transaction: t }
+        )
 
         await t.commit()
 

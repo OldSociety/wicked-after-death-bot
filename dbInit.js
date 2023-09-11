@@ -16,7 +16,7 @@ sequelize
 
 // Sync changes and populate database
 sequelize
-  .sync({ alter: true })
+  .sync({ force: true })
   .then(async () => {
     const shopPromises = shopData.map((item) => Shop.upsert(item))
     const masterCharacterPromises = characterData.map(async (item) => {

@@ -16,11 +16,11 @@ const Shop = require('./Shop/Shop')(sequelize, DataTypes)
 const CharacterPack = require('./Shop/CharacterPack')(sequelize, DataTypes)
 
 // Scavenge Models
-const Gear = require('./Scavenge/Gear')(sequelize, DataTypes)
+const Gear = require('./Scavenge/GearSets')(sequelize, DataTypes)
 
 // User Models
 const User = require('./User/User')(sequelize, DataTypes)
-const UserGear = require('./User/UserGear')(sequelize, DataTypes)
+const UserGear = require('./Scavenge/UserGear')(sequelize, DataTypes)
 
 console.log('Setting up associations')
 
