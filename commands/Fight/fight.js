@@ -51,7 +51,6 @@ module.exports = {
       const characterEmbed = new EmbedBuilder()
         .setColor('#0099ff')
         .setTitle('Character Selection')
-        .setDescription('Please select a character for the fight:')
 
       await interaction.reply({
         embeds: [characterEmbed],
@@ -90,14 +89,33 @@ module.exports = {
               },
             } = selectedCharacter
             await interaction.followUp(
-              `${i.user.tag}'s **${character_name}** is looking for a fight.`
+              `${i.user.tag}'s **${character_name}** is looking for a fight...`
             )
-            // Enemy selection code can go here
-          } else {
-            await interaction.followUp(
-              `No character found for ID ${selectedMasterCharacterID}.`
-            )
+            // Enemy selection
+            let enemy
+            try {
+              enemy = await selectEnemy()
+            } catch (err) {
+              await interaction.followUp('No enemies available for selection.')
+              return
+            }
+
+            const enemyEmbed = new EmbedBuilder()
+              .setColor('#ff0000')
+              .setTitle('Enemy Selection')
+              .setDescription(`...and has found ${enemy.name}`)
+            // .addField('Description', enemy.description)
+
+            await interaction.followUp({
+              embeds: [enemyEmbed],
+            })
           }
+
+          // Further code can go here to initiate the actual fight.
+        } else {
+          await interaction.followUp(
+            `No character found for ID ${selectedMasterCharacterID}.`
+          )
         }
       })
 
