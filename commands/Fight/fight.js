@@ -112,6 +112,7 @@ module.exports = {
           }
 
           // Further code can go here to initiate the actual fight.
+          
         } else {
           await interaction.followUp(
             `No character found for ID ${selectedMasterCharacterID}.`
