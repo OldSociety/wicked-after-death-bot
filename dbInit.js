@@ -6,6 +6,7 @@ const {
   Enemy,
   GearSets,
   GearParts,
+  UserGearParts,
   Shop,
 } = require('./Models/model')
 

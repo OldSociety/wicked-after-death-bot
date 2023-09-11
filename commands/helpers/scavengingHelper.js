@@ -1,5 +1,5 @@
 const cron = require('node-cron')
-const { GearParts, UserGearParts } = require('./Models/model'); // Adjust the import according to your project structure
+const { GearParts, UserGearParts } = require('../../Models/model'); // Adjust the import according to your project structure
 
 function pickRarity() {
   const rand = Math.random() * 100;

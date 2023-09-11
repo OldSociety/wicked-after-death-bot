@@ -6,11 +6,14 @@ const {
   Character,
   MasterCharacter,
   UserGear,
+  GearParts,
+  UserGearParts,
 } = require('../../Models/model.js')
 
-const { startScavengingForUser } = require('./scavengingHelper');
+const { startScavengingForUser } = require('../helpers/scavengingHelper')
 
 const startingCharacterIds = [0, 1, 2]
+const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 module.exports = {
   cooldown: 5,
@@ -20,8 +23,6 @@ module.exports = {
   async execute(interaction) {
     const userId = interaction.user.id
     const userName = interaction.user.username
-    console.log(interaction.user)
-    console.log("Storing username as: " + userName)
     const t = await sequelize.transaction()
 
     try {
@@ -44,16 +45,23 @@ module.exports = {
             )
           })
         )
+
         // Create initial UserGear record
-        await UserGear.create(
-          {
-            user_id: userId,
-            // any other fields to initialize
-          },
-          { transaction: t }
+        await Promise.all(
+          startingGearParts.map((id) => {
+            return UserGearParts.create(
+              {
+                id: id,
+                user_id: userId,
+                parts_id: UserGearParts.parts_id,
+                rarity: GearParts.rarity,
+              },
+              { transaction: t }
+            )
+          })
         )
 
-        startScavengingForUser(newUser.id);
+        startScavengingForUser(userId)
 
         await t.commit()
 

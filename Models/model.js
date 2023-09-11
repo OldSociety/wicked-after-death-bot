@@ -18,6 +18,7 @@ const CharacterPack = require('./Shop/CharacterPack')(sequelize, DataTypes)
 // Scavenge Models
 const GearSets = require('./Scavenge/GearSets')(sequelize, DataTypes)
 const GearParts = require('./Scavenge/GearParts')(sequelize, DataTypes)
+const UserGearParts = require('./Scavenge/UserGearParts')(sequelize, DataTypes);
 
 // User Models
 const User = require('./User/User')(sequelize, DataTypes)
@@ -50,12 +51,14 @@ MasterCharacter.hasMany(Character, {
 })
 
 // Gear associations
-
 User.hasMany(UserGear, { foreignKey: 'user_id' })
 GearSets.hasMany(UserGear, { foreignKey: 'gear_id' })
 
 UserGear.belongsTo(User, { foreignKey: 'user_id' })
-UserGear.belongsTo(GearSets, { foreignKey: 'gear_id' })
+GearSets.belongsTo(GearSets, { foreignKey: 'gear_id' })
+
+UserGearParts.belongsTo(User, { foreignKey: 'user_id' });
+UserGearParts.belongsTo(GearParts, { foreignKey: 'parts_id' });
 
 console.log('Finished setting up associations')
 
@@ -69,4 +72,5 @@ module.exports = {
   CharacterPack,
   User,
   UserGear,
+  UserGearParts
 }
