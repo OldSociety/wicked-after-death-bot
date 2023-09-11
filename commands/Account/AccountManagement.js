@@ -20,7 +20,8 @@ module.exports = {
         .addUserOption((option) =>
           option
             .setName('user')
-            .setDescription('The user whose balance to reset (optional)')
+            .setDescription('The user whose balance to reset')
+            .setRequired(true)
         )
     )
     .addSubcommand((subcommand) =>
