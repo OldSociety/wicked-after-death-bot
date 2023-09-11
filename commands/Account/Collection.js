@@ -1,57 +1,78 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { retrieveCharacters } = require('./helpers/characterRetrieval');
-const { createCharacterSelectMenu } = require('./helpers/characterSelection');
-const { selectEnemy } = require('./helpers/enemySelection');
+const { User, Character, MasterCharacter } = require('../../Models/model.js');
 
 module.exports = {
-  cooldown: 5,
   data: new SlashCommandBuilder()
-    .setName('fight')
-    .setDescription('Engage in combat'),
+    .setName('collection')
+    .setDescription('View the characters in your roster'),
 
   async execute(interaction) {
     const userId = interaction.user.id;
 
-    // User character selection
-    const userCharacters = await retrieveCharacters(userId);
-    if (!userCharacters.length) {
-      await interaction.reply('You have no characters to select.');
-      return;
-    }
-
-    const actionRow = createCharacterSelectMenu(userCharacters);
-
-    const characterEmbed = new EmbedBuilder()
-      .setColor('#0099ff')
-      .setTitle('Character Selection')
-      .setDescription('Please select a character for the fight:');
-
-    await interaction.reply({
-      embeds: [characterEmbed],
-      components: [actionRow],
-      ephemeral: true,
-    });
-
-    // Enemy selection
-    let enemy;
     try {
-      enemy = await selectEnemy();
-    } catch (err) {
-      await interaction.followUp('No enemies available for selection.');
-      return;
+      const user = await User.findOne({
+        where: { user_id: userId },
+        include: [
+          {
+            model: Character,
+            as: 'characters',
+            include: [
+              {
+                model: MasterCharacter,
+                as: 'masterCharacter',
+                attributes: { exclude: ['master_character_id'] },
+              },
+            ],
+          },
+        ],
+      });
+
+      if (!user) {
+        return interaction.reply('You do not have an account.');
+      }
+
+      const characters = user.characters || [];
+
+      if (characters.length === 0) {
+        return interaction.reply('Your roster is empty.');
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle('Character Collection')
+        .setColor('#0099ff');
+
+      const fields = characters.map((character) => {
+        const masterInfo = character.masterCharacter;
+        let rarityColor;
+
+        // Decide the font color based on the rarity
+        switch (masterInfo.rarity) {
+          case 'folk hero':
+            rarityColor = '🟢'; // Bronze
+            break;
+          case 'legend':
+            rarityColor = '🔵'; // Purple
+            break;
+          case 'unique':
+            rarityColor = '🟣'; // Yellow
+            break;
+          default:
+            rarityColor = '⚪'; // White
+        }
+
+        const characterInfo = `${rarityColor} ${masterInfo.character_name} | Lvl ${character.level} | XP: ${character.experience} | ⚔️: ${masterInfo.base_damage} | 🧡 ${masterInfo.base_health}`;
+        return { name: '\u200B', value: characterInfo };
+      });
+
+      embed.addFields(fields);
+
+      return interaction.reply({ embeds: [embed] });
+
+    } catch (error) {
+      console.error(error);
+      return interaction.reply(
+        'Something went wrong while retrieving your roster.'
+      );
     }
-
-    const enemyEmbed = new EmbedBuilder()
-      .setColor('#ff0000')
-      .setTitle('Enemy Selection')
-      .setDescription(`Your opponent is ${enemy.name}`)
-      .addField('Description', enemy.description)
-      .addField('Type', enemy.type);
-
-    await interaction.followUp({
-      embeds: [enemyEmbed],
-    });
-
-    // Further code can go here to initiate the actual fight.
   },
 };

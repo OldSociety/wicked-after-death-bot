@@ -1,4 +1,4 @@
-const { Character, MasterCharacter } = require('../../../Models/model');
+const { Character, MasterCharacter } = require('../../../Models/model')
 
 const retrieveCharacters = async (userId) => {
   const userCharacters = await Character.findAll({
@@ -9,10 +9,10 @@ const retrieveCharacters = async (userId) => {
         as: 'masterCharacter',
       },
     ],
-  });
-  return userCharacters;
-};
+  })
+  return userCharacters
+}
 
 module.exports = {
   retrieveCharacters,
-};
+}
