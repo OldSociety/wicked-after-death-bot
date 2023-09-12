@@ -46,22 +46,31 @@ module.exports = {
           })
         )
 
+        const gearPartsDetails = await GearParts.findAll({
+          where: { parts_id: startingGearParts }
+        });
+        
+        if (!gearPartsDetails || gearPartsDetails.length === 0) {
+          throw new Error('Failed to fetch gear parts details')
+        }
+
         // Create initial UserGear record
         await Promise.all(
-          startingGearParts.map((id) => {
+          gearPartsDetails.map((part) => {
             return UserGearParts.create(
               {
-                id: id,
                 user_id: userId,
-                parts_id: UserGearParts.parts_id,
-                rarity: GearParts.rarity,
+                parts_id: part.parts_id,
+                rarity: part.rarity,
               },
               { transaction: t }
             )
           })
         )
 
+        console.log('we are starting to scavenge.')
         startScavengingForUser(userId)
+        console.log('we are scavenging for '+userId)
 
         await t.commit()
 

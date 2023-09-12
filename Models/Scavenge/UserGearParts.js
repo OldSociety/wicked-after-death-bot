@@ -1,4 +1,3 @@
-// UserGearParts model
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define(
     'user_gear_parts',

@@ -9,6 +9,17 @@ module.exports = {
     .setDescription('Manage user accounts (DM ONLY)')
     .addSubcommand((subcommand) =>
       subcommand
+        .setName('delete_account')
+        .setDescription("Delete a user's account")
+        .addUserOption((option) =>
+          option
+            .setName('user')
+            .setDescription('The user whose account to delete')
+            .setRequired(true)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
         .setName('reset_balance')
         .setDescription("Reset a user's balance")
         .addIntegerOption((option) =>
@@ -23,18 +34,8 @@ module.exports = {
             .setDescription('The user whose balance to reset')
             .setRequired(true)
         )
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
-        .setName('delete_account')
-        .setDescription("Delete a user's account")
-        .addUserOption((option) =>
-          option
-            .setName('user')
-            .setDescription('The user whose account to delete')
-            .setRequired(true)
-        )
     ),
+
   async execute(interaction) {
     if (interaction.user.id !== process.env.BOTADMINID) {
       await interaction.reply({
@@ -48,7 +49,6 @@ module.exports = {
       const subcommand = interaction.options.getSubcommand()
 
       if (subcommand === 'reset_balance') {
-
         // Get the user and amount from the interaction's options
         const user = interaction.options.getUser('user')
         const amount = interaction.options.getInteger('amount')
@@ -70,15 +70,16 @@ module.exports = {
 
         const color = parseInt('0099ff', 16)
         const embedReset = new EmbedBuilder()
-        .setTitle('Balance Reset Confirmation')
-        .setDescription(`Successfully reset the balance of ${user.tag} to ${amount}.`)
-        .setColor(color);
+          .setTitle('Balance Reset Confirmation')
+          .setDescription(
+            `Successfully reset the balance of ${user.tag} to ${amount}.`
+          )
+          .setColor(color)
 
-      await interaction.reply({
-        embeds: [embedReset],
-        ephemeral: true,
+        await interaction.reply({
+          embeds: [embedReset],
+          ephemeral: true,
         })
-
       } else if (subcommand === 'delete_account') {
         const targetUser = interaction.options.getUser('user')
         console.log('target user')
@@ -119,9 +120,11 @@ module.exports = {
         )
 
         const embed = new EmbedBuilder()
-        .setTitle('Account Deletion Confirmation')
-        .setDescription(`Are you sure you want to delete the account for ${targetUser.tag}?`)
-        .setColor('#0099ff');
+          .setTitle('Account Deletion Confirmation')
+          .setDescription(
+            `Are you sure you want to delete the account for ${targetUser.tag}?`
+          )
+          .setColor('#0099ff')
 
         await interaction.reply({ embeds: [embed], components: [row] })
       }

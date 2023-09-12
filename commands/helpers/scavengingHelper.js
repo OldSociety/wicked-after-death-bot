@@ -13,7 +13,7 @@ async function scavengeGearParts(userId) {
     const rarity = pickRarity();
     const allParts = await GearParts.findAll({ where: { rarity } });
     const randomPart = allParts[Math.floor(Math.random() * allParts.length)];
-    
+
     await UserGearParts.create({
       user_id: userId,
       parts_id: randomPart.parts_id,
@@ -22,12 +22,16 @@ async function scavengeGearParts(userId) {
   }
 }
 
-module.exports.startScavengingForUser = function (userId) {
-  cron.schedule('0 * * * *', async () => {
-    const users = await User.findAll() 
+module.exports.startScavengingForUser = function(userId) {
+  cron.schedule('* * * * *', async () => {
+    try {const users = await User.findAll();
 
     for (const user of users) {
-      scavengeForGear(user.id) // your scavenging function
+      await scavengeForGear(user.id); // Added 'await' here
     }
+    console.log('I am scavenging.');
+  } catch (error) {
+    console.log("Error in cron job:", error)
+  }
   })
 }
