@@ -39,6 +39,17 @@ module.exports = {
       return
     }
 
+    // Check for admin-only commands
+    if (command.data.name === 'account_management') {
+      if (interaction.user.id !== process.env.BOTADMINID) {
+        await interaction.reply({
+          content: 'You are not authorized to use this command.',
+          ephemeral: true,
+        })
+        return
+      }
+    }
+
     try {
       await command.execute(interaction)
     } catch (error) {

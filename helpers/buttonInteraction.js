@@ -1,4 +1,4 @@
-const { User,Character, UserGear, UserGearParts } = require('../Models/model')
+const { User, Character, UserGear, UserGearParts } = require('../Models/model')
 
 async function deleteUserAccount(userId) {
   try {
@@ -14,7 +14,6 @@ async function deleteUserAccount(userId) {
     })
 
     for (const character of relatedCharacters) {
-      
       await character.destroy()
       console.log('characters destroyed')
     }
@@ -23,7 +22,6 @@ async function deleteUserAccount(userId) {
       console.log('gear destroyed')
     }
     for (const gearPart of relatedUserGearParts) {
-      
       await gearPart.destroy()
       console.log('gear parts destroyed')
     }
