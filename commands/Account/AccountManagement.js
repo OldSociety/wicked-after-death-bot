@@ -1,6 +1,10 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders')
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+} = require('@discordjs/builders')
 const { User, Character, MasterCharacter } = require('../../Models/model.js')
-const { MessageActionRow, MessageButton } = require('discord.js')
 
 module.exports = {
   cooldown: 5,
@@ -68,39 +72,36 @@ module.exports = {
         userAccount.balance = amount
         await userAccount.save()
 
-        const color = parseInt('0099ff', 16)
         const embedReset = new EmbedBuilder()
           .setTitle('Balance Reset Confirmation')
           .setDescription(
             `Successfully reset the balance of ${user.tag} to ${amount}.`
           )
-          .setColor(color)
+        setColor(0x0099ff)
 
         await interaction.reply({
           embeds: [embedReset],
           ephemeral: true,
         })
       } else if (subcommand === 'delete_account') {
+        console.log('Entered delete_account') // New log
+
         const targetUser = interaction.options.getUser('user')
-        console.log('target user')
+        console.log(`Target User: ${targetUser}`) // New log
 
         if (!targetUser) {
+          console.log('Invalid input, no user') // New log
           await interaction.reply('Invalid input. Please provide a user.')
-          return
-        }
-
-        if (targetUser.id === interaction.client.user.id) {
-          await interaction.reply("You cannot delete the bot's account.")
           return
         }
 
         const targetUserAccount = await User.findOne({
           where: { user_id: targetUser.id },
         })
-        console.log(`Target User Account: ${JSON.stringify(targetUserAccount)}`)
+        console.log(`Target User Account: ${JSON.stringify(targetUserAccount)}`) // Existing log
 
         if (!targetUserAccount) {
-          console.log('cant target')
+          console.log('Target user not found') // New log
           await interaction.reply({
             content: "The specified user doesn't have an account.",
             ephemeral: true,
@@ -108,28 +109,62 @@ module.exports = {
           return
         }
 
-        const row = new MessageActionRow().addComponents(
-          new MessageButton()
-            .setCustomId(`delete_account_yes_${targetUser.id}`)
-            .setLabel('Yes')
-            .setStyle('PRIMARY'),
-          new MessageButton()
-            .setCustomId(`delete_account_no_${targetUser.id}`)
-            .setLabel('No')
-            .setStyle('DANGER')
-        )
+        const yesButton = new ButtonBuilder()
+          .setCustomId(`delete_account_yes_${targetUser.id}`)
+          .setLabel('Yes')
+          .setStyle(1)
+
+        const noButton = new ButtonBuilder()
+          .setCustomId(`delete_account_no_${targetUser.id}`)
+          .setLabel('No')
+          .setStyle(4)
+
+        const row = new ActionRowBuilder().addComponents(yesButton, noButton)
 
         const embed = new EmbedBuilder()
           .setTitle('Account Deletion Confirmation')
           .setDescription(
             `Are you sure you want to delete the account for ${targetUser.tag}?`
           )
-          .setColor('#0099ff')
-
+          .setColor(0x0099ff)
         await interaction.reply({ embeds: [embed], components: [row] })
+
+        if (!interaction.isButton()) return
+
+        const customId = interaction.customId
+
+        // Extract user ID from customId
+        const userId = customId.split('_').pop()
+
+        if (customId.startsWith('delete_account_yes')) {
+          try {
+            const userAccount = await User.findOne({
+              where: { user_id: userId },
+            })
+
+            if (!userAccount) {
+              await interaction.reply(`No account found for user ID ${userId}`)
+              return
+            }
+
+            await userAccount.destroy()
+            await interaction.reply(
+              `Successfully deleted account for user ID ${userId}`
+            )
+          } catch (error) {
+            console.error('Error deleting account:', error)
+            await interaction.reply(
+              `An error occurred while deleting the account.`
+            )
+          }
+        } else if (customId.startsWith('delete_account_no')) {
+          await interaction.reply(
+            `Canceled account deletion for user ID ${userId}`
+          )
+        }
       }
     } catch (error) {
-      console.error('Error in account management command:', error)
+      console.error('Error in account management command:', error) // Existing log
       await interaction.reply({
         content: 'An error occurred. Please try again later.',
         ephemeral: true,

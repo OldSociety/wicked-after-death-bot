@@ -7,6 +7,7 @@ const sequelize = require('./Utils/sequelize')
 
 const { Client, Collection, GatewayIntentBits } = require('discord.js')
 const { userInfo } = require('node:os')
+const buttonInteractionHandler = require('./helpers/buttonInteraction')
 
 // Create a new client instance
 const client = new Client({
@@ -51,6 +52,10 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args))
   }
 }
+
+client.on('interactionCreate', async (interaction) => {
+  await buttonInteractionHandler.execute(interaction);
+});
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
