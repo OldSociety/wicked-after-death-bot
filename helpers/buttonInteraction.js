@@ -1,3 +1,4 @@
+const { Op } = require('sequelize')
 const { User, Character, UserGear, UserGearParts } = require('../Models/model')
 
 async function deleteUserAccount(userId) {
@@ -11,6 +12,24 @@ async function deleteUserAccount(userId) {
     })
     const relatedUserGearParts = await UserGearParts.findAll({
       where: { user_id: userId },
+    })
+
+    await Character.destroy({
+      where: {
+        user_id: null,
+      },
+    })
+
+    await UserGear.destroy({
+      where: {
+        user_id: null,
+      },
+    })
+
+    await UserGearParts.destroy({
+      where: {
+        user_id: null,
+      },
     })
 
     for (const character of relatedCharacters) {

@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^18.0.6",
+    "bull": "^4.11.3",
     "discord.js": "^14.12.1",
     "node-cron": "^3.0.2",
     "node-fetch": "^3.2.6",

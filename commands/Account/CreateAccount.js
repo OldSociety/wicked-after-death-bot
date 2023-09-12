@@ -67,11 +67,6 @@ module.exports = {
             )
           })
         )
-
-        console.log('we are starting to scavenge.')
-        startScavengingForUser(userId)
-        console.log('we are scavenging for '+userId)
-
         await t.commit()
 
         return interaction.reply(
