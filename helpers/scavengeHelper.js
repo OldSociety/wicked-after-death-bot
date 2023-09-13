@@ -5,6 +5,7 @@ const { User, GearParts, UserGearParts } = require('../Models/model')
 const baseChance = 0.05
 const maxChanceIncrease = 0.1
 const chanceIncrement = 0.01
+const userChanceToFind = {}
 
 function pickRarity() {
   const rand = Math.random() * 100
@@ -14,70 +15,103 @@ function pickRarity() {
 }
 
 async function scavengeGearParts(userId, chanceToFind) {
+  console.log('at the end of the hour, this is the chances', chanceToFind)
   if (Math.random() < chanceToFind) {
     const rarity = pickRarity()
     const allParts = await GearParts.findAll({ where: { rarity } })
     const randomPart = allParts[Math.floor(Math.random() * allParts.length)]
-
     const [userGearPart, created] = await UserGearParts.findOrCreate({
       where: { user_id: userId, parts_id: randomPart.parts_id },
       defaults: { quantity: 0 },
     })
-
     await userGearPart.increment('quantity', { by: 1 })
     console.log('I have found a part for ' + userId)
   }
 }
 
-const lastCountedMessageTimestamp = {}
+// New object to keep track of temporary increments
+const tempIncrements = {}
 
-cron.schedule('* * * * *', async () => { // '*/6 * * * *' <- 6 minutes
+// Function called when a new message is received
+function newMessageReceived(userId) {
+  tempIncrements[userId] = (tempIncrements[userId] || 0) + 0.01
+  // Make sure the temporary increment does not exceed 0.1
+  tempIncrements[userId] = Math.min(tempIncrements[userId], 0.1)
+}
+
+// Schedule a cron job to run every 5 seconds (replace this with 6 minutes in production)
+cron.schedule('*/6 * * * *', async () => {
   try {
-    const currentTime = new Date()
-
-    const activeUsers = await User.findAll({
+    console.log('Cron job started')
+    const allUsers = await User.findAll({
       attributes: ['user_id'],
-      where: {
-        last_counted_message_timestamp: {
-          [Op.gte]: new Date(currentTime - 360000),
-        },
-      },
     })
 
-    for (const user of activeUsers) {
-      user.chanceToFind = Math.min(
-        user.chanceToFind + chanceIncrement,
+    console.log(`Number of total users
+    : ${allUsers.length}`)
+
+    // Inside your cron job that fires every 5 seconds...
+    for (const user of allUsers) {
+      const userId = user.user_id
+
+      // Fetch the current chance from the database
+      const dbUser = await User.findOne({ where: { user_id: userId } })
+      const currentChanceFromDB = dbUser.currentChance
+
+      // Use the chance from the database if available
+      if (currentChanceFromDB !== null) {
+        userChanceToFind[userId] = currentChanceFromDB
+      } else if (!userChanceToFind[userId]) {
+        userChanceToFind[userId] = baseChance
+      }
+
+      console.log(
+        `Initial chance for User ID ${userId}: ${userChanceToFind[userId]}`
+      )
+
+      // Add the temporary increment if there's any, but cap it at 0.01
+      const incrementForThisJob = Math.min(
+        chanceIncrement,
+        tempIncrements[userId] || 0
+      )
+
+      userChanceToFind[userId] += incrementForThisJob
+
+      // Cap it at baseChance + maxChanceIncrease
+      userChanceToFind[userId] = Math.min(
+        userChanceToFind[userId],
         baseChance + maxChanceIncrease
       )
 
-      user.message_count = (user.message_count || 0) + 1
-      await user.save()
-    }
+      // Log: Temp increments for this user
+      console.log(
+        `Temporary increments this job for User ID ${userId}: ${tempIncrements[userId]}`
+      )
 
-    for (const user of activeUsers) {
-      if (
-        Date.now() - (lastCountedMessageTimestamp[user.user_id] || 0) >=
-        6 * 60 * 1000
-      ) {
-        user.chanceToFind = Math.min(
-          user.chanceToFind + chanceIncrement,
-          baseChance + maxChanceIncrease
-        )
-        user.message_count = (user.message_count || 0) + 1
-        lastCountedMessageTimestamp[user.user_id] = Date.now() // Update the last counted time
-        await user.save()
-        console.log(`User ID: ${user.user_id}, Current chance to find: ${user.chanceToFind}`); // Added log
-      }
+      // Log: Updated chance for this user
+      console.log(
+        `Updated chance for User ID ${userId}: ${userChanceToFind[userId]}`
+      )
+
+      // Reset the temporary increment for this user
+      tempIncrements[userId] = 0
+
+      // Update the chance in the database
+      await User.update(
+        { currentChance: userChanceToFind[userId] },
+        { where: { user_id: userId } }
+      )
     }
   } catch (error) {
     console.error('Error in scheduled task:', error)
   }
 })
 
+// ... (rest of the code, like the hourly cron job, remains unchanged)
+
 cron.schedule('0 * * * *', async () => {
   try {
     const currentTime = new Date()
-
     const uniqueUserIds = await UserGearParts.findAll({
       attributes: ['user_id'],
       group: ['user_id'],
@@ -87,11 +121,25 @@ cron.schedule('0 * * * *', async () => {
       const user = await User.findOne({
         where: { user_id: uniqueUser.user_id },
       })
-      await scavengeGearParts(user.user_id, user.chanceToFind)
+      await scavengeGearParts(
+        user.user_id,
+        userChanceToFind[user.user_id] || baseChance
+      )
     }
 
-    await User.update({ last_counted_message_timestamp: currentTime }, { where: {} })
-    await User.update({ chanceToFind: baseChance }, { where: {} })
+    await User.update(
+      { last_counted_message_timestamp: currentTime },
+      { where: {} }
+    )
+
+    // Reset all chanceToFind to baseChance
+    for (const userId in userChanceToFind) {
+      userChanceToFind[userId] = baseChance
+      await User.update(
+        { currentChance: baseChance },
+        { where: { user_id: userId } }
+      )
+    }
   } catch (error) {
     console.error('Error in scheduled task:', error)
   }
@@ -101,9 +149,22 @@ module.exports = {
   scavengeHelper: async (message) => {
     try {
       const userId = message.author.id
+
+      // Call the new function when a new message is received
+
+      newMessageReceived(userId)
+
       const user = await User.findOne({ where: { user_id: userId } })
       if (user) {
-        const chanceToFind = user.chanceToFind || baseChance
+        const currentTime = new Date()
+        if (
+          !user.last_counted_message_timestamp ||
+          new Date(currentTime - user.last_counted_message_timestamp) >= 360000
+        ) {
+          await user.save()
+        }
+
+        const chanceToFind = userChanceToFind[userId] || baseChance
         await scavengeGearParts(userId, chanceToFind)
       }
     } catch (error) {

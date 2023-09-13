@@ -29,11 +29,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-    message_count: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
+    currentChance: {
+      type: DataTypes.DOUBLE,
+      defaultValue: 0.05,
     },
-    last_counted_message_timestamp: {  // New Field
+    last_counted_message_timestamp: { 
       type: DataTypes.DATE,
       defaultValue: null,
     }
