@@ -25,8 +25,8 @@ async function scavengeGearParts(userId, chanceToFind) {
       defaults: { quantity: 0 },
     })
     await userGearPart.increment('quantity', { by: 1 })
+    console.log('I found something!')
   } else {
-    console.log(`I looked but I didn't find anything.`)
   }
 }
 
@@ -40,10 +40,9 @@ function newMessageReceived(userId) {
   tempIncrements[userId] = Math.min(tempIncrements[userId], 0.1)
 }
 
-// Schedule a cron job to run every 5 seconds (replace this with 6 minutes in production)
+// Check for messages and increase chance to find every 6 minutes ('*/6 * * * *)
 cron.schedule('*/6 * * * *', async () => {
   try {
-    console.log('Cron job started')
     const allUsers = await User.findAll({
       attributes: ['user_id'],
     })
@@ -108,8 +107,8 @@ cron.schedule('*/6 * * * *', async () => {
   }
 })
 
-// Search for gear part every hour
-cron.schedule('0 * * * * *', async () => {
+// Search for gear part every hour ('0 * * * *)
+cron.schedule('0 * * * *', async () => {
   try {
     const currentTime = new Date()
     const uniqueUserIds = await UserGearParts.findAll({
