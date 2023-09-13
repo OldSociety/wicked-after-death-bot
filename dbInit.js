@@ -25,7 +25,7 @@ sequelize
   .catch(console.error)
 
 // Sync changes and populate database
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync({ alter: true }).then(async () => {
   try {
     await Shop.bulkCreate(shopData, { updateOnDuplicate: ['name', 'cost'] }) // Replace field1 and field2 with the actual field names
 
@@ -56,19 +56,6 @@ sequelize.sync({ force: true }).then(async () => {
     await GearParts.bulkCreate(gearPartsData, {
       updateOnDuplicate: ['parts_id', 'type', 'rarity'],
     }) 
-
-
-    // await UserGear.bulkCreate(userGearData, {
-    //   updateOnDuplicate: [
-    //     'character_id',
-    //     'user_id',
-    //     'gear_id',
-    //     'name',
-    //     'rarity',
-    //     'level',
-    //     'ability',
-    //   ],
-    // }) 
 
     console.log('All databases synced successfully.')
   } catch (error) {

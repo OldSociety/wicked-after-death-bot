@@ -2,7 +2,7 @@ const cron = require('node-cron')
 const { Op } = require('sequelize')
 const { User, GearParts, UserGearParts } = require('../Models/model')
 
-const baseChance = 0.05
+const baseChance = 0.5
 const maxChanceIncrease = 0.1
 const chanceIncrement = 0.01
 const userChanceToFind = {}
@@ -25,7 +25,8 @@ async function scavengeGearParts(userId, chanceToFind) {
       defaults: { quantity: 0 },
     })
     await userGearPart.increment('quantity', { by: 1 })
-    console.log('I have found a part for ' + userId)
+  } else {
+    console.log(`I looked but I didn't find anything.`)
   }
 }
 
@@ -107,9 +108,8 @@ cron.schedule('*/6 * * * *', async () => {
   }
 })
 
-// ... (rest of the code, like the hourly cron job, remains unchanged)
-
-cron.schedule('0 * * * *', async () => {
+// Search for gear part every hour
+cron.schedule('0 * * * * *', async () => {
   try {
     const currentTime = new Date()
     const uniqueUserIds = await UserGearParts.findAll({
