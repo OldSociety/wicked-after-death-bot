@@ -4,7 +4,6 @@ const { User, GearParts, UserGearParts } = require('../Models/model')
 const sequelize = require('../Utils/sequelize')
 
 const baseChance = 0.05
-const maxChanceIncrease = 0.1
 const chanceIncrement = 0.01
 const userChanceToFind = {}
 const userIncrementFlags = {} // Store flags to track increments
@@ -36,8 +35,8 @@ cron.schedule('*/6 * * * *', async () => {
   try {
     for (const userId of Object.keys(userIncrementFlags)) {
       if (userIncrementFlags[userId]) {
-        // Only proceed if flag is true
-        // Check if flag is set for user
+
+        // Check if flag is set for user - Only proceed if flag is true
         const dbUser = await User.findOne({ where: { user_id: userId } })
         const currentChanceFromDB = dbUser ? dbUser.currentChance : null
 
@@ -47,18 +46,9 @@ cron.schedule('*/6 * * * *', async () => {
           userChanceToFind[userId] = baseChance
         }
 
-        console.log(
-          `Initial chance for User ID ${userId}: ${userChanceToFind[userId]}`
-        )
-
         // Increment the chance by 0.01, and then round it to two decimal places
         userChanceToFind[userId] = parseFloat(
           (userChanceToFind[userId] + chanceIncrement).toFixed(2)
-        )
-
-        // Log: Updated chance for this user
-        console.log(
-          `Updated chance for User ID ${userId}: ${userChanceToFind[userId]}`
         )
 
         // Update the chance in the database
@@ -66,7 +56,7 @@ cron.schedule('*/6 * * * *', async () => {
           { currentChance: userChanceToFind[userId] },
           { where: { user_id: userId } }
         )
-      } // End of if block
+      } 
     }
 
     console.log('Before reset:', JSON.stringify(userIncrementFlags))
@@ -105,7 +95,6 @@ cron.schedule('0 * * * *', async () => {
           userChanceToFind[userId] || baseChance
         )
         userChanceToFind[userId] = baseChance // Reset to baseChance
-        console.log('chance successfully reset to ', userChanceToFind[userId])
         // Update the chance in the database
         await User.update(
           { currentChance: userChanceToFind[userId] },
@@ -127,8 +116,6 @@ module.exports = {
       const userName = message.author.username
 
       console.log(userName, ' sent a message')
-      // Call the new function when a new message is received
-      // newMessageReceived(userId)
 
       // Check if the increment flag is set for this user in this job
       if (!userIncrementFlags[userId]) {

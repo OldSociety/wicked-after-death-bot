@@ -32,10 +32,6 @@ module.exports = (sequelize, DataTypes) => {
     currentChance: {
       type: DataTypes.DOUBLE,
       defaultValue: 0.05,
-    },
-    last_counted_message_timestamp: { 
-      type: DataTypes.DATE,
-      defaultValue: null,
     }
   })
 
