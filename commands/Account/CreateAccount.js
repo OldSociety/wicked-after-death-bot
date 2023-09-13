@@ -67,14 +67,31 @@ module.exports = {
         )
         await t.commit()
 
-        return interaction.reply(
-          `Your Hellbound: Wicked after Death account has been created with a balance of 730 gold. You've unlocked three new characters and they have begun scavenging for gear! Use /help for more information.`
-        )
+        const color = parseInt('0099ff', 16)
+        const embedReset = new EmbedBuilder()
+          .setDescription(
+            `Your Hellbound: Wicked after Death account has been created with a balance of 730 gold. You've unlocked three new characters and they have begun scavenging for gear! Use /help for more information.`
+          )
+          .setColor(color)
+
+        await interaction.reply({
+          embeds: [embedReset],
+          ephemeral: true,
+        })
       } else {
         await t.rollback()
-        return interaction.reply(
-          `You already have an account. You currently have ${user.balance} gold in your account.`
-        )
+       
+        const color = parseInt('0099ff', 16)
+        const embedReset = new EmbedBuilder()
+          .setDescription(
+            `You already have an account. You currently have **${user.balance} gold** in your account.`
+          )
+          .setColor(color)
+
+        await interaction.reply({
+          embeds: [embedReset],
+          ephemeral: true,
+        })
       }
     } catch (error) {
       await t.rollback()
