@@ -8,10 +8,15 @@ const sequelize = require('./Utils/sequelize')
 const { Client, Collection, GatewayIntentBits } = require('discord.js')
 const { userInfo } = require('node:os')
 const buttonInteractionHandler = require('./helpers/buttonInteraction')
+const { scavengeHelper } = require('./helpers/scavengeHelper')
 
 // Create a new client instance
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildVoiceStates,
+  ],
 })
 
 client.cooldowns = new Collection()
@@ -54,33 +59,13 @@ for (const file of eventFiles) {
 }
 
 client.on('interactionCreate', async (interaction) => {
-  await buttonInteractionHandler.execute(interaction);
-});
+  await buttonInteractionHandler.execute(interaction)
+})
 
-// Guild specific command set-up
-// client.once('ready', async () => {
-
-//   const guildId = process.env.GUILDID; // Replace with your guild's ID
-
-//   try {
-//     const guild = await client.guilds.fetch(guildId);
-//     if (!guild) {
-//       return console.error('Guild not found');
-//     }
-
-//     const accountManagementCommand = {
-//       name: 'account_management',
-//       description: 'Manage user accounts (DM ONLY)',
-//       // ... other fields like subcommands, options, etc.
-//     };
-
-//     await guild.commands.create(accountManagementCommand);
-//     console.log('Guild-specific command registered');
-//   } catch (error) {
-//     console.error('An error occurred:', error);
-//   }
-// });
-
+// Track messages
+client.on('messageCreate', async function (message) {
+  scavengeHelper(message)
+})
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)

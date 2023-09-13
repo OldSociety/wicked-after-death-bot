@@ -29,7 +29,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-  });
+    message_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    last_counted_message_timestamp: {  // New Field
+      type: DataTypes.DATE,
+      defaultValue: null,
+    }
+  })
 
-  return User;
-};
+  return User
+}

@@ -10,7 +10,7 @@ const {
   UserGearParts,
 } = require('../../Models/model.js')
 
-const { startScavengingForUser } = require('../../helpers/scavengingHelper')
+const { startScavengingForUser } = require('../../helpers/scavengeHelper')
 
 const startingCharacterIds = [0, 1, 2]
 const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
