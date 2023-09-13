@@ -19,6 +19,8 @@ const client = new Client({
   ],
 })
 
+global.client = client;
+
 client.cooldowns = new Collection()
 client.commands = new Collection()
 const foldersPath = path.join(__dirname, 'commands')
@@ -69,4 +71,4 @@ client.on('messageCreate', async function (message) {
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
-module.exports = sequelize // Export the Sequelize instance
+module.exports = { sequelize } // Export the Sequelize instance

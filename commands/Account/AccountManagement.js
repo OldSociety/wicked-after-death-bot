@@ -77,7 +77,7 @@ module.exports = {
           .setDescription(
             `Successfully reset the balance of ${user.tag} to ${amount}.`
           )
-        setColor(0x0099ff)
+        .setColor(0x0099ff)
 
         await interaction.reply({
           embeds: [embedReset],

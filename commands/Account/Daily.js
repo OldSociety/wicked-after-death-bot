@@ -30,7 +30,7 @@ module.exports = {
 
       if (!user) {
         await interaction.reply({
-          content: "You don't have an account. Use `/account` to create one.",
+          content: "You don't have an account. Use `/create` to create one.",
           ephemeral: true,
         })
         return

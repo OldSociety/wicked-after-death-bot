@@ -1,8 +1,9 @@
 const cron = require('node-cron')
 const { Op } = require('sequelize')
 const { User, GearParts, UserGearParts } = require('../Models/model')
+const sequelize = require('../Utils/sequelize')
 
-const baseChance = 0.5
+const baseChance = 0.05
 const maxChanceIncrease = 0.1
 const chanceIncrement = 0.01
 const userChanceToFind = {}
@@ -40,7 +41,7 @@ function newMessageReceived(userId) {
   tempIncrements[userId] = Math.min(tempIncrements[userId], 0.1)
 }
 
-// Check for messages and increase chance to find every 6 minutes ('*/6 * * * *)
+// Check for messages and increase chance to find every 6 minutes ('*/6 * * * *')
 cron.schedule('*/6 * * * *', async () => {
   try {
     const allUsers = await User.findAll({
@@ -110,39 +111,38 @@ cron.schedule('*/6 * * * *', async () => {
 // Search for gear part every hour ('0 * * * *)
 cron.schedule('0 * * * *', async () => {
   try {
-    const currentTime = new Date()
+    const currentTime = new Date();
     const uniqueUserIds = await UserGearParts.findAll({
-      attributes: ['user_id'],
+      attributes: [
+        [sequelize.literal("CAST(`user_id` AS CHAR)"), 'user_id']
+      ],
       group: ['user_id'],
-    })
+    });
 
     for (const uniqueUser of uniqueUserIds) {
+      const userId = String(uniqueUser.dataValues.user_id); 
+      console.log("Querying for user ID:", userId);
+    
       const user = await User.findOne({
-        where: { user_id: uniqueUser.user_id },
-      })
-      await scavengeGearParts(
-        user.user_id,
-        userChanceToFind[user.user_id] || baseChance
-      )
-    }
-
-    await User.update(
-      { last_counted_message_timestamp: currentTime },
-      { where: {} }
-    )
-
-    // Reset all chanceToFind to baseChance
-    for (const userId in userChanceToFind) {
-      userChanceToFind[userId] = baseChance
-      await User.update(
-        { currentChance: baseChance },
-        { where: { user_id: userId } }
-      )
+        where: { user_id: userId },
+        attributes: ['user_id'],
+      });
+    
+      if (user) {
+        await scavengeGearParts(
+          user.user_id,
+          userChanceToFind[userId] || baseChance
+        );
+      } else {
+        console.log(`No user found with ID ${userId}`);
+      }
     }
   } catch (error) {
-    console.error('Error in scheduled task:', error)
+    console.error("Error in cron job:", error);
   }
-})
+});
+
+
 
 module.exports = {
   scavengeHelper: async (message) => {
