@@ -1,9 +1,6 @@
-// CharacterData.js
+const { Character, MasterCharacter } = require('../../../../Models/model')
 
-const { Character, MasterCharacter } = require('../../../Models/models')
-const LevelUp = require('./levelUpSystem')
-
-class CharacterData {
+class CharacterInstance {
   static async initCharacter(masterCharacterId, userId) {
     // Initialize character based on MasterCharacter
     const masterCharacter = await MasterCharacter.findByPk(masterCharacterId)
@@ -43,7 +40,9 @@ class CharacterData {
       masterCharacterId: masterCharacterId,
       health: effective_health,
       damage: effective_damage,
-      // ... any other fields
+      chance_to_hit: chance_to_hit,
+      crit_chance: crit_chance,
+      crit_damage: crit_damage,
     })
 
     if (!newCharacter) {
@@ -69,4 +68,4 @@ class CharacterData {
   // Add more methods related to individual characters
 }
 
-module.exports = CharacterData
+module.exports = CharacterInstance

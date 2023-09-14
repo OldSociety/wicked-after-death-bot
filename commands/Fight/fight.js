@@ -7,6 +7,12 @@ const {
 } = require('discord.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { selectEnemy } = require('./helpers/enemySelection')
+const { initiateBattle } = require('./helpers/battle/initiateBattle')
+const { battleLogic } = require('./helpers/battle/battleLogic')
+const { battleManager } = require('./helpers/battle/battleManager')
+const {
+  CharacterInstance,
+} = require('./helpers/characterFiles/characterInstance')
 
 module.exports = {
   cooldown: 5,
@@ -69,7 +75,6 @@ module.exports = {
       })
 
       collector.on('collect', async (i) => {
-        console.log('custom id: ' + i.customId)
         if (i.customId === 'characterSelect') {
           const selectedMasterCharacterID = i.values[0]
           console.log(selectedMasterCharacterID)
@@ -91,7 +96,7 @@ module.exports = {
             await interaction.followUp(
               `${i.user.tag}'s **${character_name}** is looking for a fight...`
             )
-            // Enemy selection
+            // Enemy selection --------------------
             let enemy
             try {
               enemy = await selectEnemy()
@@ -111,8 +116,18 @@ module.exports = {
             })
           }
 
-          // Further code can go here to initiate the actual fight.
-          
+          // Extract IDs
+          const selectedCharacterId = selectedCharacter.dataValues.character_id
+          const selectedEnemyId = enemy.id
+
+          // Call the function to initiate battle
+          const { characterInstance, enemyInstance } = await initiateBattle(
+            selectedCharacterId,
+            selectedEnemyId
+          )
+
+          const battleKey = `${userId}-${enemyId}`
+          battleManager[battleKey] = { characterInstance, enemyInstance }
         } else {
           await interaction.followUp(
             `No character found for ID ${selectedMasterCharacterID}.`
