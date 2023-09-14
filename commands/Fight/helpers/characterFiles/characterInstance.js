@@ -53,16 +53,10 @@ class CharacterInstance {
   }
 
   static async updateHealth(characterId, change) {
-    // Fetch the character
-    const character = await Character.findByPk(characterId)
-
-    if (!character) {
-      throw new Error('Character not found')
-    }
 
     // Update the health
-    character.health += change
-    await character.save()
+    character.effective_health += change
+
   }
 
   // Add more methods related to individual characters

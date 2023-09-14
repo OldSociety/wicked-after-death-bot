@@ -114,20 +114,20 @@ module.exports = {
             await interaction.followUp({
               embeds: [enemyEmbed],
             })
+            // Extract IDs
+            const selectedCharacterId =
+              selectedCharacter.dataValues.character_id
+            const selectedEnemyId = enemy.id
+
+            // Call the function to initiate battle
+            const { characterInstance, enemyInstance } = await initiateBattle(
+              selectedCharacterId,
+              selectedEnemyId
+            )
+
+            const battleKey = `${selectedCharacterId}-${selectedEnemyId}`
+            battleManager[battleKey] = { characterInstance, enemyInstance }
           }
-
-          // Extract IDs
-          const selectedCharacterId = selectedCharacter.dataValues.character_id
-          const selectedEnemyId = enemy.id
-
-          // Call the function to initiate battle
-          const { characterInstance, enemyInstance } = await initiateBattle(
-            selectedCharacterId,
-            selectedEnemyId
-          )
-
-          const battleKey = `${userId}-${enemyId}`
-          battleManager[battleKey] = { characterInstance, enemyInstance }
         } else {
           await interaction.followUp(
             `No character found for ID ${selectedMasterCharacterID}.`

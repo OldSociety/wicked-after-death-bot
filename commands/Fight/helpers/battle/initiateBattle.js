@@ -1,3 +1,5 @@
+const { Character, Enemy } = require('../../../../Models/model')
+
 async function initiateBattle(characterId, enemyId) {
     // Fetch the actual character and enemy from the database
     const characterData = await Character.findByPk(characterId);

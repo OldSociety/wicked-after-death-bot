@@ -3,7 +3,7 @@ const { Op } = require('sequelize')
 const { User, GearParts, UserGearParts } = require('../Models/model')
 const sequelize = require('../Utils/sequelize')
 
-const baseChance = 0.05
+const baseChance = 0.03
 const chanceIncrement = 0.01
 const userChanceToFind = {}
 const userIncrementFlags = {} // Store flags to track increments
