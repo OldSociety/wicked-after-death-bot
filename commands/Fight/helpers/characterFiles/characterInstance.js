@@ -1,12 +1,11 @@
 const { Character, MasterCharacter } = require('../../../../Models/model')
 
 class CharacterInstance {
-  static async initCharacter(masterCharacterId, userId) {
+  static async initCharacter(masterCharacterId, userId, characterId) {
     try {
       const masterCharacter = await MasterCharacter.findByPk(masterCharacterId)
       if (!masterCharacter) throw new Error('MasterCharacter not found')
 
-      console.log("1")
       const {
         base_health,
         base_damage,
@@ -14,7 +13,7 @@ class CharacterInstance {
         crit_chance,
         crit_damage,
       } = masterCharacter.dataValues
-      console.log(2)
+
       // Character health calculation
       const enhancements_health_bonus = 0
       const enhancements_health_modifier =
@@ -29,7 +28,7 @@ class CharacterInstance {
             rank_health_modifier *
             support_health_modifier)
       )
-      console.log(3)
+
       // Character damage calculation
       const enhancements_damage_bonus = 0
       const enhancements_damage_modifier =
@@ -37,28 +36,45 @@ class CharacterInstance {
       const level_damage_modifier = 1
       const rank_damage_modifier = 1
       const support_damage_modifier = 1
-      console.log(4)
+
       const effective_damage = Math.floor(
         (base_damage + enhancements_damage_modifier) *
           (level_damage_modifier *
             rank_damage_modifier *
             support_damage_modifier)
       )
-      console.log(5)
-      // Create a new instance of Character and save it
-      const newCharacter = await Character.create({
-        userId,
-        masterCharacterId,
+
+      // Fetch the existing character
+      const character = await Character.findByPk(characterId)
+
+      //update effective health / damage
+      await character.update({
+        effective_health: effective_health,
+        effective_damage: effective_damage,
+        // other attributes you want to update
+      });
+
+
+      if (!character) throw new Error('Character not found')
+
+      // Update and save the character attributes
+      await character.update({
         effective_health,
         effective_damage,
         chance_to_hit,
         crit_chance,
         crit_damage,
       })
-      console.log(6)
-      if (!newCharacter) throw new Error('Failed to create new character')
-      console.log(7)
-      return newCharacter
+
+      // Your character is now updated
+
+      return {
+        effective_health,
+        effective_damage,
+        chance_to_hit,
+        crit_chance,
+        crit_damage,
+      }
     } catch (error) {
       console.error(error)
       throw new Error('Character initialization failed')

@@ -13,6 +13,7 @@
 // const {
 //   characterInstance,
 // } = require('./helpers/characterFiles/characterInstance')
+// const { setupBattleLogic } = require('./helpers/battle/battleLogic')
 
 // module.exports = {
 //   cooldown: 5,
@@ -38,9 +39,6 @@
 //             dataValues: { character_name, description },
 //           },
 //         } = char
-//         // console.log(
-//         //   `Character ID: ${character_id}, Character Name: ${character_name}, Description: ${description}`
-//         // )
 
 //         return new StringSelectMenuOptionBuilder()
 //           .setLabel(character_name) // Corrected the reference here
@@ -77,7 +75,6 @@
 //       collector.on('collect', async (i) => {
 //         if (i.customId === 'characterSelect') {
 //           const selectedMasterCharacterID = i.values[0]
-//           console.log(selectedMasterCharacterID)
 //           const selectedCharacter = userCharacters.find((char) => {
 //             const {
 //               dataValues: { character_id },
@@ -119,15 +116,15 @@
 //               selectedCharacter.dataValues.character_id
 //             const selectedEnemyId = enemy.id
 
-//             // Call the function to initiate battle
-//             console.log('begins')
+//             // Inside execute(interaction) after initiating the battle
 //             const { characterInstance, enemyInstance } = await initiateBattle(
 //               selectedCharacterId,
 //               selectedEnemyId
 //             )
-
 //             const battleKey = `${selectedCharacterId}-${selectedEnemyId}`
 //             battleManager[battleKey] = { characterInstance, enemyInstance }
+
+//             setupBattleLogic() // Activate the cron job
 //           }
 //         } else {
 //           await interaction.followUp(

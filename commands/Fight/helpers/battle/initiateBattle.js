@@ -5,6 +5,7 @@ const {
 } = require('../../../../Models/model')
 
 const { CharacterInstance } = require('../characterFiles/characterInstance')
+const battleManager = require('./battleManager')
 
 async function initiateBattle(characterId, enemyId) {
   // Fetch the actual character and enemy from the database
@@ -16,45 +17,41 @@ async function initiateBattle(characterId, enemyId) {
 
   const enemyData = await Enemy.findByPk(enemyId)
 
-  console.log('master_character_id:', characterData.dataValues.master_character_id);
-
-  const newCharacter = await Character.create({
-    user_id: characterData.dataValues.user_id,
-    master_character_id: characterData.dataValues.master_character_id,
-    // other fields
-  });
-  
-  console.log(2, newCharacter.master_character_id)
-  await CharacterInstance.initCharacter(
-    newCharacter.master_character_id,
-    newCharacter.user_id
+  const newCharacter = await CharacterInstance.initCharacter(
+    masterCharacterData.dataValues.master_character_id,
+    characterData.dataValues.user_id,
+    characterId
   )
 
   // Create combined stats for the in-memory copy of the character
   const combinedCharacterStats = {
     ...characterData.get(),
     ...masterCharacterData.get(),
-    currentHealth: characterData.effective_health,
-    currentDamage: characterData.effective_damage,
+    current_health: characterData.effective_health,
+    current_damage: characterData.effective_damage,
   }
-
-  await CharacterInstance.updateHealth(characterId, some_health_change_value)
 
   // Create in-memory copies
   const CharacterInstanceObject = {
     ...combinedCharacterStats,
     actionQueue: [],
   }
+  console.log('Character Instance: ', CharacterInstanceObject)
 
   const enemyInstance = {
     ...enemyData.get(),
-    currentHealth: enemyData.base_health,
-    currentDamage: enemyData.base_damage,
+    current_health: enemyData.effective_health,
+    current_damage: enemyData.effective_damage,
+    actionQueue: [],
   }
 
-  // Initialize action queues if needed
-  CharacterInstance.actionQueue = []
-  enemyInstance.actionQueue = []
+  console.log('Enemy Instance: ', enemyInstance)
+
+  const battleKey = `${characterId}-${enemyId}`;  // Create a unique identifier for the battle
+  battleManager[battleKey] = {
+    characterInstance: CharacterInstanceObject,
+    enemyInstance
+  };
 
   return { CharacterInstanceObject, enemyInstance }
 }

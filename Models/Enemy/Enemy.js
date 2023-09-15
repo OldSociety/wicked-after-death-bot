@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true,
     },
-    name: {
+    character_name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -21,11 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true, // Allow null for this column
     },
-    base_damage: {
+    effective_damage: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    base_health: {
+    effective_health: {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
