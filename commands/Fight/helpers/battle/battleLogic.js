@@ -12,7 +12,9 @@ function applyDamage(attacker, defender) {
 }
 
 const setupBattleLogic = () => {
-  cron.schedule('* * * * *', () => {
+  cron.schedule(' 0 * * * *', () => {
+    console.log('Current battles:', JSON.stringify(battleManager));
+
     Object.keys(battleManager).forEach((battleKey) => {
       const { characterInstance, enemyInstance } = battleManager[battleKey];
       // Perform hit chance checks and health deductions here
