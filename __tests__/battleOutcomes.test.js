@@ -1,6 +1,5 @@
 const {
   applyDamage,
-  applyCritDamage,
 } = require('../commands/Fight/helpers/battle/battleLogic')
 
 describe('Battle Outcomes', () => {
