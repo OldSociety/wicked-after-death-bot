@@ -5,10 +5,10 @@ const EnemyList = [
       description: 'A flock of feral monstrosities from the Dead Dame Mountains.',
       type: 'monstrosity',
       unique_skill: null,
-      effective_damage: 1800,
+      effective_damage: 180,
       effective_health: 150,
-      chance_to_hit: 0.75,
-      crit_chance: 0.1,
+      chance_to_hit: .75,
+      crit_chance: .1,
       crit_damage: 1.5
     }
   ];

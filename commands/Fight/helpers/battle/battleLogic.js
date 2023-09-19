@@ -1,113 +1,101 @@
 const cron = require('node-cron')
 const battleManager = require('./battleManager')
-const {Character} = require('../../../../Models/model')
+const { Character } = require('../../../../Models/model')
+const { traits, applyCritDamage } = require('../characterFiles/traits')
 
-let cronJobStarted = false
 let cronTask
-const battleTicker = 'MY_CUSTOM_ID'
 
 function applyDamage(attacker, defender) {
+  // Store the defender's starting health before the attack
+  const startingHealth = defender.current_health
+
   const randHit = Math.random() * 100
+  let isCrit = false
+  let actualDamage
+
   if (randHit < attacker.chance_to_hit * 100) {
-    const minDamage = attacker.effective_damage * 0.08 // Minimum 20% of effective_damage
-    const maxDamage = attacker.effective_damage * 0.12 // Maximum 25% of effective_damage
-    const actualDamage = Math.floor(
+    let minDamage = attacker.effective_damage * 0.08
+    let maxDamage = attacker.effective_damage * 0.12
+
+    if (randHit < attacker.crit_chance * 100) {
+      console.log(`${attacker.character_name} landed a critical hit!`)
+      isCrit = true
+      minDamage *= 1.5
+      maxDamage *= 1.5
+    }
+
+    actualDamage = Math.floor(
       Math.random() * (maxDamage - minDamage + 1) + minDamage
     )
 
-    defender.current_health -= actualDamage
-    console.log(
-      `${attacker.character_name} hits ${defender.character_name} for ${actualDamage} damage.`
-    )
+    const bufferDamage = Math.min(actualDamage, defender.buffer_health)
+    // Subtract bufferDamage from buffer_health only if buffer health is available
+    if (defender.buffer_health > 0) {
+      defender.buffer_health -= bufferDamage;
+    }
+
+    // Calculate the actual damage taken after considering the buffer
+    const damageTaken = actualDamage - bufferDamage
+
+    // Calculate the resulting health
+    defender.current_health = Math.max(0, defender.current_health - damageTaken)
+
+    // Calculate the change in starting health
+    const healthChange = startingHealth - defender.current_health
+
+    if (defender.character_name === 'Huntsman Hyrum') {
+    console.log(`Debug: Starting Health: ${startingHealth}`)
+    console.log(`Debug: Attacker's Full Damage: ${actualDamage}`)
+    console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
+    console.log(`Debug: Buffer Damage: ${bufferDamage}`)
+    console.log(`Debug: Actual Damage Taken: ${damageTaken}`)
+    console.log(`Debug: Resulting Health: ${defender.current_health}`)
+    console.log(`Debug: Change in Starting Health: ${healthChange}`)
+    }
   } else {
     console.log(`${attacker.character_name} misses.`)
+    return
   }
-}
-
-function canParticipate(instance) {
-  if (instance.recoveryTimestamp) {
-    const currentTime = new Date().getTime()
-    return currentTime > instance.recoveryTimestamp
+  if (isCrit && traits[defender.character_name]?.onCritReceived) {
+    traits[defender.character_name].onCritReceived(defender, attacker)
   }
-  return true
 }
 
 const setupBattleLogic = () => {
-  if (Object.keys(battleManager).length <= 1) {
-    // console.log('No ongoing battles. Should have stopped cron job.');
-    return
-  }
+  if (Object.keys(battleManager).length <= 1) return
 
   cronTask = cron.schedule('*/5 * * * * *', async () => {
-    console.log('Battle Key:', JSON.stringify(Object.keys(battleManager)))
     if (Object.keys(battleManager).length <= 1) {
-      // console.log('No ongoing battles. Stopping cron job.')
-      delete battleManager[battleKey]
-      // console.log('Current state of battleManager:', battleManager)
+      cronTask.stop()
       return
     }
 
-    // console.log('Current battles:', JSON.stringify(battleManager))
-
-    function canParticipate(instance) {
-      if (instance.recoveryTimestamp) {
-        const currentTime = new Date().getTime()
-        return currentTime > instance.recoveryTimestamp
-      }
-      return true
-    }
-
-    Object.keys(battleManager).forEach(async (battleKey) => {
+    for (const battleKey of Object.keys(battleManager)) {
       const battle = battleManager[battleKey]
-      if (!battle) return
+      if (!battle) continue
 
       const { characterInstance, enemyInstance } = battle
-      if (!characterInstance || !enemyInstance) return
+      if (!characterInstance || !enemyInstance) continue
 
-      if (
-        !canParticipate(characterInstance)
-      ) {
-        console.log('Character is in recovery mode.')
-        return
-      }
-
-      console.log("I'm working.")
-      console.log('Player health before: ', characterInstance.current_health)
-      console.log('Enemy health before: ', enemyInstance.current_health)
+      console.log('Character Health Before: ', characterInstance.current_health)
+      console.log('Enemy Health Before: ', enemyInstance.current_health)
       applyDamage(characterInstance, enemyInstance)
-
-      console.log('Enemy health after :', enemyInstance.current_health)
       applyDamage(enemyInstance, characterInstance)
-      console.log('Player health', characterInstance.current_health)
+      console.log('Character Health After: ', characterInstance.current_health)
+      console.log('Enemy Health After: ', enemyInstance.current_health)
+
       if (
         characterInstance.current_health <= 0 ||
         enemyInstance.current_health <= 0
       ) {
         console.log('Battle ends.')
-
-
-          const recoveryTime = new Date(Date.now() + 12 * 60 * 60 * 1000); // 12 hours from now
-
-
-        // Update the database records
-        if (characterInstance.current_health <= 0) {
-          console.log("Your character needs to recover.")
-          await Character.update(
-            { recovery_timestamp: recoveryTime },
-            { where: { character_id: characterInstance.character_id } }
-          )
-        }
-
         delete battleManager[battleKey]
-        console.log(Object.keys(battleManager))
 
         if (Object.keys(battleManager).length <= 1) {
-          // console.log('About to stop cron job.');
           cronTask.stop()
-          // console.log('Cron job should have stopped.');
         }
       }
-    })
+    }
   })
 }
 

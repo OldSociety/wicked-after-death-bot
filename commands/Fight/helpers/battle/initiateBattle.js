@@ -15,14 +15,14 @@ async function initiateBattle(characterId, enemyId) {
     // Fetch the updated character and enemy from the database
     const characterData = await Character.findByPk(characterId)
 
-    // Check if character is in recovery mode
-    const currentTime = new Date()
-    if (
-      characterData.recovery_timestamp &&
-      characterData.recovery_timestamp > currentTime
-    ) {
-      return { error: 'Character is in recovery mode and cannot fight' }
-    }
+    // // Check if character is in recovery mode
+    // const currentTime = new Date()
+    // if (
+    //   characterData.recovery_timestamp &&
+    //   characterData.recovery_timestamp > currentTime
+    // ) {
+    //   return { error: 'Character is in recovery mode and cannot fight' }
+    // }
 
     const masterCharacterData = await MasterCharacter.findByPk(
       characterData.dataValues.master_character_id
@@ -42,9 +42,9 @@ async function initiateBattle(characterId, enemyId) {
     const CharacterInstanceObject = {
       ...combinedCharacterStats,
       actionQueue: [],
-      recoveryTimestamp: null, // Initialize the recoveryTimestamp
+      // recoveryTimestamp: null, // Initialize the recoveryTimestamp
     }
-    console.log('Character Instance: ', CharacterInstanceObject)
+
 
     const enemyInstance = {
       ...enemyData.get(),
@@ -52,6 +52,11 @@ async function initiateBattle(characterId, enemyId) {
       current_damage: enemyData.effective_damage,
       actionQueue: [],
     }
+
+    CharacterInstanceObject.buffer_health = 0;
+    enemyInstance.buffer_health = 0;
+
+    console.log('Character Instance: ', CharacterInstanceObject)
     console.log('Enemy Instance: ', enemyInstance)
 
     // Create a unique identifier for the battle
