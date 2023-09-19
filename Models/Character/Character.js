@@ -40,6 +40,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
       },
+      consecutive_kill: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
       recovery_timestamp: {
         type: DataTypes.DATE,
         allowNull: true
