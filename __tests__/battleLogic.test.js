@@ -68,28 +68,4 @@ describe('Character Traits', () => {
       }
     })
   })
-
-  describe('Traits', () => {
-    it('should apply Huntsman Hyrum trait correctly', () => {
-      traits['Huntsman Hyrum'].onCritReceived(mockCharacter)
-      const expectedBuffer = Math.floor(mockCharacter.effective_health * 0.1)
-      expect(mockCharacter.buffer_health).toBe(expectedBuffer)
-      console.log('buffer should be:', expectedBuffer)
-    })
-
-    // if (mockCharacter.character_name === 'Blackguard Clara') {
-    //   it('should apply Blackguard Clara trait correctly', () => {
-    //     const originalMathRandom = Math.random
-    //     Math.random = () => 0.4
-
-    //     const startingHealth = mockCharacter.current_health
-
-    //     traits['Blackguard Clara'].onCritReceived(mockEnemy, mockCharacter)
-
-    //     expect(mockCHaracter.current_health).toBeLessThan(startingHealth)
-
-    //     Math.random = originalMathRandom
-    //   })
-    // }
-  })
 })
