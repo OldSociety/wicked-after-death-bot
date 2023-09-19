@@ -45,6 +45,8 @@ async function initiateBattle(characterId, enemyId) {
     CharacterInstanceObject.buffer_health = 0
     enemyInstance.buffer_health = 0
 
+
+    console.log("Character:", CharacterInstanceObject)
     // Create a unique identifier for the battle
     const battleKey = `${characterId}-${enemyId}`
     battleManager[battleKey] = {

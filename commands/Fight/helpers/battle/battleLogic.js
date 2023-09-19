@@ -15,13 +15,23 @@ function applyDamage(attacker, defender) {
 
   if (randHit < attacker.chance_to_hit * 100) {
     let minDamage = attacker.effective_damage * 0.08
+    // console.log(`${attacker.character_name}: min damage ${minDamage}`)
     let maxDamage = attacker.effective_damage * 0.12
+    // console.log(`${attacker.character_name}: max damage ${maxDamage}`)
 
     if (randHit < attacker.crit_chance * 100) {
       console.log(`${attacker.character_name} landed a critical hit!`)
       isCrit = true
+      console.log(isCrit)
       minDamage *= 1.5
+      // console.log(`${attacker.character_name}: crit min damage ${minDamage}`)
       maxDamage *= 1.5
+      // console.log(`${attacker.character_name}: crit max damage ${maxDamage}`)
+    }
+
+    // Ensure minDamage is less than or equal to maxDamage
+    if (minDamage > maxDamage) {
+      minDamage = maxDamage
     }
 
     actualDamage = Math.floor(
@@ -31,9 +41,11 @@ function applyDamage(attacker, defender) {
     const bufferDamage = Math.min(actualDamage, defender.buffer_health)
     // Subtract bufferDamage from buffer_health only if buffer health is available
     if (defender.buffer_health > 0) {
-      defender.buffer_health = Math.max(0, defender.buffer_health - bufferDamage);
+      defender.buffer_health = Math.max(
+        0,
+        defender.buffer_health - bufferDamage
+      )
     }
-    
 
     // Calculate the actual damage taken after considering the buffer
     const damageTaken = actualDamage - bufferDamage
@@ -44,15 +56,14 @@ function applyDamage(attacker, defender) {
     // Calculate the change in starting health
     const healthChange = startingHealth - defender.current_health
 
-    if (defender.character_name === 'Huntsman Hyrum') {
-    console.log(`Debug: Starting Health: ${startingHealth}`)
-    console.log(`Debug: Attacker's Full Damage: ${actualDamage}`)
-    console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
-    console.log(`Debug: Buffer Damage: ${bufferDamage}`)
-    console.log(`Debug: Actual Damage Taken: ${damageTaken}`)
-    console.log(`Debug: Resulting Health: ${defender.current_health}`)
-    console.log(`Debug: Change in Starting Health: ${healthChange}`)
-    }
+      // console.log(`Debug: Starting Health: ${startingHealth}`)
+      // console.log(`Debug: ${attacker.character_name} Full Damage: ${actualDamage}`)
+      // console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
+      // console.log(`Debug: Buffer Damage: ${bufferDamage}`)
+      // console.log(`Debug: ${defender.character_name} Actual Damage Taken: ${damageTaken}`)
+      // console.log(`Debug: ${defender.character_name} Resulting Health: ${defender.current_health}`)
+      // console.log(`Debug: Change in ${defender.character_name} Starting Health: ${healthChange}`)
+
   } else {
     console.log(`${attacker.character_name} misses.`)
     return
@@ -104,4 +115,4 @@ const setupBattleLogic = () => {
 // Run the setup function once to initiate the cron job
 setupBattleLogic()
 
-module.exports = { setupBattleLogic }
+module.exports = { setupBattleLogic, applyDamage, applyCritDamage }
