@@ -31,8 +31,9 @@ function applyDamage(attacker, defender) {
     const bufferDamage = Math.min(actualDamage, defender.buffer_health)
     // Subtract bufferDamage from buffer_health only if buffer health is available
     if (defender.buffer_health > 0) {
-      defender.buffer_health -= bufferDamage
+      defender.buffer_health = Math.max(0, defender.buffer_health - bufferDamage);
     }
+    
 
     // Calculate the actual damage taken after considering the buffer
     const damageTaken = actualDamage - bufferDamage
@@ -44,13 +45,13 @@ function applyDamage(attacker, defender) {
     const healthChange = startingHealth - defender.current_health
 
     if (defender.character_name === 'Huntsman Hyrum') {
-      console.log(`Debug: Starting Health: ${startingHealth}`)
-      console.log(`Debug: Attacker's Full Damage: ${actualDamage}`)
-      console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
-      console.log(`Debug: Buffer Damage: ${bufferDamage}`)
-      console.log(`Debug: Actual Damage Taken: ${damageTaken}`)
-      console.log(`Debug: Resulting Health: ${defender.current_health}`)
-      console.log(`Debug: Change in Starting Health: ${healthChange}`)
+    console.log(`Debug: Starting Health: ${startingHealth}`)
+    console.log(`Debug: Attacker's Full Damage: ${actualDamage}`)
+    console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
+    console.log(`Debug: Buffer Damage: ${bufferDamage}`)
+    console.log(`Debug: Actual Damage Taken: ${damageTaken}`)
+    console.log(`Debug: Resulting Health: ${defender.current_health}`)
+    console.log(`Debug: Change in Starting Health: ${healthChange}`)
     }
   } else {
     console.log(`${attacker.character_name} misses.`)
@@ -64,12 +65,13 @@ function applyDamage(attacker, defender) {
 const setupBattleLogic = () => {
   if (Object.keys(battleManager).length <= 1) return
 
-  cronTask = cron.schedule('*/15 * * * * *', async () => {
+  cronTask = cron.schedule('*/10 * * * * *', async () => {
     if (Object.keys(battleManager).length <= 1) {
       cronTask.stop()
       return
     }
-
+    console.log(Object.keys(battleManager).length)
+    console.log(Object.keys(battleManager))
     for (const battleKey of Object.keys(battleManager)) {
       const battle = battleManager[battleKey]
       if (!battle) continue
@@ -90,9 +92,6 @@ const setupBattleLogic = () => {
       ) {
         console.log('Battle ends.')
         delete battleManager[battleKey]
-
-        // Reset the inBattle flag for the user
-        userInBattle[userId] = false
 
         if (Object.keys(battleManager).length <= 1) {
           cronTask.stop()
