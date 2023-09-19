@@ -2,6 +2,7 @@ const cron = require('node-cron')
 const battleManager = require('./battleManager')
 const { Character } = require('../../../../Models/model')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
+const LevelUpSystem = require('../characterFiles/levelUpSystem') // Replace with actual path to LevelUpSystem
 
 let cronTask
 
@@ -56,14 +57,13 @@ function applyDamage(attacker, defender) {
     // Calculate the change in starting health
     const healthChange = startingHealth - defender.current_health
 
-      // console.log(`Debug: Starting Health: ${startingHealth}`)
-      // console.log(`Debug: ${attacker.character_name} Full Damage: ${actualDamage}`)
-      // console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
-      // console.log(`Debug: Buffer Damage: ${bufferDamage}`)
-      // console.log(`Debug: ${defender.character_name} Actual Damage Taken: ${damageTaken}`)
-      // console.log(`Debug: ${defender.character_name} Resulting Health: ${defender.current_health}`)
-      // console.log(`Debug: Change in ${defender.character_name} Starting Health: ${healthChange}`)
-
+    // console.log(`Debug: Starting Health: ${startingHealth}`)
+    // console.log(`Debug: ${attacker.character_name} Full Damage: ${actualDamage}`)
+    // console.log(`Debug: Buffer Health: ${defender.buffer_health}`)
+    // console.log(`Debug: Buffer Damage: ${bufferDamage}`)
+    // console.log(`Debug: ${defender.character_name} Actual Damage Taken: ${damageTaken}`)
+    // console.log(`Debug: ${defender.character_name} Resulting Health: ${defender.current_health}`)
+    // console.log(`Debug: Change in ${defender.character_name} Starting Health: ${healthChange}`)
   } else {
     console.log(`${attacker.character_name} misses.`)
     return
@@ -76,13 +76,12 @@ function applyDamage(attacker, defender) {
 const setupBattleLogic = () => {
   if (Object.keys(battleManager).length <= 1) return
 
-  cronTask = cron.schedule('*/10 * * * * *', async () => {
+  cronTask = cron.schedule('*/5 * * * * *', async () => {
     if (Object.keys(battleManager).length <= 1) {
       cronTask.stop()
       return
     }
-    console.log(Object.keys(battleManager).length)
-    console.log(Object.keys(battleManager))
+
     for (const battleKey of Object.keys(battleManager)) {
       const battle = battleManager[battleKey]
       if (!battle) continue
@@ -103,6 +102,32 @@ const setupBattleLogic = () => {
       ) {
         console.log('Battle ends.')
         delete battleManager[battleKey]
+
+        // Check if character survived the battle
+        if (characterInstance.current_health > 0) {
+          const earnedXP = 500 // Define your XP logic here
+          await LevelUpSystem.levelUp(characterInstance.character_id, earnedXP)
+          // Increment consecutive_kill counter
+          characterInstance.consecutive_kill += 1
+        } else {
+          // Reset consecutive_kill counter
+          characterInstance.consecutive_kill = 0
+        }
+
+        // Save updated consecutive_kill value to the database
+        try {
+          await Character.update(
+            { consecutive_kill: characterInstance.consecutive_kill },
+            { where: { character_id: characterInstance.character_id } }
+          )
+        } catch (e) {
+          console.error('Failed to update consecutive_kill:', e)
+        }
+
+        // Check if enemy survived the battle
+        if (enemyInstance.current_health > 0) {
+          // Enemy-specific logic here, if needed
+        }
 
         if (Object.keys(battleManager).length <= 1) {
           cronTask.stop()

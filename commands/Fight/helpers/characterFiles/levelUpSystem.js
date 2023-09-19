@@ -43,36 +43,50 @@ class LevelUpSystem {
   static async levelUp(characterId, earnedXP) {
     const character = await Character.findByPk(characterId);
     if (!character) {
+      console.error('Character not found');
       throw new Error('Character not found');
     }
 
+    
+    if (earnedXP <= 0) {
+      console.warn('No positive experience earned. Skipping update.');
+      return;
+    }
+
+    console.log(`Initial XP: ${character.experience}`);
     character.experience += earnedXP;
+    console.log(`Updated XP: ${character.experience}`);
 
     let newLevelData = null;
     for (const ld of levelData) {
       if (character.experience >= ld.cumulativeXP) {
         newLevelData = ld;
+        console.log(4, newLevelData)
       } else {
+        console.log(5)
         break; // Exit loop once you find the level range where the character's experience lies
       }
     }
 
-    if (!newLevelData || newLevelData.level <= character.level) {
-      return; // No level-up needed
+    try {
+      if (newLevelData && newLevelData.level > character.level) {
+        character.level = newLevelData.level;
+        character.xp_needed = newLevelData.xpToNextLevel;
+        character.effective_health = Math.floor(character.effective_health * newLevelData.healthMultiplier);
+        character.effective_damage = Math.floor(character.effective_damage * newLevelData.damageMultiplier);
+      }
+      
+      await character.save();
+      console.log('Updated experience:', character.experience);
+      
+    } catch (e) {
+      console.error('Failed to update character:', e);
     }
-
-    character.level = newLevelData.level;
-    character.xp_needed = newLevelData.xpToNextLevel;
-    character.effective_health = Math.floor(
-      character.effective_health * newLevelData.healthMultiplier
-    );
-    character.effective_damage = Math.floor(
-      character.effective_damage * newLevelData.damageMultiplier
-    );
-
-    await character.save();
   }
 }
+
+// ... (rest of the code)
+
 
 
 module.exports = LevelUpSystem
