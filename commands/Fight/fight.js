@@ -9,7 +9,7 @@ const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { selectEnemy } = require('./helpers/enemySelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleLogic } = require('./helpers/battle/battleLogic')
-const { battleManager } = require('./helpers/battle/battleManager')
+const { battleManager, userInBattle } = require('./helpers/battle/battleManager')
 const {
   characterInstance,
 } = require('./helpers/characterFiles/characterInstance')
@@ -82,7 +82,7 @@ module.exports = {
         if (i.customId === 'characterSelect') {
             // Mark the user as being in a battle
           userInBattle[userId] = true;
-          
+
           const selectedMasterCharacterID = i.values[0]
           const selectedCharacter = userCharacters.find((char) => {
             const {
