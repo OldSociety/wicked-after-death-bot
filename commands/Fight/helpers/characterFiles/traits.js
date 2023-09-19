@@ -25,7 +25,7 @@ const traits = {
 }
 
 function applyCritDamage(target, source) {
-  const damage = source.effective_damage * 1.5
+  const damage = (source.effective_damage * 0.1) * 1.5
   target.current_health -= damage
   console.log(
     `${source.character_name} crits ${target.character_name} for ${damage}`

@@ -25,6 +25,12 @@ module.exports = {
     try {
       const userId = interaction.user.id
 
+      // Check if the user is already in a battle
+      if (userInBattle[userId]) {
+        await interaction.reply("You're already in a battle!");
+        return;
+      }
+
       // User character selection
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
@@ -74,6 +80,9 @@ module.exports = {
 
       collector.on('collect', async (i) => {
         if (i.customId === 'characterSelect') {
+            // Mark the user as being in a battle
+          userInBattle[userId] = true;
+          
           const selectedMasterCharacterID = i.values[0]
           const selectedCharacter = userCharacters.find((char) => {
             const {

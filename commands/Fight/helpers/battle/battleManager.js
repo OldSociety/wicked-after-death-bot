@@ -1,4 +1,5 @@
 const battleManager = {}
-// BattleManager object starts as an empty object, acting as a state manager for all ongoing battles.
+const userInBattle = {} // New object to track if a user is in a battle
 
-module.exports = { battleManager }
+
+module.exports = { battleManager, userInBattle }
