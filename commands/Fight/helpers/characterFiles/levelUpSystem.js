@@ -1,4 +1,4 @@
-const { Character } = require('../../../../Models/model')
+const { Character, Enemy } = require('../../../../Models/model')
 
 function generateLevelData(maxLevel) {
   let levelData = []
@@ -39,14 +39,23 @@ function generateLevelData(maxLevel) {
 const maxLevel = 40
 const levelData = generateLevelData(maxLevel)
 
+// Add constants for the formula
+const e = 2.71828;
+const alpha = 0.1; // You can set alpha to whatever decay constant you desire
+
 class LevelUpSystem {
-  static async levelUp(characterId, earnedXP) {
+  static async levelUp(characterId, enemyId) {
     const character = await Character.findByPk(characterId);
-    if (!character) {
-      console.error('Character not found');
-      throw new Error('Character not found');
+    const enemy = await Enemy.findByPk(enemyId); // Assuming enemy model is also available
+
+    if (!character || !enemy) {
+      console.error('Character or enemy not found');
+      throw new Error('Character or enemy not found');
     }
 
+    // Calculate earned XP based on your formula
+    const originalXP = 500; 
+    const earnedXP = enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level)); 
     
     if (earnedXP <= 0) {
       console.warn('No positive experience earned. Skipping update.');

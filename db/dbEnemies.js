@@ -1,9 +1,11 @@
 const EnemyList = [
     {
       id: 0,
-      character_name: 'Goldfeather Harpy',
+      character_name: 'Goldfeather Harpies',
       description: 'A flock of feral monstrosities from the Dead Dame Mountains.',
-      type: 'monstrosity',
+      level: 1,
+      xp_awarded: 650,
+      type: 'group',
       unique_skill: null,
       effective_damage: 180,
       effective_health: 150,

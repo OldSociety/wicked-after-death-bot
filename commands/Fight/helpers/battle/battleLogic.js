@@ -118,11 +118,9 @@ const setupBattleLogic = (userId) => {
         ) {
           // Check if character survived the battle
           if (characterInstance.current_health > 0) {
-            const earnedXP = 500; // Define your XP logic here
-            console.log('Character earned xp:', earnedXP); // Log earned XP
             await LevelUpSystem.levelUp(
               characterInstance.character_id,
-              earnedXP
+              enemyInstance.id
             )
               .then(() => {
                 console.log('Level up successful.'); // Log on successful level up
