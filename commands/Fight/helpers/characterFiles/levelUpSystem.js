@@ -40,57 +40,58 @@ const maxLevel = 40
 const levelData = generateLevelData(maxLevel)
 
 // Add constants for the formula
-const e = 2.71828;
-const alpha = 0.1; // You can set alpha to whatever decay constant you desire
+const e = 2.71828
+const alpha = 0.1 // You can set alpha to whatever decay constant you desire
 
 class LevelUpSystem {
   static async levelUp(characterId, enemyId) {
-    const character = await Character.findByPk(characterId);
-    const enemy = await Enemy.findByPk(enemyId); // Assuming enemy model is also available
+    const character = await Character.findByPk(characterId)
+    const enemy = await Enemy.findByPk(enemyId) // Assuming enemy model is also available
 
     if (!character || !enemy) {
-      console.error('Character or enemy not found');
-      throw new Error('Character or enemy not found');
+      console.error('Character or enemy not found')
+      throw new Error('Character or enemy not found')
     }
 
     // Calculate earned XP based on your formula
-    const originalXP = 500; 
-    const earnedXP = enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level)); 
-    
+    const earnedXP =
+      enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
+
     if (earnedXP <= 0) {
-      console.warn('No positive experience earned. Skipping update.');
-      return;
+      console.warn('No positive experience earned. Skipping update.')
+      return
     }
 
-    console.log(`Initial XP: ${character.experience}`);
-    character.experience += earnedXP;
-    console.log(`Updated XP: ${character.experience}`);
+    console.log(`Initial XP: ${character.experience}`)
+    character.experience += Math.round(earnedXP)
+    console.log(`Updated XP: ${character.experience}`)
 
-    let newLevelData = null;
+    let newLevelData = null
     for (const ld of levelData) {
       if (character.experience >= ld.cumulativeXP) {
-        newLevelData = ld;
+        newLevelData = ld
       } else {
-        break; // Exit loop once you find the level range where the character's experience lies
+        break // Exit loop once you find the level range where the character's experience lies
       }
     }
-
+    console.log(earnedXP)
     try {
       if (newLevelData && newLevelData.level > character.level) {
-        character.level = newLevelData.level;
-        character.xp_needed = newLevelData.xpToNextLevel;
-        character.effective_health = Math.floor(character.effective_health * newLevelData.healthMultiplier);
-        character.effective_damage = Math.floor(character.effective_damage * newLevelData.damageMultiplier);
+        character.level = newLevelData.level
+        character.xp_needed = newLevelData.xpToNextLevel
+        character.effective_health = Math.floor(
+          character.effective_health * newLevelData.healthMultiplier
+        )
+        character.effective_damage = Math.floor(
+          character.effective_damage * newLevelData.damageMultiplier
+        )
       }
-      
-      await character.save();
-      
+
+      await character.save()
     } catch (e) {
-      console.error('Failed to update character:', e);
+      console.error('Failed to update character:', e)
     }
   }
 }
-
-
 
 module.exports = LevelUpSystem

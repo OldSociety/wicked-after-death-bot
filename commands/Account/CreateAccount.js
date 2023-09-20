@@ -16,7 +16,7 @@ const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
-    .setName('create')
+    .setName('account')
     .setDescription('Create your economy account'),
   async execute(interaction) {
     const userId = interaction.user.id
