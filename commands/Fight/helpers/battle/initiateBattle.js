@@ -7,10 +7,11 @@ const {
 const { CharacterInstance } = require('../characterFiles/characterInstance')
 const battleManager = require('./battleManager')
 
-async function initiateBattle(characterId, enemyId) {
+async function initiateBattle(masterCharacterId, characterId, enemyId, userId) {
+  console.log(characterId)
   try {
     // Initialize character to update effective_health and effective_damage
-    await CharacterInstance.initialize(characterId)
+    await CharacterInstance.initCharacter(masterCharacterId, userId, characterId)
 
     // Fetch the updated character and enemy from the database
     const characterData = await Character.findByPk(characterId)

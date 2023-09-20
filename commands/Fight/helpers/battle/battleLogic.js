@@ -102,6 +102,7 @@ const setupBattleLogic = () => {
       ) {
         console.log('Battle ends.')
         delete battleManager[battleKey]
+        delete userBattles[userId]
 
         // Check if character survived the battle
         if (characterInstance.current_health > 0) {
