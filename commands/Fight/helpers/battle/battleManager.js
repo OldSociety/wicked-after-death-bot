@@ -1,4 +1,5 @@
-const battleManager = {}
-const userBattles = {}
-
-module.exports = { battleManager, userBattles }
+const userBattles = {};
+module.exports = {
+  battleManager: {}, // your existing battleManager object
+  userBattles,
+};

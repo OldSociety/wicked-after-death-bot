@@ -138,7 +138,7 @@ module.exports = {
         const battleKey = `${selectedCharacterId}-${selectedEnemyId}`
         battleManager[battleKey] = { characterInstance, enemyInstance }
 
-        setupBattleLogic()
+        setupBattleLogic(userId)
       })
 
       collector.on('end', (collected) => {

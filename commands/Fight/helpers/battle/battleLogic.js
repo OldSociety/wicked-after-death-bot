@@ -1,10 +1,10 @@
 const cron = require('node-cron')
-const battleManager = require('./battleManager')
+const {battleManager, userBattles} = require('./battleManager')
 const { Character } = require('../../../../Models/model')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem') // Replace with actual path to LevelUpSystem
 
-let cronTask
+let cronTask = null
 
 function applyDamage(attacker, defender) {
   // Store the defender's starting health before the attack
@@ -73,73 +73,69 @@ function applyDamage(attacker, defender) {
   }
 }
 
-const setupBattleLogic = () => {
+const setupBattleLogic = (userId) => {
   const validBattleKeys = Object.keys(battleManager).filter(
     (key) => key !== 'battleManager' && key !== 'userBattles'
-  )
+  );
 
-  if (validBattleKeys.length <= 0) return
+  if (validBattleKeys.length <= 0) return;
 
-  cronTask = cron.schedule('*/5 * * * * *', async () => {
-
+  const cronTask = cron.schedule('*/5 * * * * *', async () => {
     if (validBattleKeys.length <= 0) {
-      cronTask.stop()
-      return
-    }
-    const keys = Object.keys(battleManager)
-    if (keys.length === 0) {
-      console.log('No battles to process.')
+      cronTask.stop();
+      return;
     }
 
-    console.log(12, battleManager)
     try {
       for (const battleKey of validBattleKeys) {
-        const battle = battleManager[battleKey]
-        console.log(10, battle)
-        if (!battle) continue
+        const battle = battleManager[battleKey];
 
-        console.log(15, battle)
-        const { characterInstance, enemyInstance } = battle
-        console.log(20, battle)
-        if (!characterInstance || !enemyInstance) continue
+        if (!battle) continue;
 
+        const { characterInstance, enemyInstance } = battle;
+
+        if (!characterInstance || !enemyInstance) continue;
+
+        // Apply damage and handle battles here
         console.log(
           'Character Health Before: ',
           characterInstance.current_health
-        )
-        console.log('Enemy Health Before: ', enemyInstance.current_health)
-        applyDamage(characterInstance, enemyInstance)
-        applyDamage(enemyInstance, characterInstance)
+        );
+        console.log('Enemy Health Before: ', enemyInstance.current_health);
+        applyDamage(characterInstance, enemyInstance);
+        applyDamage(enemyInstance, characterInstance);
         console.log(
           'Character Health After: ',
           characterInstance.current_health
-        )
-        console.log('Enemy Health After: ', enemyInstance.current_health)
+        );
+        console.log('Enemy Health After: ', enemyInstance.current_health);
 
+
+        // Check for battle results and perform necessary actions
         if (
           characterInstance.current_health <= 0 ||
           enemyInstance.current_health <= 0
         ) {
           // Check if character survived the battle
           if (characterInstance.current_health > 0) {
-            const earnedXP = 500 // Define your XP logic here
-            console.log('Character earned xp:', earnedXP) // Log earned XP
+            const earnedXP = 500; // Define your XP logic here
+            console.log('Character earned xp:', earnedXP); // Log earned XP
             await LevelUpSystem.levelUp(
               characterInstance.character_id,
               earnedXP
             )
               .then(() => {
-                console.log('Level up successful.') // Log on successful level up
+                console.log('Level up successful.'); // Log on successful level up
               })
               .catch((err) => {
-                console.log('Level up failed:', err) // Log if level up fails
-              })
+                console.log('Level up failed:', err); // Log if level up fails
+              });
 
             // Increment consecutive_kill counter
-            characterInstance.consecutive_kill += 1
+            characterInstance.consecutive_kill += 1;
           } else {
             // Reset consecutive_kill counter
-            characterInstance.consecutive_kill = 0
+            characterInstance.consecutive_kill = 0;
           }
 
           // Save updated consecutive_kill value to the database
@@ -147,44 +143,38 @@ const setupBattleLogic = () => {
             await Character.update(
               { consecutive_kill: characterInstance.consecutive_kill },
               { where: { character_id: characterInstance.character_id } }
-            )
+            );
             console.log(
               'Successfully updated consecutive_kill counter in the database.'
-            ) // Log on successful update
+            ); // Log on successful update
           } catch (e) {
-            console.error('Failed to update consecutive_kill:', e) // Log on failed update
+            console.error('Failed to update consecutive_kill:', e); // Log on failed update
           }
 
           // Check if enemy survived the battle
           if (enemyInstance.current_health > 0) {
-            console.log('Enemy Wins')
+            console.log('Enemy Wins');
           } else {
-            console.log('Character Wins.') // Log message for debugging
+            console.log('Character Wins.'); // Log message for debugging
           }
 
-          console.log('Battle ends.')
-          delete battleManager[battleKey]
-          delete userBattles[userId]
+          console.log('Battle ends.');
+          delete battleManager[battleKey];
+          delete userBattles[userId];
 
-          console.log('battle manager #s before deletion. ')
-          console.log(Object.keys(battleManager).length)
-          console.log(Object.keys(battleManager))
           if (cronTask) {
-            console.log('Stopping cron task is stopping.') // Log message for debugging
-            cronTask.stop()
+            cronTask.stop();
           }
-
-          // if (cronTask) {
-          //   cronTask.stop();
-          // }
         }
-        // Run the setup function once to initiate the cron job
-        setupBattleLogic()
       }
-    } catch (error) {
-      console.error('An error occurred:', error)
-    }
-  })
-}
 
-module.exports = { setupBattleLogic, applyDamage, applyCritDamage }
+    } catch (error) {
+      console.error('An error occurred:', error);
+    }
+  });
+
+  // Start the cron job
+  cronTask.start();
+};
+
+module.exports = { setupBattleLogic, applyDamage, applyCritDamage };
