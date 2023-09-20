@@ -61,9 +61,7 @@ class LevelUpSystem {
     for (const ld of levelData) {
       if (character.experience >= ld.cumulativeXP) {
         newLevelData = ld;
-        console.log(4, newLevelData)
       } else {
-        console.log(5)
         break; // Exit loop once you find the level range where the character's experience lies
       }
     }
@@ -77,15 +75,12 @@ class LevelUpSystem {
       }
       
       await character.save();
-      console.log('Updated experience:', character.experience);
       
     } catch (e) {
       console.error('Failed to update character:', e);
     }
   }
 }
-
-// ... (rest of the code)
 
 
 

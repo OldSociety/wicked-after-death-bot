@@ -1,5 +1,4 @@
+const battleManager = {}
 const userBattles = {}
-module.exports = {
-  battleManager: {},
-  userBattles,
-}
+
+module.exports = { battleManager, userBattles }

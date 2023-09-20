@@ -4,9 +4,8 @@ class CharacterInstance {
   static async initCharacter(masterCharacterId, userId, characterId) {
     try {
       // Fetch the existing character
-      console.log(characterId)
       const character = await Character.findByPk(characterId)
-      console.log(character)
+
       if (!character) throw new Error('Character not found')
 
       if (!character.initialized) {

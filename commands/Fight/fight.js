@@ -125,7 +125,7 @@ module.exports = {
         const selectedEnemyId = enemy.id // Assuming enemy object has 'id' field
         const masterCharacterId = master_character_id
 
-        console.log(selectedCharacterId, selectedEnemyId, masterCharacterId)
+        // console.log(selectedCharacterId, selectedEnemyId, masterCharacterId)
 
         userBattles[userId] = true
         const { masterCharacter, characterInstance, enemyInstance } =
