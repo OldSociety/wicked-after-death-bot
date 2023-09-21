@@ -15,9 +15,9 @@ function applyDamage(attacker, defender) {
   let actualDamage
 
   if (randHit < attacker.chance_to_hit * 100) {
-    let minDamage = attacker.effective_damage * 0.08
+    let minDamage = Math.round(attacker.effective_damage * 0.08)
     // console.log(`${attacker.character_name}: min damage ${minDamage}`)
-    let maxDamage = attacker.effective_damage * 0.12
+    let maxDamage = Math.round(attacker.effective_damage * 0.12)
     // console.log(`${attacker.character_name}: max damage ${maxDamage}`)
 
     if (randHit < attacker.crit_chance * 100) {
@@ -123,10 +123,10 @@ const setupBattleLogic = (userId) => {
               enemyInstance.id
             )
               .then(() => {
-                console.log('Level up successful.'); // Log on successful level up
+                console.log('XP updated.'); // Log on successful
               })
               .catch((err) => {
-                console.log('Level up failed:', err); // Log if level up fails
+                console.log('XP updated failed:', err); // Log if level up fails
               });
 
             // Increment consecutive_kill counter

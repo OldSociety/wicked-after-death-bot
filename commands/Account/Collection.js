@@ -49,21 +49,21 @@ module.exports = {
         // Decide the font color based on the rarity
         switch (character.masterCharacter.rarity) {
           case 'folk hero':
-            rarityColor = '🟢' // Bronze
+            rarityColor = '🟩'
             break
           case 'legend':
-            rarityColor = '🔵' // Purple
+            rarityColor = '🟦'
             break
           case 'unique':
-            rarityColor = '🟣' // Yellow
+            rarityColor = '🟪'
             break
           default:
-            rarityColor = '⚪' // White
+            rarityColor = '⬜'
         }
 
         return new StringSelectMenuOptionBuilder()
           .setLabel(
-            `${character.masterCharacter.character_name} ${rarityColor}`
+            `${rarityColor} ${character.masterCharacter.character_name}`
           ) // added rarityColor icon next to the name
           .setValue(character.character_id.toString())
           .setDescription(`Lvl ${character.level}`)
@@ -105,34 +105,51 @@ module.exports = {
         if (selectedCharacter) {
           switch (selectedCharacter.masterCharacter.rarity) {
             case 'folk hero':
-              rarityColor = '🟢';
-              break;
-            case 'legend':
-              rarityColor = '🔵';
-              break;
-            case 'unique':
-              rarityColor = '🟣';
-              break;
-            default:
-              rarityColor = '⚪';
+            rarityColor = '🟩'
+            break
+          case 'legend':
+            rarityColor = '🟦'
+            break
+          case 'unique':
+            rarityColor = '🟪'
+            break
+          default:
+            rarityColor = '⬜'
           }
 
           const detailEmbed = new EmbedBuilder()
-            .setTitle(`${selectedCharacter.masterCharacter.character_name}  ${rarityColor}`)
+            .setTitle(
+              `${rarityColor}` + '\u00A0'.repeat(3) + `${selectedCharacter.masterCharacter.character_name}`
+            )
             .setDescription(`${selectedCharacter.masterCharacter.description}`)
             .addFields(
               {
                 name: 'Level' + '\u00A0'.repeat(16) + 'Experience',
-                value: '`' + selectedCharacter.level.toString() + '`' + '\u00A0'.repeat(22
-                  ) + '`' + selectedCharacter.experience.toString() + ' / ' + selectedCharacter.xp_needed.toString() + '`'
+                value:
+                  '`' +
+                  selectedCharacter.level.toString() +
+                  '`' +
+                  '\u00A0'.repeat(22) +
+                  '`' +
+                  selectedCharacter.experience.toString() +
+                  ' / ' +
+                  selectedCharacter.xp_needed.toString() +
+                  '`',
               },
               {
                 name: 'Damage' + '\u00A0'.repeat(10) + 'Health',
-                value: '`⚔️' + selectedCharacter.masterCharacter.base_damage.toString() + '`' + '\u00A0'.repeat(12) + '`🧡' + selectedCharacter.masterCharacter.base_health.toString() + '`',
+                value:
+                  '`⚔️' +
+                  selectedCharacter.masterCharacter.base_damage.toString() +
+                  '`' +
+                  '\u00A0'.repeat(12) +
+                  '`🧡' +
+                  selectedCharacter.masterCharacter.base_health.toString() +
+                  '`',
               }
             )
 
-          await interaction.followUp({ embeds: [detailEmbed] })
+          await interaction.followUp({ embeds: [detailEmbed], ephemeral: true })
         } else {
           await interaction.followUp('Character not found.')
         }

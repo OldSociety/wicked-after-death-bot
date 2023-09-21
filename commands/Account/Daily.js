@@ -71,7 +71,7 @@ module.exports = {
 
         fields.push({
           name: 'Reward',
-          value: `You come across ${dailyCoins} on the floor! Your balance: ${newBalance} coins.`,
+          value: `You come across ${dailyCoins} gold on the floor! Your balance: ${newBalance}`,
         })
         fields.push({
           name: 'Next Claim',

@@ -142,8 +142,33 @@ module.exports = {
 
         const characters = await Character.findAll({
           where: { user_id: userId },
-        })
+          include: [{ model: MasterCharacter, as: 'masterCharacter' }]
+        });
+        
 
+        const charactersInfo = characters.map((character) => {
+          const masterInfo = character.masterCharacter;
+          let rarityColor;
+        
+          // Decide the font color based on the rarity
+          switch (masterInfo.rarity) {
+            case 'folk hero':
+              rarityColor = '🟩'
+              break
+            case 'legend':
+              rarityColor = '🟦'
+              break
+            case 'unique':
+              rarityColor = '🟪'
+              break
+            default:
+              rarityColor = '⬜'
+          }
+        
+          return '`' + `${rarityColor} ${masterInfo.character_name} | Lvl ${character.level}` + '`';
+        }).join('\n'); // joins each character info with a newline
+        
+        // Then you can add it to your embed like this:
         const embed = new EmbedBuilder()
           .setTitle(`${userName}`)
           .setDescription(`**Created on:** ${result}`)
@@ -160,13 +185,14 @@ module.exports = {
             },
             {
               name: 'Characters Owned:',
-              value: `${characters.length}`,
+              value: `${charactersInfo}`,
             },
-          )
-
+          );
+        
         await interaction.reply({
           embeds: [embed],
-        })
+        });
+        
       }
     } catch (error) {
       if (!isRolledBack) {
