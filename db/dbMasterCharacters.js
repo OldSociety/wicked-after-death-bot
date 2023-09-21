@@ -5,7 +5,7 @@ const CharacterList = [
     cost: 0,
     rarity: 'Commoner',
     description:
-      'Before Hyrum was Aja of Resolute, he was a skilled warrior and folk hero of his people.',
+      'Before Hyrum was Aja of Resolute, he was a young and brash man more considered with drink than politics. This young Hyrum cares enough to feed his fellow survivors, just not for free.',
     type: 'Character',
     unique_skill: 'Unknown',
     base_damage: 275,
@@ -20,7 +20,7 @@ const CharacterList = [
     cost: 0,
     rarity: 'Commoner',
     description:
-      'Servants of the nation, Clara served as a Wren Blackguard for decade, before deserting her post and discovering her cleric power.',
+      'Conscripted into the Wren Blackguard, this Clara was pulled into the present before discovering her cleric abilities. Instead, Clara is a battle hardened warrior and brutal on the battlefield.',
     type: 'Character',
     unique_skill: 'Unknown',
     base_damage: 225,
@@ -34,7 +34,7 @@ const CharacterList = [
     character_name: 'Marksmen Rennex',
     cost: 0,
     rarity: 'Commoner',
-    description: `Discovered on the brink of death, Rennex was taken by Damaris and his inventions were turned against him. Rennex is now just another pawn in the mad scientist's war against hell.`,
+    description: `Discovered on the brink of death, this Rennex was taken in by the mad scientist, Damaris, who used Rennex's inventions to create an army of homebrew Marksmen. What survived of Rennex is gone and what remains is just a pawn in the war against hell.`,
     type: 'Character',
     unique_skill: 'Unknown',
     base_damage: 215,
