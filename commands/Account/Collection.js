@@ -1,4 +1,10 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+} = require('discord.js')
 const { User, Character, MasterCharacter } = require('../../Models/model.js')
 
 module.exports = {
@@ -25,7 +31,7 @@ module.exports = {
             ],
           },
         ],
-      });
+      })
 
       if (!user) {
         return interaction.reply('You do not have an account.')
@@ -38,19 +44,37 @@ module.exports = {
       }
 
       const options = characters.map((character) => {
-        return {
-          label: character.masterCharacter.character_name,
-          value: character.character_id.toString(),
-          description: `Lvl ${character.level}`,
+        let rarityColor
+
+        // Decide the font color based on the rarity
+        switch (character.masterCharacter.rarity) {
+          case 'folk hero':
+            rarityColor = '🟢' // Bronze
+            break
+          case 'legend':
+            rarityColor = '🔵' // Purple
+            break
+          case 'unique':
+            rarityColor = '🟣' // Yellow
+            break
+          default:
+            rarityColor = '⚪' // White
         }
+
+        return new StringSelectMenuOptionBuilder()
+          .setLabel(
+            `${character.masterCharacter.character_name} ${rarityColor}`
+          ) // added rarityColor icon next to the name
+          .setValue(character.character_id.toString())
+          .setDescription(`Lvl ${character.level}`)
       })
 
-      const selectMenu = new MessageSelectMenu()
+      let selectMenu = new StringSelectMenuBuilder()
         .setCustomId('characterSelect')
         .setPlaceholder('Select a character')
         .addOptions(options)
 
-      const actionRow = new MessageActionRow().addComponents(selectMenu)
+      const actionRow = new ActionRowBuilder().addComponents(selectMenu)
 
       const characterEmbed = new EmbedBuilder()
         .setColor('#0099ff')
@@ -79,18 +103,38 @@ module.exports = {
         )
 
         if (selectedCharacter) {
+          switch (selectedCharacter.masterCharacter.rarity) {
+            case 'folk hero':
+              rarityColor = '🟢';
+              break;
+            case 'legend':
+              rarityColor = '🔵';
+              break;
+            case 'unique':
+              rarityColor = '🟣';
+              break;
+            default:
+              rarityColor = '⚪';
+          }
+
           const detailEmbed = new EmbedBuilder()
-            .setTitle(`${selectedCharacter.masterCharacter.character_name}`)
-            .addField('Level', selectedCharacter.level.toString())
-            .addField('Experience', selectedCharacter.experience.toString())
-            .addField('Base Damage', selectedCharacter.masterCharacter.base_damage.toString())
-            .addField('Base Health', selectedCharacter.masterCharacter.base_health.toString());
-            
-          // Add more fields as needed
-      
-          await interaction.followUp({ embeds: [detailEmbed] });
+            .setTitle(`${selectedCharacter.masterCharacter.character_name}  ${rarityColor}`)
+            .setDescription(`${selectedCharacter.masterCharacter.description}`)
+            .addFields(
+              {
+                name: 'Level' + '\u00A0'.repeat(16) + 'Experience',
+                value: '`' + selectedCharacter.level.toString() + '`' + '\u00A0'.repeat(22
+                  ) + '`' + selectedCharacter.experience.toString() + ' / ' + selectedCharacter.xp_needed.toString() + '`'
+              },
+              {
+                name: 'Damage' + '\u00A0'.repeat(10) + 'Health',
+                value: '`⚔️' + selectedCharacter.masterCharacter.base_damage.toString() + '`' + '\u00A0'.repeat(12) + '`🧡' + selectedCharacter.masterCharacter.base_health.toString() + '`',
+              }
+            )
+
+          await interaction.followUp({ embeds: [detailEmbed] })
         } else {
-          await interaction.followUp('Character not found.');
+          await interaction.followUp('Character not found.')
         }
       })
     } catch (error) {
