@@ -35,7 +35,6 @@ cron.schedule('*/6 * * * *', async () => {
   try {
     for (const userId of Object.keys(userIncrementFlags)) {
       if (userIncrementFlags[userId]) {
-
         // Check if flag is set for user - Only proceed if flag is true
         const dbUser = await User.findOne({ where: { user_id: userId } })
         const currentChanceFromDB = dbUser ? dbUser.currentChance : null
@@ -56,7 +55,7 @@ cron.schedule('*/6 * * * *', async () => {
           { currentChance: userChanceToFind[userId] },
           { where: { user_id: userId } }
         )
-      } 
+      }
     }
 
     console.log('Before reset:', JSON.stringify(userIncrementFlags))
@@ -129,5 +128,8 @@ module.exports = {
     } catch (error) {
       console.error('Error handling incoming message:', error)
     }
+  },
+  getChanceToFind: (userId) => {
+    return userChanceToFind[userId] || baseChance
   },
 }
