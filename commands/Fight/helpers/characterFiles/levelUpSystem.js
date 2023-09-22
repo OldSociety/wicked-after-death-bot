@@ -55,7 +55,7 @@ class LevelUpSystem {
 
     // Calculate earned XP based on your formula
     const earnedXP =
-      enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
+      Math.round(enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level)))
 
     if (earnedXP <= 0) {
       console.warn('No positive experience earned. Skipping update.')

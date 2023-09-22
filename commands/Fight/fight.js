@@ -4,6 +4,7 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
+  ChannelType
 } = require('discord.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { selectEnemy } = require('./helpers/enemySelection')
@@ -32,6 +33,23 @@ module.exports = {
       }
 
       const options = userCharacters.map((char) => {
+        let rarityColor
+
+        // Decide the font color based on the rarity
+        switch (userCharacters.rarity) {
+          case 'folk hero':
+            rarityColor = '🟩'
+            break
+          case 'legend':
+            rarityColor = '🟦'
+            break
+          case 'unique':
+            rarityColor = '🟪'
+            break
+          default:
+            rarityColor = '⬜'
+        }
+
         const {
           dataValues: { character_id },
           masterCharacter: {
@@ -40,7 +58,7 @@ module.exports = {
         } = char
 
         return new StringSelectMenuOptionBuilder()
-          .setLabel(character_name)
+          .setLabel( `${rarityColor} ${character_name}`)
           .setValue(character_id.toString())
       })
 
@@ -118,14 +136,7 @@ module.exports = {
           await interaction.followUp('Enemy not found.')
           return
         }
-        const enemyEmbed = new EmbedBuilder()
-          .setColor('#ff0000')
-          .setTitle('Enemy Selection')
-          .setDescription(`...and has found ${enemy.character_name}`)
 
-        await interaction.followUp({
-          embeds: [enemyEmbed],
-        })
         const selectedCharacterId = selectedCharacter.dataValues.character_id
         const selectedEnemyId = enemy.id // Assuming enemy object has 'id' field
         const masterCharacterId = master_character_id
@@ -143,7 +154,26 @@ module.exports = {
         const battleKey = `${selectedCharacterId}-${selectedEnemyId}`
         battleManager[battleKey] = { characterInstance, enemyInstance }
 
-        setupBattleLogic(userId)
+        const embed = new EmbedBuilder()
+          .setTitle('Fight!')
+          .setDescription(`...and has found ${enemy.character_name}`)
+          .addFields(
+            {
+              name: `${character_name}`,
+              value: `⚔️ ${selectedCharacter.effective_damage} 🧡 ${selectedCharacter.effective_health}`,
+            },
+            {
+              name: `${enemy.character_name}`,
+              value: `⚔️ ${enemy.effective_damage} 🧡 ${enemy.effective_health}`,
+            }
+          )
+
+        await interaction.followUp({
+          embeds: [embed],
+          ephemeral: true,
+        })
+
+        setupBattleLogic(userId, i.user.tag, interaction)
       })
 
       collector.on('end', (collected) => {

@@ -65,7 +65,9 @@ client.on('interactionCreate', async (interaction) => {
 
 // Track messages
 client.on('messageCreate', async function (message) {
+  const channel = message.channel;
   scavengeHelper(message)
+  
 })
 
 // Log in to Discord with your client's token
