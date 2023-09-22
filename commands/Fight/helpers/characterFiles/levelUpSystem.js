@@ -81,7 +81,7 @@ class LevelUpSystem {
         .setTitle(`${character.masterCharacter.character_name} wins.`)
         .addFields({
           name: `Rewards`,
-          value: `Earned ` + '`' + `⏫ ${earnedXP}` + '`' + ` XP and found ` + '`' + `🪙 ${earnedGold}` + '`' + ` gold.`,
+          value: `Earned ` + '`' + `⏫${earnedXP}` + '`' + ` XP and found ` + '`' + `🪙${earnedGold}` + '`' + ` gold.`,
         })
 
       await interaction.followUp({ embeds: [critEmbed], ephemeral: true })

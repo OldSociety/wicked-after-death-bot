@@ -27,7 +27,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      unique_skill: {
+      passive: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      passive_detail: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -54,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
       crit_damage: {
         type: DataTypes.FLOAT,
         allowNull: false,
-        defaultValue: 0.0,
+        defaultValue: 1.5,
       },
     },
     {

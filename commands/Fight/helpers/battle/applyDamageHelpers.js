@@ -5,8 +5,8 @@ function calcDamage(attacker, randHit, isCrit) {
   
     if (randHit < attacker.crit_chance * 100) {
       isCrit = true
-      minDamage *= 1.5
-      maxDamage *= 1.5
+      minDamage *= attacker.crit_damage
+      maxDamage *= attacker.crit_damage
     }
   
     return [minDamage, maxDamage, isCrit]

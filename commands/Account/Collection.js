@@ -105,48 +105,88 @@ module.exports = {
         if (selectedCharacter) {
           switch (selectedCharacter.masterCharacter.rarity) {
             case 'folk hero':
-            rarityColor = '🟩'
-            break
-          case 'legend':
-            rarityColor = '🟦'
-            break
-          case 'unique':
-            rarityColor = '🟪'
-            break
-          default:
-            rarityColor = '⬜'
+              rarityColor = '🟩'
+              break
+            case 'legend':
+              rarityColor = '🟦'
+              break
+            case 'unique':
+              rarityColor = '🟪'
+              break
+            default:
+              rarityColor = '⬜'
           }
 
           const detailEmbed = new EmbedBuilder()
             .setTitle(
-              `${rarityColor}` + '\u00A0'.repeat(3) + `${selectedCharacter.masterCharacter.character_name}`
+              `${rarityColor}` +
+                '\u00A0'.repeat(3) +
+                `${selectedCharacter.masterCharacter.character_name}`
             )
             .setDescription(`${selectedCharacter.masterCharacter.description}`)
             .addFields(
               {
-                name: 'Level' + '\u00A0'.repeat(16) + 'Experience',
+                name: 'Level',
                 value:
                   '`' +
                   selectedCharacter.level.toString() +
-                  '`' +
-                  '\u00A0'.repeat(22) +
-                  '`' +
-                  selectedCharacter.experience.toString() +
-                  ' / ' +
-                  selectedCharacter.xp_needed.toString() +
                   '`',
+                  inline: true
               },
               {
-                name: 'Damage' + '\u00A0'.repeat(10) + 'Health',
+                name: 'Experience',
+                value:
+                '`' +
+                selectedCharacter.experience.toString() +
+                ' / ' +
+                selectedCharacter.xp_needed.toString() +
+                '`',
+                  inline: true
+              },
+              {
+                name: 'Damage',
                 value:
                   '`⚔️' +
                   selectedCharacter.masterCharacter.base_damage.toString() +
-                  '`' +
-                  '\u00A0'.repeat(12) +
+                  '`',
+                inline: true,
+              },
+              {
+                name: 'Health',
+                value:
                   '`🧡' +
                   selectedCharacter.masterCharacter.base_health.toString() +
                   '`',
-              }
+                inline: true,
+              },
+              {
+                name: 'Crit Chances',
+                value:
+                  '`🎯' +
+                  selectedCharacter.masterCharacter.crit_chance.toString() +
+                  '`',
+                inline: true,
+              },
+              {
+                name: 'Crit Damage',
+                value:
+                  '`💥' +
+                  selectedCharacter.masterCharacter.crit_damage.toString() +
+                  '`',
+                inline: true,
+              },
+              
+              // {
+              //   name: 'Damage' + '\u00A0'.repeat(10) + 'Health',
+              //   value:
+              //     '`⚔️' +
+              //     selectedCharacter.masterCharacter.base_damage.toString() +
+              //     '`' +
+              //     '\u00A0'.repeat(12) +
+              //     '`🧡' +
+              //     selectedCharacter.masterCharacter.base_health.toString() +
+              //     '`',
+              // }
             )
 
           await interaction.followUp({ embeds: [detailEmbed], ephemeral: true })
