@@ -77,6 +77,11 @@ module.exports = {
       })
 
       collector.on('collect', async (i) => {
+        if (userBattles[userId]) {
+          await interaction.followUp('You are already in an ongoing battle.')
+          return
+        }
+        userBattles[userId] = true
         const selectedMasterCharacterID = i.values[0]
         const selectedCharacter = userCharacters.find(
           (char) =>
