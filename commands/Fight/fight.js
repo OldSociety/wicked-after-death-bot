@@ -4,7 +4,7 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  ChannelType
+  ChannelType,
 } = require('discord.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { selectEnemy } = require('./helpers/enemySelection')
@@ -58,7 +58,7 @@ module.exports = {
         } = char
 
         return new StringSelectMenuOptionBuilder()
-          .setLabel( `${rarityColor} ${character_name}`)
+          .setLabel(`${rarityColor} ${character_name}`)
           .setValue(character_id.toString())
       })
 
@@ -120,10 +120,6 @@ module.exports = {
           },
         } = selectedCharacter
 
-        await interaction.followUp(
-          `${i.user.tag}'s **${character_name}** is looking for a fight...`
-        )
-
         let enemy
         try {
           enemy = await selectEnemy()
@@ -155,8 +151,10 @@ module.exports = {
         battleManager[battleKey] = { characterInstance, enemyInstance }
 
         const embed = new EmbedBuilder()
-          .setTitle('Fight!')
-          .setDescription(`...and has found ${enemy.character_name}`)
+          .setTitle('⚡Fight!')
+          .setDescription(
+            `**${character_name}** is looking for a fight and has found **${enemy.character_name}**!`
+          )
           .addFields(
             {
               name: `${character_name}`,

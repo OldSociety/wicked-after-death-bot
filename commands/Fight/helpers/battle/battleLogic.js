@@ -5,12 +5,22 @@ const { Character } = require('../../../../Models/model')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
 const { createRoundEmbed } = require('./battleEmbeds')
+const { checkSpecialTrigger } = require('./executeSpecial')
+const {
+  calcDamage,
+  calcActualDamage,
+  updateBufferHealth,
+  updateHealth,
+  compileDamageResult,
+} = require('./applyDamageHelpers')
 
 let cronTask = null
 
 async function applyDamage(attacker, defender, userId) {
-  // const user = await client.users.fetch(userId);
-  const startingHealth = defender.current_health
+  // checkSpecialTrigger(defender).catch((error) => {
+  //   console.error('Failed to check special trigger:', error)
+  // })
+
   const randHit = Math.random() * 100
   let isCrit = false,
     didMiss = false,
@@ -20,8 +30,8 @@ async function applyDamage(attacker, defender, userId) {
   if (randHit < attacker.chance_to_hit * 100) {
     let [minDamage, maxDamage] = calcDamage(attacker, randHit)
 
-    actualDamage = calcActualDamage(minDamage, maxDamage)
-    const bufferDamage = Math.min(actualDamage, defender.buffer_health)
+    actualDamage = calcActualDamage(minDamage, maxDamage, isCrit)
+    bufferDamage = Math.min(actualDamage, defender.buffer_health)
 
     updateBufferHealth(defender, bufferDamage)
     updateHealth(defender, actualDamage - bufferDamage)
@@ -43,52 +53,8 @@ async function applyDamage(attacker, defender, userId) {
   )
 }
 
-function calcDamage(attacker, randHit) {
-  let minDamage = Math.round(attacker.effective_damage * 0.08)
-  let maxDamage = Math.round(attacker.effective_damage * 0.12)
-
-  if (randHit < attacker.crit_chance * 100) {
-    isCrit = true
-    minDamage *= 1.5
-    maxDamage *= 1.5
-  }
-
-  return [minDamage, maxDamage]
-}
-
-function calcActualDamage(minDamage, maxDamage) {
-  return Math.floor(Math.random() * (maxDamage - minDamage + 1) + minDamage)
-}
-
-function updateBufferHealth(defender, bufferDamage) {
-  if (defender.buffer_health > 0) {
-    defender.buffer_health = Math.max(0, defender.buffer_health - bufferDamage)
-  }
-}
-
-function updateHealth(defender, damageTaken) {
-  defender.current_health = Math.max(0, defender.current_health - damageTaken)
-}
-
-function compileDamageResult(
-  attacker,
-  defender,
-  actualDamage,
-  bufferDamage,
-  isCrit,
-  didMiss
-) {
-  return {
-    attacker,
-    defender,
-    actualDamage,
-    bufferDamage,
-    isCrit,
-    didMiss,
-  }
-}
-
-const applyRound = async (character, enemy, userName, interaction) => {
+// ROUND LOGIC
+const applyRound = async (character, enemy, userName, interaction, turnNum) => {
   const actions = []
 
   const action1 = await applyDamage(character, enemy)
@@ -96,13 +62,22 @@ const applyRound = async (character, enemy, userName, interaction) => {
 
   // Check if enemy's health is already <= 0, if not, proceed with defender's attack
   if (enemy.current_health > 0) {
-    const action2 = await applyDamage(enemy, character);
-    actions.push(action2);
+    const action2 = await applyDamage(enemy, character)
+    actions.push(action2)
   }
 
-  const roundEmbed = createRoundEmbed(actions, userName, character, enemy)
+  const roundEmbed = createRoundEmbed(
+    actions,
+    userName,
+    character,
+    enemy,
+    turnNum
+  )
   await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
 }
+
+// BATTLE LOGIC
+let turnNum = 1
 
 const setupBattleLogic = async (userId, userName, interaction) => {
   // const user = await client.users.fetch(userId)
@@ -112,7 +87,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
   if (validBattleKeys.length <= 0) return
 
-  const cronTask = cron.schedule('*/15 * * * * *', async () => {
+  const cronTask = cron.schedule('*/5 * * * * *', async () => {
     if (validBattleKeys.length <= 0) {
       cronTask.stop()
       return
@@ -134,8 +109,11 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           characterInstance,
           enemyInstance,
           userName,
-          interaction
+          interaction,
+          turnNum // Pass turnNum here
         )
+
+        turnNum++ // Increment the turn number
 
         // Check for battle results and perform necessary actions
         if (
@@ -147,7 +125,8 @@ const setupBattleLogic = async (userId, userName, interaction) => {
             try {
               await LevelUpSystem.levelUp(
                 characterInstance.character_id,
-                enemyInstance.id
+                enemyInstance.id,
+                interaction
               )
               console.log('XP updated.') // Log on successful
             } catch (err) {
@@ -181,13 +160,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
             )
 
             await interaction.followUp({ embeds: [winEmbed], ephemeral: true })
-          } else {
-            const critEmbed = new EmbedBuilder().setDescription(
-              `${characterInstance.character_name} wins.`
-            )
-
-            await interaction.followUp({ embeds: [critEmbed], ephemeral: true })
-          }
+          } 
 
           delete battleManager[battleKey]
           delete userBattles[userId]

@@ -1,4 +1,5 @@
-const { Character, Enemy } = require('../../../../Models/model')
+const { EmbedBuilder } = require('discord.js')
+const { Character, Enemy, MasterCharacter } = require('../../../../Models/model')
 
 function generateLevelData(maxLevel) {
   let levelData = []
@@ -44,8 +45,17 @@ const e = 2.71828
 const alpha = 0.1 // You can set alpha to whatever decay constant you desire
 
 class LevelUpSystem {
-  static async levelUp(characterId, enemyId) {
-    const character = await Character.findByPk(characterId)
+  static async levelUp(characterId, enemyId, interaction) {
+    const character = await Character.findByPk(characterId, {
+      include: [
+        {
+          model: MasterCharacter,
+          as: 'masterCharacter',
+          attributes: { exclude: ['master_character_id'] },
+        },
+      ],
+    })
+
     const enemy = await Enemy.findByPk(enemyId) // Assuming enemy model is also available
 
     if (!character || !enemy) {
@@ -54,15 +64,29 @@ class LevelUpSystem {
     }
 
     // Calculate earned XP based on your formula
-    const earnedXP =
-      Math.round(enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level)))
+    const earnedXP = Math.round(
+      enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
+    )
+
+    let earnedGold = 0
+    if (enemy.type !== 'boss' || enemy.type !== 'mini-boss') {
+      earnedGold = Math.round(enemy.gold_awarded + 20 * enemy.level)
+    }
 
     if (earnedXP <= 0) {
       console.warn('No positive experience earned. Skipping update.')
       return
+    } else {
+      const critEmbed = new EmbedBuilder()
+        .setTitle(`${character.masterCharacter.character_name} wins.`)
+        .addFields({
+          name: `Rewards`,
+          value: `Earned ` + '`' + `⏫ ${earnedXP}` + '`' + ` XP and found ` + '`' + `🪙 ${earnedGold}` + '`' + ` gold.`,
+        })
+
+      await interaction.followUp({ embeds: [critEmbed], ephemeral: true })
     }
 
-    console.log(`Initial XP: ${character.experience}`)
     character.experience += Math.round(earnedXP)
     console.log(`Updated XP: ${character.experience}`)
 

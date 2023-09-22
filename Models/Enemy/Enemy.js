@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0,
     },
+    gold_awarded: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     type: {
       type: DataTypes.STRING,
       allowNull: false,

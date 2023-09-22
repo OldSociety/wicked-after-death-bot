@@ -5,6 +5,7 @@ const EnemyList = [
       description: 'A flock of feral monstrosities from the Dead Dame Mountains.',
       level: 1,
       xp_awarded: 650,
+      gold_awarded: 250,
       type: 'group',
       unique_skill: null,
       effective_damage: 180,
