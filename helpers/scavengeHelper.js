@@ -1,135 +1,105 @@
-const cron = require('node-cron')
-const { Op } = require('sequelize')
-const { User, GearParts, UserGearParts } = require('../Models/model')
-const sequelize = require('../Utils/sequelize')
+// const cron = require('node-cron')
+// const { Op } = require('sequelize')
+// const { EmbedBuilder } = require('discord.js')
+// const { User, GearParts, UserGearParts } = require('../Models/model')
+// const sequelize = require('../Utils/sequelize')
 
-const baseChance = 0.03
-const chanceIncrement = 0.01
-const userChanceToFind = {}
-const userIncrementFlags = {} // Store flags to track increments
+// const baseChance = 0.01
+// const chanceIncrement = 0.01
+// const userChanceToFind = {}
+// const userIncrementFlags = {} // Store flags to track increments
 
-function pickRarity() {
-  const rand = Math.random() * 100
-  if (rand < 60) return 'common'
-  if (rand < 90) return 'uncommon'
-  return 'rare'
-}
+// // Function to update currentChance
+// async function updateCurrentChance(user, userId, chanceIncrement) {
+//   // Increment the user's temporary increment, but limit it to 0.15
+//   const incrementedChance = parseFloat((user.currentChance + chanceIncrement).toFixed(2));
 
-async function scavengeGearParts(userId, chanceToFind) {
-  console.log('at the end of the hour, this is the chances', chanceToFind)
-  if (Math.random() < chanceToFind) {
-    const rarity = pickRarity()
-    const allParts = await GearParts.findAll({ where: { rarity } })
-    const randomPart = allParts[Math.floor(Math.random() * allParts.length)]
-    const [userGearPart, created] = await UserGearParts.findOrCreate({
-      where: { user_id: userId, parts_id: randomPart.parts_id },
-      defaults: { quantity: 0 },
-    })
-    await userGearPart.increment('quantity', { by: 1 })
-    console.log('I found something!')
-  }
-}
+//   // Apply the limit of 0.15
+//   const limitedChance = Math.min(incrementedChance, 0.15).toFixed(2);
 
-// Check for messages and increase chance to find every 6 minutes ('*/6 * * * *')
-cron.schedule('*/6 * * * *', async () => {
-  try {
-    for (const userId of Object.keys(userIncrementFlags)) {
-      if (userIncrementFlags[userId]) {
-        // Check if flag is set for user - Only proceed if flag is true
-        const dbUser = await User.findOne({ where: { user_id: userId } })
-        const currentChanceFromDB = dbUser ? dbUser.currentChance : null
+//   // Update the user's currentChance in the database with the limited value
+//   await User.update(
+//     { currentChance: limitedChance },
+//     { where: { user_id: userId } }
+//   );
 
-        if (currentChanceFromDB !== null) {
-          userChanceToFind[userId] = currentChanceFromDB
-        } else if (!userChanceToFind[userId]) {
-          userChanceToFind[userId] = baseChance
-        }
+//   return limitedChance;
+// }
 
-        // Increment the chance by 0.01, and then round it to two decimal places
-        userChanceToFind[userId] = parseFloat(
-          (userChanceToFind[userId] + chanceIncrement).toFixed(2)
-        )
+// // Function to manage the timer
+// async function manageTimer(user, userId, baseChance) {
+//   const now = new Date(); // Current date and time
 
-        // Update the chance in the database
-        await User.update(
-          { currentChance: userChanceToFind[userId] },
-          { where: { user_id: userId } }
-        )
-      }
-    }
+//   if (!user.cooldownTime || user.cooldownTime <= now.getTime()) {
+//     const cooldownDuration = 3600000; // One hour in milliseconds
 
-    console.log('Before reset:', JSON.stringify(userIncrementFlags))
+//     // Check if the user was on cooldown before, indicating the cooldown has ended
+//     const wasOnCooldown = user.cooldownTime > now.getTime();
 
-    Object.keys(userIncrementFlags).forEach((userId) => {
-      userIncrementFlags[userId] = false
-    })
+//     // If the user was on cooldown, reset currentChance to baseChance
+//     if (wasOnCooldown) {
+//       user.currentChance = baseChance;
+//     }
 
-    console.log('After reset:', JSON.stringify(userIncrementFlags))
-  } catch (error) {
-    console.error('Error in scheduled task:', error)
-  }
-})
+//     const cooldownEndTime = now.getTime() + cooldownDuration;
+//     user.cooldownTime = cooldownEndTime;
 
-// Search for gear part every hour ('0 * * * *)
-cron.schedule('0 * * * *', async () => {
-  try {
-    const currentTime = new Date()
-    const uniqueUserIds = await UserGearParts.findAll({
-      attributes: [[sequelize.literal('CAST(`user_id` AS CHAR)'), 'user_id']],
-      group: ['user_id'],
-    })
+//     // Save the updated user object with the new cooldown time and currentChance
+//     await user.save();
+//   }
 
-    for (const uniqueUser of uniqueUserIds) {
-      const userId = String(uniqueUser.dataValues.user_id)
-      console.log('Querying for user ID:', userId)
+//   if (user.cooldownTime > now.getTime()) {
+//     const timeRemainingMilliseconds = user.cooldownTime - now.getTime();
+//     const timeRemainingSeconds = timeRemainingMilliseconds / 1000; // Convert to seconds
+//     console.log(
+//       'On cooldown. Remaining time:',
+//       timeRemainingSeconds.toFixed(0),
+//       'seconds'
+//     );
+//   } else {
+//     console.log('Timer not set');
+//   }
+// }
 
-      const user = await User.findOne({
-        where: { user_id: userId },
-        attributes: ['user_id'],
-      })
+// // Main function
+// module.exports = {
+//   scavengeHelper: async (message) => {
+//     try {
+//       if (!message || !message.author) {
+//         console.error('Invalid message or message author.');
+//         return;
+//       }
 
-      if (user) {
-        await scavengeGearParts(
-          user.user_id,
-          userChanceToFind[userId] || baseChance
-        )
-        userChanceToFind[userId] = baseChance // Reset to baseChance
-        // Update the chance in the database
-        await User.update(
-          { currentChance: userChanceToFind[userId] },
-          { where: { user_id: userId } }
-        )
-      } else {
-        console.log(`No user found with ID ${userId}`)
-      }
-    }
-  } catch (error) {
-    console.error('Error in cron job:', error)
-  }
-})
+//       const userId = message.author.id;
+//       const userName = message.author.username;
 
-module.exports = {
-  scavengeHelper: async (message) => {
-    try {
-      const userId = message.author.id
-      const userName = message.author.username
+//       console.log(userName, ' sent a message');
 
-      console.log(userName, ' sent a message')
+//       const user = await User.findByPk(userId);
 
-      // Check if the increment flag is set for this user in this job
-      if (!userIncrementFlags[userId]) {
-        // Increment the user's temporary increment
-        userChanceToFind[userId] =
-          (userChanceToFind[userId] || 0) + chanceIncrement
+//       console.log(15, user)
 
-        // Set the increment flag to prevent further increments in this job
-        userIncrementFlags[userId] = true
-      }
-    } catch (error) {
-      console.error('Error handling incoming message:', error)
-    }
-  },
-  getChanceToFind: (userId) => {
-    return userChanceToFind[userId] || baseChance
-  },
-}
+//       if (!user) {
+//         console.error('User not found in the database.');
+//         return;
+//       }
+
+//       // Fetch the user's currentChance from the database
+//       const currentChance = user.currentChance || 0;
+//       console.log(1, currentChance);
+
+//       // Manage the timer
+//       await manageTimer(user, userId, baseChance);
+
+//       // Update currentChance and log the new value
+//       const updatedChance = await updateCurrentChance(user, userId, chanceIncrement);
+//       console.log('Updated currentChance:', updatedChance);
+
+//     } catch (error) {
+//       console.error('Error handling incoming message:', error);
+//     }
+//   },
+//   getChanceToFind: (userId) => {
+//     return userChanceToFind[userId] || baseChance;
+//   },
+// };

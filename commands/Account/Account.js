@@ -142,32 +142,47 @@ module.exports = {
 
         const characters = await Character.findAll({
           where: { user_id: userId },
-          include: [{ model: MasterCharacter, as: 'masterCharacter' }]
-        });
-        
+          include: [{ model: MasterCharacter, as: 'masterCharacter' }],
+        })
 
-        const charactersInfo = characters.map((character) => {
-          const masterInfo = character.masterCharacter;
-          let rarityColor;
-        
-          // Decide the font color based on the rarity
-          switch (masterInfo.rarity) {
-            case 'folk hero':
-              rarityColor = '🟩'
-              break
-            case 'legend':
-              rarityColor = '🟦'
-              break
-            case 'unique':
-              rarityColor = '🟪'
-              break
-            default:
-              rarityColor = '⬜'
-          }
-        
-          return '`' + `${rarityColor} ${masterInfo.character_name} | Lvl ${character.level}` + '`';
-        }).join('\n'); // joins each character info with a newline
-        
+        const charactersInfo = characters
+          .map((character) => {
+            const masterInfo = character.masterCharacter
+            let rarityColor
+
+            // Decide the font color based on the rarity
+            switch (masterInfo.rarity) {
+              case 'folk hero':
+                rarityColor = '🟩'
+                break
+              case 'legend':
+                rarityColor = '🟦'
+                break
+              case 'unique':
+                rarityColor = '🟪'
+                break
+              default:
+                rarityColor = '⬜'
+            }
+
+            return (
+              '`' +
+              `${rarityColor}` +
+              '`' +
+              ` ${masterInfo.character_name}` +
+              ` ` +
+              '`' +
+              `⏫${character.level}` +
+              '`' + ` ` +
+              '`' +
+              character.experience.toString() +
+              ' / ' +
+              character.xp_needed.toString() +
+              '`'
+            )
+          })
+          .join('\n') // joins each character info with a newline
+
         // Then you can add it to your embed like this:
         const embed = new EmbedBuilder()
           .setTitle(`${userName}`)
@@ -175,7 +190,7 @@ module.exports = {
           .addFields(
             {
               name: 'Balance:',
-              value: '`' + `${user.balance} gold` + '`',
+              value: '`' + `🪙${user.balance}` + '`',
               inline: true,
             },
             {
@@ -186,13 +201,12 @@ module.exports = {
             {
               name: 'Characters Owned:',
               value: `${charactersInfo}`,
-            },
-          );
-        
+            }
+          )
+
         await interaction.reply({
           embeds: [embed],
-        });
-        
+        })
       }
     } catch (error) {
       if (!isRolledBack) {
@@ -203,5 +217,5 @@ module.exports = {
         'Something went wrong while creating your account.'
       )
     }
-  }
+  },
 }

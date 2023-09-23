@@ -71,11 +71,11 @@ module.exports = {
 
         fields.push({
           name: 'Reward',
-          value: `You come across ${dailyCoins} gold on the floor! Your balance: ${newBalance}`,
+          value: `You find ` + '`' + `🪙${dailyCoins}` + '`' + ` gold on the floor! Your balance:` + '`' + `🪙${newBalance}` + '`' + ` gold.`,
         })
         fields.push({
           name: 'Next Claim',
-          value: `You can claim more daily rewards in ${hours} hours and ${minutes} minutes.`,
+          value: `You can claim more daily rewards in` + '`' + ` ${hours} hours ${minutes} minutes` + '.`',
         })
 
         embed.addFields(fields)
@@ -84,7 +84,7 @@ module.exports = {
       } else {
         fields.push({
           name: 'Next Claim',
-          value: `You have ${hours} h ${minutes} m remaining until your next claim.`,
+          value: `You have ` + '`' + `${hours} hours ${minutes} minutes` + '`' + ` remaining until your next claim.`,
         })
 
         embed.addFields(fields)

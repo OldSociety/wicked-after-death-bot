@@ -32,7 +32,15 @@ module.exports = (sequelize, DataTypes) => {
     currentChance: {
       type: DataTypes.DOUBLE,
       defaultValue: 0.05,
-    }
+    },
+    message_cooldownTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    scavenge_cooldownTime: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   })
 
   return User

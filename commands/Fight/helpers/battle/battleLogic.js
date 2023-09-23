@@ -87,7 +87,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
   if (validBattleKeys.length <= 0) return
 
-  const cronTask = cron.schedule('*/5 * * * * *', async () => {
+  const cronTask = cron.schedule('*/10 * * * * *', async () => {
     if (validBattleKeys.length <= 0) {
       cronTask.stop()
       return
