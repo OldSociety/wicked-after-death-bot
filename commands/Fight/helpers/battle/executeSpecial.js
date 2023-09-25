@@ -1,6 +1,36 @@
 const executeSpecial = async (character, threshold) => {
     characterInstance.specialsQueue = [];
     // Send ephemeral embed with dropdown here
+    const StringSelectMenuBuilder = require('discord.js/src/structures/StringSelectMenuBuilder')
+const ActionRowBuilder  = require('discord.js').ActionRowBuilder // Adjust import as needed
+
+const createCharacterSelectMenu = (userCharacters) => {
+  const selectOptions = userCharacters.map((character) => {
+    const masterInfo = character.masterCharacter
+    let rarityColor
+
+    const characterInfo = `${rarityColor} Lvl ${character.level} | ⚔️: ${masterInfo.base_damage} | 🧡 ${masterInfo.base_health}`
+
+    return {
+      label: character.masterCharacter.character_name,
+      value: character.masterCharacter.master_character_id.toString(),
+      description: ` ${characterInfo}`,
+    }
+  })
+
+  const selectMenu = new StringSelectMenuBuilder()
+    .setCustomId('characterSelect')
+    .setPlaceholder('Select a Character')
+    .addOptions(selectOptions)
+
+  const actionRow = new ActionRowBuilder().addComponents(selectMenu)
+
+  return actionRow
+}
+
+module.exports = {
+  createCharacterSelectMenu,
+}
     // Assume handleDropdown is a function that waits for dropdown selection.
     const selected = await handleDropdown();
   

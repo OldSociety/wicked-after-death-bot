@@ -63,14 +63,28 @@ class LevelUpSystem {
       throw new Error('Character or enemy not found')
     }
 
+    // function calculateStartingXP(level) {
+    //   // Base starting XP for level 1
+    //   const baseXP = 2045;
+    
+    //   // Calculate the additional XP based on the level
+    //   const additionalXP = (level - 1) * 5575;
+    
+    //   // Calculate the total starting XP
+    //   const startingXP = baseXP + additionalXP;
+    
+    //   return startingXP;
+    // }
+
     // Calculate earned XP based on your formula
     const earnedXP = Math.round(
-      enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
-    )
+      // calculateStartingXP(enemy.level) * Math.exp(-alpha * (character.level - enemy.level))
+      enemy.level * Math.exp(-alpha * (character.level - enemy.level))
+      )
 
     let earnedGold = 0
     if (enemy.type !== 'boss' || enemy.type !== 'mini-boss') {
-      earnedGold = Math.round(enemy.gold_awarded + 20 * enemy.level)
+      earnedGold = Math.round(enemy.gold_awarded + (20 * enemy.level))
     }
 
     if (earnedXP <= 0) {
