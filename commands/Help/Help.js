@@ -15,7 +15,7 @@ module.exports = {
     	.addFields(
             { name: 'account', value: '`/account` ' },
             { name: 'fighting', value: '`/fight` ' },
-            { name: 'scavenging', value: '`/scavenge` ' },
+            // { name: 'scavenging', value: '`/scavenge` ' },
             { name: 'misc', value: '`/server`, `/story`' },
         );
 

@@ -63,11 +63,11 @@ client.on('interactionCreate', async (interaction) => {
   await buttonInteractionHandler.execute(interaction)
 })
 
-// Track messages
-client.on('messageCreate', async function (message) {
-  scavengeHelper(message)
+// // Track messages
+// client.on('messageCreate', async function (message) {
+//   scavengeHelper(message)
 
-})
+// })
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)
