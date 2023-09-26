@@ -171,7 +171,6 @@ module.exports = {
 
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true,
         })
 
         setupBattleLogic(userId, i.user.tag, interaction)

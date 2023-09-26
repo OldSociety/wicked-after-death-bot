@@ -162,7 +162,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
             const winEmbed = new EmbedBuilder().setDescription(
               `${enemyInstance.character_name} wins.`
             )
-            await interaction.followUp({ embeds: [winEmbed], ephemeral: true })
+            await interaction.followUp({ embeds: [winEmbed] })
           }
 
           // Save updated consecutive_kill value to the database

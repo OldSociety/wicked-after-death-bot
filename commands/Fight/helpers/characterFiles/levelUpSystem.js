@@ -98,7 +98,7 @@ class LevelUpSystem {
           value: `Earned ` + '`' + `⏫${earnedXP}` + '`' + ` XP and found ` + '`' + `🪙${earnedGold}` + '`' + ` gold.`,
         })
 
-      await interaction.followUp({ embeds: [critEmbed], ephemeral: true })
+      await interaction.followUp({ embeds: [critEmbed]})
     }
 
     character.experience += Math.round(earnedXP)
