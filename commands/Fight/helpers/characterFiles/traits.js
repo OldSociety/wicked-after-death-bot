@@ -28,7 +28,7 @@ const traits = {
 
   'Blackguard Clara': {
     onCritReceived: (character, attacker, channel) => {
-      console.log("Blackguard Clara's trait is triggered!")
+      console.log(`Blackguard Clara's trait is triggered!`)
       if (Math.random() < 0.5) {
         applyCritDamage(attacker, character)
       }

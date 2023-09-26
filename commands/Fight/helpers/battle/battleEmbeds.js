@@ -1,8 +1,16 @@
 const { EmbedBuilder } = require('discord.js')
 
-const createRoundEmbed = (actions, userName, character1, character2, turnNum) => {
-  const embed = new EmbedBuilder()
-  .setTitle(`Battle Status: Turn ${turnNum}`)
+const createRoundEmbed = (
+  actions,
+  userName,
+  character1,
+  character2,
+  turnNum
+) => {
+  const healthPercent =
+    (character1.current_health / character1.effective_health) * 100
+
+  const embed = new EmbedBuilder().setTitle(`Battle Status: Turn ${turnNum}`)
 
   actions.forEach((action) => {
     embed.addFields(
@@ -10,9 +18,10 @@ const createRoundEmbed = (actions, userName, character1, character2, turnNum) =>
         name: `Action`,
         value: action.didMiss
           ? `${action.attacker.character_name} missed.`
-          : 
-          `${action.attacker.character_name} strikes for `  +
-          '`' + `⚔️${action.actualDamage} damage` + '`.' 
+          : `${action.attacker.character_name} strikes for ` +
+            '`' +
+            `⚔️${action.actualDamage} damage` +
+            '`.',
       },
       {
         name: `${action.defender.character_name}'s Health`,
@@ -33,9 +42,22 @@ const createRoundEmbed = (actions, userName, character1, character2, turnNum) =>
     if (action.isCrit) {
       embed.addFields({
         name: 'Critical',
-        value: `${action.attacker.character_name} landed a critical hit! ` + '`' + `💥${action.actualDamage} damage` + '`',
+        value:
+          `${action.attacker.character_name} landed a critical hit! ` +
+          '`' +
+          `💥${action.actualDamage} damage` +
+          '`',
       })
     }
+
+    // This is just not working at allowedNodeEnvironmentFlags.
+    // console.log(character1.sp1Counter)
+    //     if ("counter for embed", character1.sp1Counter > 0) {
+    //         embed.addFields({
+    //           name: 'Special Ability',
+    //           value: 'SP1 is ready! Click the button to activate!',
+    //         });
+    //       }
   })
 
   return embed

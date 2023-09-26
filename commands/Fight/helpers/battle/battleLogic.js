@@ -5,7 +5,6 @@ const { Character } = require('../../../../Models/model')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
 const { createRoundEmbed } = require('./battleEmbeds')
-const { checkSpecialTrigger } = require('./executeSpecial')
 const {
   calcDamage,
   calcActualDamage,
@@ -13,14 +12,11 @@ const {
   updateHealth,
   compileDamageResult,
 } = require('./applyDamageHelpers')
+const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
 
 let cronTask = null
 
 async function applyDamage(attacker, defender, userId) {
-  // checkSpecialTrigger(defender).catch((error) => {
-  //   console.error('Failed to check special trigger:', error)
-  // })
-
   const randHit = Math.random() * 100
   let isCrit = false,
     didMiss = false,
@@ -55,6 +51,18 @@ async function applyDamage(attacker, defender, userId) {
 
 // ROUND LOGIC
 const applyRound = async (character, enemy, userName, interaction, turnNum) => {
+  // Step 1: Check specials
+  await checkSpecialTrigger(character, character.activeSpecials)
+  // await checkSpecialTrigger(enemy, specialsArray)
+
+  // Step 2: Execute specials
+  for (const specialId of character.activeSpecials) {
+    await executeSpecial(character, { id: specialId })
+  }
+  // for (const specialId of enemy.activeSpecials) {
+  //   await executeSpecial(enemy, { id: specialId })
+  // }
+
   const actions = []
 
   const action1 = await applyDamage(character, enemy)
@@ -73,7 +81,19 @@ const applyRound = async (character, enemy, userName, interaction, turnNum) => {
     enemy,
     turnNum
   )
+
   await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
+}
+
+function initializeCharacterFlagsAndCounters(character) {
+  character.sp1Counter = 0
+  character.special90 = false
+  character.special60 = false
+  character.special30 = false
+  character.special90Triggered = false
+  character.special60Triggered = false
+  character.special30Triggered = false
+  character.activeSpecials = []
 }
 
 // BATTLE LOGIC
@@ -103,6 +123,10 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
         if (!characterInstance || !enemyInstance) continue
 
+        // Initialize flags and counters
+        initializeCharacterFlagsAndCounters(characterInstance)
+        // initializeCharacterFlagsAndCounters(enemyInstance)
+
         // Apply damage and handle battles here
 
         await applyRound(
@@ -123,6 +147,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           // Check if character survived the battle
           if (characterInstance.current_health > 0) {
             try {
+              characterInstance.consecutive_kill++
               await LevelUpSystem.levelUp(
                 characterInstance.character_id,
                 enemyInstance.id,
@@ -132,12 +157,12 @@ const setupBattleLogic = async (userId, userName, interaction) => {
             } catch (err) {
               console.log('XP update failed:', err) // Log if level up fails
             }
-
-            // Increment consecutive_kill counter
-            characterInstance.consecutive_kill += 1
           } else {
-            // Reset consecutive_kill counter
             characterInstance.consecutive_kill = 0
+            const winEmbed = new EmbedBuilder().setDescription(
+              `${enemyInstance.character_name} wins.`
+            )
+            await interaction.followUp({ embeds: [winEmbed], ephemeral: true })
           }
 
           // Save updated consecutive_kill value to the database
@@ -152,15 +177,6 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           } catch (e) {
             console.error('Failed to update consecutive_kill:', e) // Log on failed update
           }
-
-          // Check if enemy survived the battle
-          if (enemyInstance.current_health > 0) {
-            const winEmbed = new EmbedBuilder().setDescription(
-              `${enemyInstance.character_name} wins.`
-            )
-
-            await interaction.followUp({ embeds: [winEmbed], ephemeral: true })
-          } 
 
           delete battleManager[battleKey]
           delete userBattles[userId]

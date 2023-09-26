@@ -79,7 +79,7 @@ class LevelUpSystem {
     // Calculate earned XP based on your formula
     const earnedXP = Math.round(
       // calculateStartingXP(enemy.level) * Math.exp(-alpha * (character.level - enemy.level))
-      enemy.level * Math.exp(-alpha * (character.level - enemy.level))
+      enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
       )
 
     let earnedGold = 0

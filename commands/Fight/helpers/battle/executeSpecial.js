@@ -1,73 +1,45 @@
-const executeSpecial = async (character, threshold) => {
-    characterInstance.specialsQueue = [];
-    // Send ephemeral embed with dropdown here
-    const StringSelectMenuBuilder = require('discord.js/src/structures/StringSelectMenuBuilder')
-const ActionRowBuilder  = require('discord.js').ActionRowBuilder // Adjust import as needed
+const { sp1Damage } = require('./30SpecialThreshold/sp1Damage')
 
-const createCharacterSelectMenu = (userCharacters) => {
-  const selectOptions = userCharacters.map((character) => {
-    const masterInfo = character.masterCharacter
-    let rarityColor
-
-    const characterInfo = `${rarityColor} Lvl ${character.level} | ⚔️: ${masterInfo.base_damage} | 🧡 ${masterInfo.base_health}`
-
-    return {
-      label: character.masterCharacter.character_name,
-      value: character.masterCharacter.master_character_id.toString(),
-      description: ` ${characterInfo}`,
-    }
-  })
-
-  const selectMenu = new StringSelectMenuBuilder()
-    .setCustomId('characterSelect')
-    .setPlaceholder('Select a Character')
-    .addOptions(selectOptions)
-
-  const actionRow = new ActionRowBuilder().addComponents(selectMenu)
-
-  return actionRow
+async function executeSpecial(character, activeSpecial) {
+  if (activeSpecial.id === 'sp1' && character.sp1Counter > 0) {
+    // character.effective_damage = sp1Damage(character)
+    // character.sp1Counter-- // decrement the counter
+    console.log('execute sp1 here')
+  }
 }
 
-module.exports = {
-  createCharacterSelectMenu,
+async function checkSpecialTrigger(character) {
+  const healthPercent =
+    (character.current_health / character.effective_health) * 100
+
+  if (healthPercent <= 70 && !character.special70Triggered) {
+    character.special70 = true
+    character.special70Triggered = true
+    character.sp1Counter++
+  }
+  if (healthPercent <= 40 && !character.special40Triggered) {
+    character.special40 = true
+    character.special40Triggered = true
+    character.sp1Counter++
+  }
+  if (healthPercent <= 10 && !character.special10Triggered) {
+    character.special10 = true
+    character.special10Triggered = true
+    character.sp1Counter++
+  }
+
+  if (character.sp1Counter > 0 && !character.activeSpecials.includes('sp1')) {
+    character.activeSpecials.push('sp1')
+  }
+
+  // Consolidated logs
+  if (character.sp1Counter !== character.prevSp1Counter) {
+    console.log(`number of special 1 available: ${character.sp1Counter}`)
+    console.log(`current health ${character.current_health}`)
+    console.log(`effective health ${character.effective_health}`)
+    console.log(healthPercent)
+    character.prevSp1Counter = character.sp1Counter
+  }
 }
-    // Assume handleDropdown is a function that waits for dropdown selection.
-    const selected = await handleDropdown();
-  
-    let activate = false;
-    if (selected) {
-      activate = true;
-    } else if (Math.random() < 0.4) {
-      activate = true;
-    }
-  
-    if (activate) {
-      // Your logic to activate the special ability based on the threshold
-    }
-  };
-  
-  const checkSpecialTrigger = async (character) => {
-    const healthPercent = (character.current_health / character.max_health) * 100;
-  
-    if (healthPercent <= 90 && !character.special90) {
-      character.special90 = true;
-      character.specialsQueue.push('90');
-    }
-    if (healthPercent <= 60 && !character.special60) {
-      character.special60 = true;
-      character.specialsQueue.push('60');
-    }
-    if (healthPercent <= 30 && !character.special30) {
-      character.special30 = true;
-      character.specialsQueue.push('30');
-    }
-  
-    if (character.specialsQueue.length > 0) {
-      const nextSpecial = character.specialsQueue.shift(); // Remove and get the first element
-      await executeSpecial(character, nextSpecial); // Execute the special and remove it from the queue
-    }
-  };
-  
-  
-  module.exports = { checkSpecialTrigger };
-  
+
+module.exports = { checkSpecialTrigger, executeSpecial }

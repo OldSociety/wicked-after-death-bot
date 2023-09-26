@@ -173,7 +173,7 @@ module.exports = {
               ` ` +
               '`' +
               `⏫${character.level}` +
-              '`' + ` ` +
+              '`' + `         ` +
               '`' +
               character.experience.toString() +
               ' / ' +
