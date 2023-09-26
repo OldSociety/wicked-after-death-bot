@@ -28,26 +28,21 @@ const traits = {
 
   'Blackguard Clara': {
     onCritReceived: (character, attacker, channel) => {
-      console.log(`Blackguard Clara's trait is triggered!`)
+      console.log(`Blackguard Clara's trait is triggered!`);
       if (Math.random() < 0.5) {
-        applyCritDamage(attacker, character)
+        const [minDamage, maxDamage, isCrit] = calcDamage(character, 0);  // Always crit
+        const actualDamage = calcActualDamage(minDamage, maxDamage);  
+        return actualDamage; // Return the damage that will be used in applyDamage
       }
-
-      // Embed to show that buffer has been activated
-      const claraEmbed = new EmbedBuilder()
-        .setTitle('Buffer Activated!')
-        .setDescription(`${character.character_name} gets retribution!`)
-      channel.send({ embeds: [claraEmbed] })
+      return null; // Return null if the trait doesn't activate
     },
   },
-}
+}  
 
-function applyCritDamage(target, source) {
-  const damage = source.effective_damage * 0.1 * 1.5
-  target.current_health -= damage
-  console.log(
-    `${source.character_name} crits ${target.character_name} for ${damage}`
-  )
-}
+function applyCritDamage(target, actualDamage) {
+    target.current_health -= actualDamage;
+    console.log(`${source.character_name} crits ${target.character_name} for ${actualDamage}`);
+  }
+  
 
 module.exports = { traits, applyCritDamage }

@@ -11,7 +11,7 @@ const EnemyList = [
       effective_damage: 180,
       effective_health: 150,
       chance_to_hit: .75,
-      crit_chance: .1,
+      crit_chance: 1,
       crit_damage: 1.5
     }
   ];

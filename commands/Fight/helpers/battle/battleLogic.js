@@ -32,13 +32,18 @@ async function applyDamage(attacker, defender, userId) {
 
     updateBufferHealth(defender, bufferDamage);
     updateHealth(defender, actualDamage - bufferDamage);
+
+    
   } else {
     // Attack misses
     didMiss = true;
   }
 
   if (isCrit && traits[defender.character_name]?.onCritReceived) {
-    traits[defender.character_name].onCritReceived(defender, attacker);
+    const reactiveDamage = traits[defender.character_name].onCritReceived(defender, attacker);
+    if (reactiveDamage !== null) {
+      actualDamage = reactiveDamage; // Update the actualDamage value
+    }
   }
 
   return compileDamageResult(
