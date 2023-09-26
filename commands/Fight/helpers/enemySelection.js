@@ -2,7 +2,6 @@ const { Enemy } = require('../../../Models/model.js')
 
 const selectEnemy = async () => {
   const enemies = await Enemy.findAll()
-  console.log(enemies)
 
   // Retrieve all available enemies
   if (!enemies.length) {

@@ -1,15 +1,16 @@
-
-function calcDamage(attacker, randHit, isCrit) {
-    let minDamage = Math.round(attacker.effective_damage * 0.08)
-    let maxDamage = Math.round(attacker.effective_damage * 0.12)
+// calcDamage function
+function calcDamage(attacker, randHit) {
+    let isCrit = false;
+    let minDamage = Math.round(attacker.effective_damage * 0.08);
+    let maxDamage = Math.round(attacker.effective_damage * 0.12);
   
     if (randHit < attacker.crit_chance * 100) {
-      isCrit = true
-      minDamage *= attacker.crit_damage
-      maxDamage *= attacker.crit_damage
+      isCrit = true;
+      minDamage *= attacker.crit_damage;
+      maxDamage *= attacker.crit_damage;
     }
   
-    return [minDamage, maxDamage, isCrit]
+    return [minDamage, maxDamage, isCrit];
   }
   
   function calcActualDamage(minDamage, maxDamage) {

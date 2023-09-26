@@ -17,26 +17,28 @@ const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
 let cronTask = null
 
 async function applyDamage(attacker, defender, userId) {
-  const randHit = Math.random() * 100
+  const randHit = Math.random() * 100;
   let isCrit = false,
     didMiss = false,
     actualDamage,
-    bufferDamage = 0 // Initialize bufferDamage to 0
+    bufferDamage = 0; // Initialize bufferDamage to 0
 
   if (randHit < attacker.chance_to_hit * 100) {
-    let [minDamage, maxDamage] = calcDamage(attacker, randHit)
+    // Attack hits
+    let [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit);
 
-    actualDamage = calcActualDamage(minDamage, maxDamage, isCrit)
-    bufferDamage = Math.min(actualDamage, defender.buffer_health)
+    actualDamage = calcActualDamage(minDamage, maxDamage);
+    bufferDamage = Math.min(actualDamage, defender.buffer_health);
 
-    updateBufferHealth(defender, bufferDamage)
-    updateHealth(defender, actualDamage - bufferDamage)
+    updateBufferHealth(defender, bufferDamage);
+    updateHealth(defender, actualDamage - bufferDamage);
   } else {
-    didMiss = true
+    // Attack misses
+    didMiss = true;
   }
 
   if (isCrit && traits[defender.character_name]?.onCritReceived) {
-    traits[defender.character_name].onCritReceived(defender, attacker)
+    traits[defender.character_name].onCritReceived(defender, attacker);
   }
 
   return compileDamageResult(
@@ -46,8 +48,9 @@ async function applyDamage(attacker, defender, userId) {
     bufferDamage,
     isCrit,
     didMiss
-  )
+  );
 }
+
 
 // ROUND LOGIC
 const applyRound = async (character, enemy, userName, interaction, turnNum) => {
@@ -98,6 +101,7 @@ function initializeCharacterFlagsAndCounters(character) {
 
 // BATTLE LOGIC
 let turnNum = 1
+let initializedCharacters = {};
 
 const setupBattleLogic = async (userId, userName, interaction) => {
   // const user = await client.users.fetch(userId)
@@ -107,7 +111,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
   if (validBattleKeys.length <= 0) return
 
-  const cronTask = cron.schedule('*/10 * * * * *', async () => {
+  const cronTask = cron.schedule('*/8 * * * * *', async () => {
     if (validBattleKeys.length <= 0) {
       cronTask.stop()
       return
@@ -121,11 +125,19 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
         const { characterInstance, enemyInstance } = battle
 
+        if (!initializedCharacters[characterInstance.character_id]) {
+          initializeCharacterFlagsAndCounters(characterInstance);
+          initializedCharacters[characterInstance.character_id] = true;
+        }
+    
+        if (!initializedCharacters[enemyInstance.character_id]) {
+          initializeCharacterFlagsAndCounters(enemyInstance);
+          initializedCharacters[enemyInstance.character_id] = true;
+        }
+
         if (!characterInstance || !enemyInstance) continue
 
-        // Initialize flags and counters
-        initializeCharacterFlagsAndCounters(characterInstance)
-        // initializeCharacterFlagsAndCounters(enemyInstance)
+
 
         // Apply damage and handle battles here
 
