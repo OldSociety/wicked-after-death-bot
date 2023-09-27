@@ -18,11 +18,17 @@ const createRoundEmbed = (
         name: `Action`,
         value: action.didMiss
           ? `${action.attacker.character_name} missed.`
+          : action.isCrit
+          ? `${action.attacker.character_name} landed a critical hit! ` +
+            '`' +
+            `💥${action.actualDamage} damage` +
+            '`'
           : `${action.attacker.character_name} strikes for ` +
             '`' +
             `⚔️${action.actualDamage} damage` +
-            '`.',
+            '`',
       },
+
       {
         name: `${action.defender.character_name}'s Health`,
         value:
@@ -33,20 +39,15 @@ const createRoundEmbed = (
     )
 
     if (action.bufferDamage > 0) {
-      embed.addFields({
-        name: 'Buffer Damage Absorbed',
-        value: '`🛡️' + `${action.bufferDamage}` + '`',
-      })
-    }
+      const initialBufferHealth =
+        action.defender.buffer_health + action.bufferDamage // Calculate the buffer health before the damage
+      const remainingBufferHealth = action.defender.buffer_health // Remaining buffer health after the damage
 
-    if (action.isCrit) {
       embed.addFields({
-        name: 'Critical',
+        name: `${action.defender.character_name}'s Buffer`,
         value:
-          `${action.attacker.character_name} landed a critical hit! ` +
-          '`' +
-          `💥${action.actualDamage} damage` +
-          '`',
+          `Activated 🛡️\n` +
+          `Initial: ${initialBufferHealth} ➡️ Damage Absorbed: ${action.bufferDamage} ➡️ Remaining: ${remainingBufferHealth}`,
       })
     }
 

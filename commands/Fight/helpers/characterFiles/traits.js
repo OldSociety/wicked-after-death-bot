@@ -1,21 +1,22 @@
-const traits = {};
+const autoCritCharacters = new Map();
 
-traits['Huntsman Hyrum'] = (defender, isCrit) => {
-  if (isCrit) {
-    defender.buffer_health += 50; // Or whatever amount you want
-  }
+const traits = {
+  'Blackguard Clara': (defender, isCrit, attacker) => {
+    // When Clara is hit, set her next attack to be an auto-crit
+    autoCritCharacters.set(defender.character_id, true);
+  },
+  'Huntsman Hyrum': (defender, isCrit) => {
+    if (isCrit) {
+      defender.buffer_health += Math.round(defender.effective_health * 0.1); // 10%
+    }
+  },
+  // ... Other traits ...
 };
 
-traits['Blackguard Clara'] = (defender, isCrit, attacker) => {
-    if (isCrit) {
-      attacker.dynamicTraits = attacker.dynamicTraits || {}; // Initialize if it doesn't exist
-      attacker.dynamicTraits.next_attack_is_crit = true;
-    }
-  };
-  
+function isNextAttackAutoCrit(characterId) {
+  const result = autoCritCharacters.get(characterId) || false;
+  autoCritCharacters.delete(characterId); // Reset the flag
+  return result;
+}
 
-// traits['Marksman Rennex'] = (defender, _, attacker) => {
-//   attacker.special_attack_charge += 1.05; // Assumes special_attack_charge is a property on the attacker object
-// };
-
-module.exports = { traits }
+module.exports = { traits, isNextAttackAutoCrit, autoCritCharacters };

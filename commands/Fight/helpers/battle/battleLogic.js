@@ -25,8 +25,10 @@ async function applyDamage(attacker, defender, userId) {
 
   if (randHit < attacker.chance_to_hit * 100) {
     // Attack hits
-    let [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit);
-
+    console.log("About to call calcDamage");  // Add this
+    [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit);
+    console.log("Received values from calcDamage:", minDamage, maxDamage, isCrit);  // And this
+  
     // Apply Traits
     if (traits[defender.character_name]) {
       traits[defender.character_name](defender, isCrit, attacker);
