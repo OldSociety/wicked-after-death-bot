@@ -7,6 +7,15 @@ function calcDamage(attacker, randHit) {
   console.log('normal damage min', attacker.character_name, minDamage)
   console.log('normal damage max', attacker.character_name, maxDamage)
 
+  // Check for forced crit from dynamicTraits first
+  if (attacker.dynamicTraits && attacker.dynamicTraits.next_attack_is_crit) {
+    isCrit = true
+    delete attacker.dynamicTraits.next_attack_is_crit
+  } else if (randHit < attacker.crit_chance * 100) {
+    // Then proceed to random crit chance
+    isCrit = true
+  }
+
   if (randHit < attacker.crit_chance * 100) {
     isCrit = true
     minDamage *= attacker.crit_damage

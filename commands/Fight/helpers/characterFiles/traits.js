@@ -1,48 +1,21 @@
-const { EmbedBuilder } = require('discord.js')
+const traits = {};
 
-const traits = {
-  'Huntsman Hyrum': {
-    onCritReceived: (character, attacker, channel) => {
-      // Calculate buffer amount based on effective health
-      const bufferAmount = Math.floor(character.effective_health * 0.1)
-
-      // If buffer_health doesn't exist or is less than the calculated bufferAmount, add the buffer
-      if (
-        typeof character.buffer_health === 'undefined' ||
-        character.buffer_health < bufferAmount
-      ) {
-        character.buffer_health = bufferAmount
-      }
-      // Embed to show that buffer has been activated
-      const bufferEmbed = new EmbedBuilder()
-        .setTitle('Buffer Activated!')
-        .setDescription(`${character.character_name} has activated a buffer!`)
-        .addFields({
-          name: 'Buffer Amount',
-          value: bufferAmount.toString(),
-        })
-
-      channel.send({ embeds: [bufferEmbed] })
-    },
-  },
-
-  'Blackguard Clara': {
-    onCritReceived: (character, attacker, channel) => {
-      console.log(`Blackguard Clara's trait is triggered!`);
-      if (Math.random() < 0.5) {
-        const [minDamage, maxDamage, isCrit] = calcDamage(character, 0);  // Always crit
-        const actualDamage = calcActualDamage(minDamage, maxDamage);  
-        return actualDamage; // Return the damage that will be used in applyDamage
-      }
-      return null; // Return null if the trait doesn't activate
-    },
-  },
-}  
-
-function applyCritDamage(target, actualDamage) {
-    target.current_health -= actualDamage;
-    console.log(`${source.character_name} crits ${target.character_name} for ${actualDamage}`);
+traits['Huntsman Hyrum'] = (defender, isCrit) => {
+  if (isCrit) {
+    defender.buffer_health += 50; // Or whatever amount you want
   }
+};
+
+traits['Blackguard Clara'] = (defender, isCrit, attacker) => {
+    if (isCrit) {
+      attacker.dynamicTraits = attacker.dynamicTraits || {}; // Initialize if it doesn't exist
+      attacker.dynamicTraits.next_attack_is_crit = true;
+    }
+  };
   
 
-module.exports = { traits, applyCritDamage }
+// traits['Marksman Rennex'] = (defender, _, attacker) => {
+//   attacker.special_attack_charge += 1.05; // Assumes special_attack_charge is a property on the attacker object
+// };
+
+module.exports = { traits }

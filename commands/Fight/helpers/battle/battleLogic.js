@@ -27,6 +27,11 @@ async function applyDamage(attacker, defender, userId) {
     // Attack hits
     let [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit);
 
+    // Apply Traits
+    if (traits[defender.character_name]) {
+      traits[defender.character_name](defender, isCrit, attacker);
+    }
+
     actualDamage = calcActualDamage(minDamage, maxDamage);
     bufferDamage = Math.min(actualDamage, defender.buffer_health);
 
@@ -39,12 +44,6 @@ async function applyDamage(attacker, defender, userId) {
     didMiss = true;
   }
 
-  if (isCrit && traits[defender.character_name]?.onCritReceived) {
-    const reactiveDamage = traits[defender.character_name].onCritReceived(defender, attacker);
-    if (reactiveDamage !== null) {
-      actualDamage = reactiveDamage; // Update the actualDamage value
-    }
-  }
 
   return compileDamageResult(
     attacker,
