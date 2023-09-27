@@ -29,7 +29,7 @@ const CharacterList = [
     base_health: 230,
     chance_to_hit: 0.8,
     crit_chance: 0,
-    crit_damage: 2,
+    crit_damage: 1.5,
   },
   {
     master_character_id: 2,
