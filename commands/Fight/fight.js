@@ -25,6 +25,7 @@ module.exports = {
   async execute(interaction) {
     try {
       const userId = interaction.user.id
+      const userName = interaction.user.username
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
@@ -153,7 +154,7 @@ module.exports = {
         const embed = new EmbedBuilder()
           .setTitle('⚡Fight!')
           .setDescription(
-            `**${character_name}** is looking for a fight and has found **${enemy.character_name}**!`
+            `**${userName}'s ${character_name}** is looking for a fight and has found **${enemy.character_name}**!`
           )
           .addFields(
             {

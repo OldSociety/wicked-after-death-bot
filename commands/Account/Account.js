@@ -77,27 +77,27 @@ module.exports = {
           })
         )
 
-      //   const gearPartsDetails = await GearParts.findAll({
-      //     where: { parts_id: startingGearParts },
-      //   })
+        //   const gearPartsDetails = await GearParts.findAll({
+        //     where: { parts_id: startingGearParts },
+        //   })
 
-      //   if (!gearPartsDetails || gearPartsDetails.length === 0) {
-      //     throw new Error('Failed to fetch gear parts details')
-      //   }
+        //   if (!gearPartsDetails || gearPartsDetails.length === 0) {
+        //     throw new Error('Failed to fetch gear parts details')
+        //   }
 
-      //   // Create initial UserGear record
-      //   await Promise.all(
-      //     gearPartsDetails.map((part) => {
-      //       return UserGearParts.create(
-      //         {
-      //           user_id: userId,
-      //           parts_id: part.parts_id,
-      //           rarity: part.rarity,
-      //         },
-      //         { transaction: t }
-      //       )
-      //     })
-      //   )
+        //   // Create initial UserGear record
+        //   await Promise.all(
+        //     gearPartsDetails.map((part) => {
+        //       return UserGearParts.create(
+        //         {
+        //           user_id: userId,
+        //           parts_id: part.parts_id,
+        //           rarity: part.rarity,
+        //         },
+        //         { transaction: t }
+        //       )
+        //     })
+        //   )
         await t.commit()
 
         const embed = new EmbedBuilder()
@@ -164,22 +164,17 @@ module.exports = {
               default:
                 rarityColor = '⬜'
             }
+            const nameField = `${character.masterCharacter.character_name}`
+            const levelField = `⏫${character.level}`
+            const xpField = `${character.experience} / ${character.xp_needed}`
 
-            return (
-              '`' +
-              `${rarityColor}` +
-              '`' +
-              ` ${masterInfo.character_name}` +
-              ` ` +
-              '`' +
-              `⏫${character.level}` +
-              '`' + `         ` +
-              '`' +
-              character.experience.toString() +
-              ' / ' +
-              character.xp_needed.toString() +
-              '`'
-            )
+            // Adjust these numbers based on your own tests
+            const nameSpaces = 20 - nameField.length
+            const levelSpaces = 5
+
+            return `\`${nameField}${' '.repeat(
+              nameSpaces
+            )}\`  \`${levelField}${' '.repeat(levelSpaces)}\`  \`${xpField}\``
           })
           .join('\n') // joins each character info with a newline
 
@@ -191,7 +186,6 @@ module.exports = {
             {
               name: 'Balance:',
               value: '`' + `🪙${user.balance}` + '`',
-              inline: true,
             },
             // {
             //   name: 'Scavenge:',
@@ -201,6 +195,7 @@ module.exports = {
             {
               name: 'Characters Owned:',
               value: `${charactersInfo}`,
+              inline: true
             }
           )
 
