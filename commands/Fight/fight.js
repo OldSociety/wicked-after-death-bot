@@ -159,14 +159,34 @@ module.exports = {
           .addFields(
             {
               name: `${character_name}`,
-              value: (selectedCharacter.effective_damage && selectedCharacter.effective_health > 0)
-              ? '`' + `⚔️ ${selectedCharacter.effective_damage}` + '`' + '\u00A0'.repeat(10) + ' `' + `🧡 ${selectedCharacter.effective_health}` + '`'
-              : '`' + `⚔️ ${selectedCharacter.masterCharacter.base_damage}` + '`' + '\u00A0'.repeat(10) + ' `' + `🧡 ${selectedCharacter.masterCharacter.base_health}` + '`'
-              ,
+              value:
+                selectedCharacter.effective_damage &&
+                selectedCharacter.effective_health > 0
+                  ? '`' +
+                    `⚔️ ${selectedCharacter.effective_damage}` +
+                    '`' +
+                    '\u00A0'.repeat(10) +
+                    ' `' +
+                    `🧡 ${selectedCharacter.effective_health}` +
+                    '`'
+                  : '`' +
+                    `⚔️ ${selectedCharacter.masterCharacter.base_damage}` +
+                    '`' +
+                    '\u00A0'.repeat(10) +
+                    ' `' +
+                    `🧡 ${selectedCharacter.masterCharacter.base_health}` +
+                    '`',
             },
             {
               name: `${enemy.character_name}`,
-              value: '`' + `⚔️ ${enemy.effective_damage}` + '`' + '\u00A0'.repeat(10) + ' `' +`🧡 ${enemy.effective_health}` + '`',
+              value:
+                '`' +
+                `⚔️ ${enemy.effective_damage}` +
+                '`' +
+                '\u00A0'.repeat(10) +
+                ' `' +
+                `🧡 ${enemy.effective_health}` +
+                '`',
             }
           )
 

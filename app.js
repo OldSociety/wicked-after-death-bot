@@ -7,7 +7,29 @@ const sequelize = require('./Utils/sequelize')
 const { Client, Collection, GatewayIntentBits } = require('discord.js')
 const { userInfo } = require('node:os')
 const buttonInteractionHandler = require('./helpers/buttonInteraction')
-const { scavengeHelper } = require('./helpers/scavengeHelper')
+// const { scavengeHelper } = require('./helpers/scavengeHelper')
+
+// // Import Redis
+// const Redis = require('ioredis');
+// const redisClient = new Redis(); // You can pass options like port and host here.
+
+// redisClient.on('error', (error) => {
+//   console.error(`Redis error: ${error}`);
+// });
+
+// // Sample Redis operations
+// redisClient.set('foo', 'bar');
+// redisClient.get('foo', (err, result) => {
+//   if (err) {
+//     console.error(`Error getting value: ${err}`);
+//   } else {
+//     console.log(`Result: ${result}`); // Should print "bar"
+//   }
+// });
+
+
+
+
 
 // Create a new client instance
 const client = new Client({
