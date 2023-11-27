@@ -68,12 +68,21 @@ module.exports = {
         return
       }
 
-      const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('characterSelect')
-        .setPlaceholder('Select a character...')
+      // Create two select menus for frontline and backline character selection
+      const frontlineSelectMenu = new StringSelectMenuBuilder()
+        .setCustomId('frontlineCharacterSelect')
+        .setPlaceholder('Select a frontline character...')
+        .addOptions(options) // Assuming 'options' contains your character options
+
+      const backlineSelectMenu = new StringSelectMenuBuilder()
+        .setCustomId('backlineCharacterSelect')
+        .setPlaceholder('Select a backline character...')
         .addOptions(options)
 
-      const actionRow = new ActionRowBuilder().addComponents(selectMenu)
+      const actionRow = new ActionRowBuilder().addComponents(
+        frontlineSelectMenu,
+        backlineSelectMenu
+      )
 
       const characterEmbed = new EmbedBuilder()
         .setColor('#0099ff')
@@ -87,7 +96,7 @@ module.exports = {
 
       const filter = (i) => {
         i.deferUpdate()
-        return i.customId === 'characterSelect'
+        return i.customId === 'frontlineCharacterSelect' || i.customId === 'backlineCharacterSelect'
       }
 
       const collector = interaction.channel.createMessageComponentCollector({
@@ -133,8 +142,8 @@ module.exports = {
           await interaction.followUp('Enemy not found.')
           return
         }
-
-        const selectedCharacterId = selectedCharacter.dataValues.character_id
+        const isFrontline = i.customId === 'frontlineCharacterSelect'
+        const selectedCharacterId = isFrontline ? i.values[0] : i.values[1] // Example, adjust as needed
         const selectedEnemyId = enemy.id // Assuming enemy object has 'id' field
         const masterCharacterId = master_character_id
 
@@ -150,6 +159,7 @@ module.exports = {
 
         const battleKey = `${selectedCharacterId}-${selectedEnemyId}`
         battleManager[battleKey] = { characterInstance, enemyInstance }
+        // Determine if the selected character is frontline or backline
 
         const embed = new EmbedBuilder()
           .setTitle('⚡Fight!')
@@ -194,7 +204,7 @@ module.exports = {
           embeds: [embed],
         })
 
-        setupBattleLogic(userId, i.user.tag, interaction)
+        setupBattleLogic(userId, i.user.tag, interaction, isFrontline) // Pass the position information to the battle logic
       })
 
       collector.on('end', (collected) => {
