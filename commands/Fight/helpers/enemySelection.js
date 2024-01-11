@@ -1,17 +1,19 @@
-const { Enemy } = require('../../../Models/model.js')
+// enemySelection.js
 
-const selectEnemy = async () => {
-  const enemies = await Enemy.findAll()
+const { Enemy } = require('../../../Models/model'); // Adjust the path as needed
 
-  // Retrieve all available enemies
-  if (!enemies.length) {
-    throw new Error('No enemies available for selection.')
+async function selectEnemy() {
+  try {
+    const enemies = await Enemy.findAll(); // Retrieve all enemies
+    if (!enemies.length) {
+      throw new Error('No enemies available');
+    }
+    const randomIndex = Math.floor(Math.random() * enemies.length); // Random index
+    return enemies[randomIndex]; // Return a random enemy
+  } catch (error) {
+    console.error('Error selecting enemy:', error);
+    throw error;
   }
-
-  const randomIndex = Math.floor(Math.random() * enemies.length) // Pick a random enemy
-  return enemies[randomIndex]
 }
 
-module.exports = {
-  selectEnemy,
-}
+module.exports = { selectEnemy };
