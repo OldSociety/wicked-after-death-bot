@@ -3,10 +3,13 @@ const { Character, MasterCharacter } = require('../../../../Models/model')
 class CharacterInstance {
   static async initCharacter(masterCharacterId, userId, characterId) {
     try {
-      // Fetch the existing character
-      const character = await Character.findByPk(characterId)
+      console.log("Initializing character with ID:", characterId);
+      const character = await Character.findByPk(characterId);
 
-      if (!character) throw new Error('Character not found')
+      if (!character) {
+        console.error("Character with ID not found in DB:", characterId);
+        throw new Error('Character not found');
+      }
 
       if (!character.initialized) {
         const masterCharacter = await MasterCharacter.findByPk(
@@ -79,9 +82,9 @@ class CharacterInstance {
           crit_damage: character.crit_damage,
         }
       }
-    } catch (error) {
-      console.error(error)
-      throw new Error('Character initialization failed')
+   } catch (error) {
+      console.error("Error in initCharacter:", error);
+      throw new Error('Character initialization failed');
     }
   }
 }

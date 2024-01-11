@@ -59,14 +59,18 @@ async function applyDamage(attacker, defender, userId) {
 
 
 // ROUND LOGIC
-const applyRound = async (character, enemy, userName, interaction, turnNum) => {
+const applyRound = async (frontlineCharacter, backlineCharacter, enemy, userName, interaction, turnNum) => {
   // Step 1: Check specials
-  await checkSpecialTrigger(character, character.activeSpecials)
+  await checkSpecialTrigger(frontlineCharacter, frontlineCharacter.activeSpecials)
+  await checkSpecialTrigger(backlineCharacter, backlineCharacter.activeSpecials)
   // await checkSpecialTrigger(enemy, specialsArray)
 
   // Step 2: Execute specials
-  for (const specialId of character.activeSpecials) {
-    await executeSpecial(character, { id: specialId })
+  for (const specialId of frontlineCharacter.activeSpecials) {
+    await executeSpecial(frontlineCharacter, { id: specialId })
+  }
+  for (const specialId of backlineCharacter.activeSpecials) {
+    await executeSpecial(backlineCharacter, { id: specialId })
   }
   // for (const specialId of enemy.activeSpecials) {
   //   await executeSpecial(enemy, { id: specialId })
@@ -74,22 +78,38 @@ const applyRound = async (character, enemy, userName, interaction, turnNum) => {
 
   const actions = []
 
-  const action1 = await applyDamage(character, enemy)
-  actions.push(action1)
-
-  // Check if enemy's health is already <= 0, if not, proceed with defender's attack
-  if (enemy.current_health > 0) {
-    const action2 = await applyDamage(enemy, character)
-    actions.push(action2)
+  if (frontlineCharacter.current_health > 0) {
+    const action1 = await applyDamage(frontlineCharacter, enemy);
+    actions.push(action1);
   }
 
-  const roundEmbed = createRoundEmbed(
+  if (backlineCharacter.current_health > 0) {
+    const action2 = await applyDamage(backlineCharacter, enemy);
+    actions.push(action2);
+  }
+
+    // Enemy attacks frontline character first, then backline if frontline is down
+    if (enemy.current_health > 0) {
+      let actionEnemy;
+      if (frontlineCharacter.current_health > 0) {
+        actionEnemy = await applyDamage(enemy, frontlineCharacter);
+      } else if (backlineCharacter.current_health > 0) {
+        actionEnemy = await applyDamage(enemy, backlineCharacter);
+      }
+      if (actionEnemy) {
+        actions.push(actionEnemy);
+      }
+    }
+
+   // Create and send round summary embed
+   const roundEmbed = createRoundEmbed(
     actions,
     userName,
-    character,
+    frontlineCharacter,
+    backlineCharacter, // Include backline character in summary
     enemy,
     turnNum
-  )
+  );
 
   await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
 }

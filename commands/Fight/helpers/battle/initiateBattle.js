@@ -1,66 +1,60 @@
 const {
-  Character,
-  MasterCharacter,
   Enemy,
-} = require('../../../../Models/model')
-const { EmbedBuilder } = require('discord.js')
-const { CharacterInstance } = require('../characterFiles/characterInstance')
-const battleManager = require('./battleManager')
+} = require('../../../../Models/model');
+const { CharacterInstance } = require('../characterFiles/characterInstance');
+const battleManager = require('./battleManager');
 
-async function initiateBattle(masterCharacterId, characterId, enemyId, userId) {
+async function initiateBattle(frontlineCharacterId, backlineCharacterId, enemyId, userId) {
   try {
-    // Initialize character to update effective_health and effective_damage
-    await CharacterInstance.initCharacter(
-      masterCharacterId,
-      userId,
-      characterId
-    )
+    // Initialize frontline character
+    const frontlineCharacterStats = await CharacterInstance.initCharacter(
+      frontlineCharacterId,
+      userId
+    );
 
-    // Fetch the updated character and enemy from the database
-    const characterData = await Character.findByPk(characterId)
+    // Initialize backline character
+    const backlineCharacterStats = await CharacterInstance.initCharacter(
+      backlineCharacterId,
+      userId
+    );
 
-    const masterCharacterData = await MasterCharacter.findByPk(
-      characterData.dataValues.master_character_id
-    )
+    // Fetch the enemy from the database
+    const enemyData = await Enemy.findByPk(enemyId);
 
-    const enemyData = await Enemy.findByPk(enemyId)
-
-    // Create combined stats for the in-memory copy of the character
-    const combinedCharacterStats = {
-      ...characterData.get(),
-      ...masterCharacterData.get(),
-      current_health: characterData.effective_health,
-      current_damage: characterData.effective_damage,
-    }
-
-    // Create in-memory copies
-    const CharacterInstanceObject = {
-      ...combinedCharacterStats,
+    // Create in-memory instances
+    const frontlineCharacterInstance = {
+      ...frontlineCharacterStats,
       actionQueue: [],
-    }
+      buffer_health: 0
+    };
+
+    const backlineCharacterInstance = {
+      ...backlineCharacterStats,
+      actionQueue: [],
+      buffer_health: 0
+    };
 
     const enemyInstance = {
       ...enemyData.get(),
       current_health: enemyData.effective_health,
       current_damage: enemyData.effective_damage,
       actionQueue: [],
-    }
-
-    CharacterInstanceObject.buffer_health = 0
-    enemyInstance.buffer_health = 0
+      buffer_health: 0
+    };
 
     // Create a unique identifier for the battle
-    const battleKey = `${characterId}-${enemyId}`
+    const battleKey = `${frontlineCharacterId}-${backlineCharacterId}-${enemyId}`;
     battleManager[battleKey] = {
-      characterInstance: CharacterInstanceObject,
+      frontlineCharacterInstance,
+      backlineCharacterInstance,
       enemyInstance,
-    }
+    };
 
-    return { characterInstance: CharacterInstanceObject, enemyInstance }
+    return { frontlineCharacterInstance, backlineCharacterInstance, enemyInstance };
   } catch (error) {
-    console.error('Failed to initiate battle: ', error)
-    throw new Error('Failed to initiate battle')
+    console.error('Failed to initiate battle: ', error);
+    throw new Error('Failed to initiate battle');
   }
 }
 
-module.exports = { initiateBattle }
+module.exports = { initiateBattle };

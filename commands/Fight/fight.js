@@ -100,42 +100,49 @@ module.exports = {
         time: 30000,
       })
 
-      let frontlineCharacter, backlineCharacter
-      collector.on('collect', async (i) => {
-        if (userBattles[userId]) {
-          await interaction.followUp('You are already in an ongoing battle.')
-          return
-        }
+      let frontlineCharacter, backlineCharacter;
+collector.on('collect', async (i) => {
+  if (userBattles[userId]) {
+    await interaction.followUp('You are already in an ongoing battle.');
+    return;
+  }
 
-        if (!frontlineCharacter && i.customId === 'characterSelect') {
-          // Handle frontline character selection
-          frontlineCharacter = userCharacters.find(
-            (char) => char.dataValues.character_id.toString() === i.values[0]
-          )
+  if (!frontlineCharacter && i.customId === 'characterSelect') {
+    // Handle frontline character selection
+    const selectedFrontlineCharacterId = i.values[0]; // Correctly capturing the selected ID
+    frontlineCharacter = userCharacters.find(
+      (char) => char.dataValues.character_id.toString() === selectedFrontlineCharacterId
+    );
 
-          // Prompt for backline character selection
-          const backlineOptions = options.filter(
-            (opt) => opt.value !== i.values[0]
-          )
-          const backlineSelectMenu = new StringSelectMenuBuilder()
-            .setCustomId('backlineCharacterSelect')
-            .setPlaceholder('Select your backline character...')
-            .addOptions(backlineOptions)
+    if (frontlineCharacter) {
+      // Log the name of the selected frontline character
+      console.log("Frontline character selected:", frontlineCharacter.masterCharacter.character_name);
+  } else {
+      console.log("Frontline character not found for ID:", selectedFrontlineCharacterId);
+  }
+    
+    const backlineSelectMenu = new StringSelectMenuBuilder()
+      .setCustomId('backlineCharacterSelect')
+      .setPlaceholder('Select your backline character...')
+      .addOptions(options);
 
-          await interaction.editReply({
-            content: 'Select your backline character',
-            components: [
-              new ActionRowBuilder().addComponents(backlineSelectMenu),
-            ],
-          })
-        } else if (
-          !backlineCharacter &&
-          i.customId === 'backlineCharacterSelect'
-        ) {
-          // Handle backline character selection
-          backlineCharacter = userCharacters.find(
-            (char) => char.dataValues.character_id.toString() === i.values[0]
-          )
+    await interaction.editReply({
+      content: 'Select your backline character',
+      components: [new ActionRowBuilder().addComponents(backlineSelectMenu)],
+    });
+  } else if (!backlineCharacter && i.customId === 'backlineCharacterSelect') {
+    // Handle backline character selection
+    backlineCharacter = userCharacters.find(
+      (char) => char.dataValues.character_id.toString() === i.values[0]
+    )
+
+     // Log the found character
+     if (backlineCharacter) {
+      console.log("Backline character found:", backlineCharacter);
+    } else {
+      console.log("Backline character not found");
+    }
+
 
           // Proceed with battle setup if both characters are selected
           if (frontlineCharacter && backlineCharacter) {
@@ -160,7 +167,11 @@ module.exports = {
               backlineCharacter.dataValues.character_id,
               enemy.id,
               userId
-            ) // Assuming initiateBattle is adapted for two characters and enemy
+            );
+
+            console.log("Frontline character ID:", frontlineCharacter.dataValues.character_id);
+            console.log("Backline character ID:", backlineCharacter.dataValues.character_id);
+            
 
             const battleKey = `${frontlineCharacter.dataValues.character_id}-${backlineCharacter.dataValues.character_id}-${enemy.id}`
             battleManager[battleKey] = battleResult
