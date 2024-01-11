@@ -68,21 +68,12 @@ module.exports = {
         return
       }
 
-      // Create two select menus for frontline and backline character selection
-      const frontlineSelectMenu = new StringSelectMenuBuilder()
-        .setCustomId('frontlineCharacterSelect')
-        .setPlaceholder('Select a frontline character...')
-        .addOptions(options) // Assuming 'options' contains your character options
-
-      const backlineSelectMenu = new StringSelectMenuBuilder()
-        .setCustomId('backlineCharacterSelect')
-        .setPlaceholder('Select a backline character...')
+      const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('characterSelect')
+        .setPlaceholder('Select your frontline character...')
         .addOptions(options)
 
-      const actionRow = new ActionRowBuilder().addComponents(
-        frontlineSelectMenu,
-        backlineSelectMenu
-      )
+      const actionRow = new ActionRowBuilder().addComponents(selectMenu)
 
       const characterEmbed = new EmbedBuilder()
         .setColor('#0099ff')
@@ -92,119 +83,114 @@ module.exports = {
         embeds: [characterEmbed],
         components: [actionRow],
         ephemeral: true,
+        content: 'Select your frontline character',
       })
 
       const filter = (i) => {
         i.deferUpdate()
-        return i.customId === 'frontlineCharacterSelect' || i.customId === 'backlineCharacterSelect'
+        return (
+          i.customId === 'characterSelect' ||
+          i.customId === 'backlineCharacterSelect'
+        )
       }
 
+      // Collector for character selection
       const collector = interaction.channel.createMessageComponentCollector({
         filter,
         time: 30000,
       })
 
+      let frontlineCharacter, backlineCharacter
       collector.on('collect', async (i) => {
         if (userBattles[userId]) {
           await interaction.followUp('You are already in an ongoing battle.')
           return
         }
-        userBattles[userId] = true
-        const selectedMasterCharacterID = i.values[0]
-        const selectedCharacter = userCharacters.find(
-          (char) =>
-            char.dataValues.character_id.toString() ===
-            selectedMasterCharacterID
-        )
 
-        if (!selectedCharacter) {
-          await interaction.followUp(
-            `No character found for ID ${selectedMasterCharacterID}.`
-          )
-          return
-        }
-
-        const {
-          masterCharacter: {
-            dataValues: { character_name, master_character_id },
-          },
-        } = selectedCharacter
-
-        let enemy
-        try {
-          enemy = await selectEnemy()
-        } catch (err) {
-          await interaction.followUp('No enemies available for selection.')
-          return
-        }
-
-        if (!enemy) {
-          await interaction.followUp('Enemy not found.')
-          return
-        }
-        const isFrontline = i.customId === 'frontlineCharacterSelect'
-        const selectedCharacterId = isFrontline ? i.values[0] : i.values[1] // Example, adjust as needed
-        const selectedEnemyId = enemy.id // Assuming enemy object has 'id' field
-        const masterCharacterId = master_character_id
-
-        // console.log(selectedCharacterId, selectedEnemyId, masterCharacterId)
-
-        userBattles[userId] = true
-        const { masterCharacter, characterInstance, enemyInstance } =
-          await initiateBattle(
-            masterCharacterId,
-            selectedCharacterId,
-            selectedEnemyId
+        if (!frontlineCharacter && i.customId === 'characterSelect') {
+          // Handle frontline character selection
+          frontlineCharacter = userCharacters.find(
+            (char) => char.dataValues.character_id.toString() === i.values[0]
           )
 
-        const battleKey = `${selectedCharacterId}-${selectedEnemyId}`
-        battleManager[battleKey] = { characterInstance, enemyInstance }
-        // Determine if the selected character is frontline or backline
-
-        const embed = new EmbedBuilder()
-          .setTitle('⚡Fight!')
-          .setDescription(
-            `**${userName}'s ${character_name}** is looking for a fight and has found **${enemy.character_name}**!`
+          // Prompt for backline character selection
+          const backlineOptions = options.filter(
+            (opt) => opt.value !== i.values[0]
           )
-          .addFields(
-            {
-              name: `${character_name}`,
-              value:
-                selectedCharacter.effective_damage &&
-                selectedCharacter.effective_health > 0
-                  ? '`' +
-                    `⚔️ ${selectedCharacter.effective_damage}` +
-                    '`' +
-                    '\u00A0'.repeat(10) +
-                    ' `' +
-                    `🧡 ${selectedCharacter.effective_health}` +
-                    '`'
-                  : '`' +
-                    `⚔️ ${selectedCharacter.masterCharacter.base_damage}` +
-                    '`' +
-                    '\u00A0'.repeat(10) +
-                    ' `' +
-                    `🧡 ${selectedCharacter.masterCharacter.base_health}` +
-                    '`',
-            },
-            {
-              name: `${enemy.character_name}`,
-              value:
-                '`' +
-                `⚔️ ${enemy.effective_damage}` +
-                '`' +
-                '\u00A0'.repeat(10) +
-                ' `' +
-                `🧡 ${enemy.effective_health}` +
-                '`',
+          const backlineSelectMenu = new StringSelectMenuBuilder()
+            .setCustomId('backlineCharacterSelect')
+            .setPlaceholder('Select your backline character...')
+            .addOptions(backlineOptions)
+
+          await interaction.editReply({
+            content: 'Select your backline character',
+            components: [
+              new ActionRowBuilder().addComponents(backlineSelectMenu),
+            ],
+          })
+        } else if (
+          !backlineCharacter &&
+          i.customId === 'backlineCharacterSelect'
+        ) {
+          // Handle backline character selection
+          backlineCharacter = userCharacters.find(
+            (char) => char.dataValues.character_id.toString() === i.values[0]
+          )
+
+          // Proceed with battle setup if both characters are selected
+          if (frontlineCharacter && backlineCharacter) {
+            userBattles[userId] = true
+
+            let enemy
+            try {
+              enemy = await selectEnemy()
+            } catch (err) {
+              await interaction.followUp('No enemies available for selection.')
+              return
             }
-          )
 
-        await interaction.followUp({
-          embeds: [embed],
-        })
+            if (!enemy) {
+              await interaction.followUp('Enemy not found.')
+              return
+            }
 
-        setupBattleLogic(userId, i.user.tag, interaction, isFrontline) // Pass the position information to the battle logic
+            // Initiate battle with selected characters and enemy
+            const battleResult = await initiateBattle(
+              frontlineCharacter.dataValues.character_id,
+              backlineCharacter.dataValues.character_id,
+              enemy.id,
+              userId
+            ) // Assuming initiateBattle is adapted for two characters and enemy
+
+            const battleKey = `${frontlineCharacter.dataValues.character_id}-${backlineCharacter.dataValues.character_id}-${enemy.id}`
+            battleManager[battleKey] = battleResult
+
+            // Create and send an embed summarizing the battle initiation
+            const embed = new EmbedBuilder()
+              .setTitle('⚡Fight!')
+              .setDescription(
+                `**${userName}'s team** is looking for a fight and has found **${enemy.character_name}**!`
+              )
+              .addFields(
+                {
+                  name: `${frontlineCharacter.masterCharacter.character_name} (Frontline)`,
+                  value: `⚔️ Damage: ${frontlineCharacter.effective_damage}, 🧡 Health: ${frontlineCharacter.effective_health}`,
+                },
+                {
+                  name: `${backlineCharacter.masterCharacter.character_name} (Backline)`,
+                  value: `⚔️ Damage: ${backlineCharacter.effective_damage}, 🧡 Health: ${backlineCharacter.effective_health}`,
+                },
+                {
+                  name: `${enemy.character_name} (Enemy)`,
+                  value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
+                }
+              )
+
+            await interaction.followUp({ embeds: [embed] })
+            // Stop the collector as we have both selections
+            collector.stop()
+          }
+        }
       })
 
       collector.on('end', (collected) => {
