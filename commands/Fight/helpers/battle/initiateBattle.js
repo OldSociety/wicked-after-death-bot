@@ -4,17 +4,17 @@ const {
 const { CharacterInstance } = require('../characterFiles/characterInstance');
 const battleManager = require('./battleManager');
 
-async function initiateBattle(frontlineCharacterId, backlineCharacterId, enemyId, userId) {
+async function initiateBattle(frontlaneCharacterId, backlaneCharacterId, enemyId, userId) {
   try {
-    // Initialize frontline character
-    const frontlineCharacterStats = await CharacterInstance.initCharacter(
-      frontlineCharacterId,
+    // Initialize frontlane character
+    const frontlaneCharacterStats = await CharacterInstance.initCharacter(
+      frontlaneCharacterId,
       userId
     );
 
-    // Initialize backline character
-    const backlineCharacterStats = await CharacterInstance.initCharacter(
-      backlineCharacterId,
+    // Initialize backlane character
+    const backlaneCharacterStats = await CharacterInstance.initCharacter(
+      backlaneCharacterId,
       userId
     );
 
@@ -22,14 +22,14 @@ async function initiateBattle(frontlineCharacterId, backlineCharacterId, enemyId
     const enemyData = await Enemy.findByPk(enemyId);
 
     // Create in-memory instances
-    const frontlineCharacterInstance = {
-      ...frontlineCharacterStats,
+    const frontlaneCharacterInstance = {
+      ...frontlaneCharacterStats,
       actionQueue: [],
       buffer_health: 0
     };
 
-    const backlineCharacterInstance = {
-      ...backlineCharacterStats,
+    const backlaneCharacterInstance = {
+      ...backlaneCharacterStats,
       actionQueue: [],
       buffer_health: 0
     };
@@ -43,14 +43,14 @@ async function initiateBattle(frontlineCharacterId, backlineCharacterId, enemyId
     };
 
     // Create a unique identifier for the battle
-    const battleKey = `${frontlineCharacterId}-${backlineCharacterId}-${enemyId}`;
+    const battleKey = `${frontlaneCharacterId}-${backlaneCharacterId}-${enemyId}`;
     battleManager[battleKey] = {
-      frontlineCharacterInstance,
-      backlineCharacterInstance,
+      frontlaneCharacterInstance,
+      backlaneCharacterInstance,
       enemyInstance,
     };
 
-    return { frontlineCharacterInstance, backlineCharacterInstance, enemyInstance };
+    return { frontlaneCharacterInstance, backlaneCharacterInstance, enemyInstance };
   } catch (error) {
     console.error('Failed to initiate battle: ', error);
     throw new Error('Failed to initiate battle');

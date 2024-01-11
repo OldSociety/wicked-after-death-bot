@@ -59,18 +59,18 @@ async function applyDamage(attacker, defender, userId) {
 
 
 // ROUND LOGIC
-const applyRound = async (frontlineCharacter, backlineCharacter, enemy, userName, interaction, turnNum) => {
+const applyRound = async (frontlaneCharacter, backlaneCharacter, enemy, userName, interaction, turnNum) => {
   // Step 1: Check specials
-  await checkSpecialTrigger(frontlineCharacter, frontlineCharacter.activeSpecials)
-  await checkSpecialTrigger(backlineCharacter, backlineCharacter.activeSpecials)
+  await checkSpecialTrigger(frontlaneCharacter, frontlaneCharacter.activeSpecials)
+  await checkSpecialTrigger(backlaneCharacter, backlaneCharacter.activeSpecials)
   // await checkSpecialTrigger(enemy, specialsArray)
 
   // Step 2: Execute specials
-  for (const specialId of frontlineCharacter.activeSpecials) {
-    await executeSpecial(frontlineCharacter, { id: specialId })
+  for (const specialId of frontlaneCharacter.activeSpecials) {
+    await executeSpecial(frontlaneCharacter, { id: specialId })
   }
-  for (const specialId of backlineCharacter.activeSpecials) {
-    await executeSpecial(backlineCharacter, { id: specialId })
+  for (const specialId of backlaneCharacter.activeSpecials) {
+    await executeSpecial(backlaneCharacter, { id: specialId })
   }
   // for (const specialId of enemy.activeSpecials) {
   //   await executeSpecial(enemy, { id: specialId })
@@ -78,23 +78,23 @@ const applyRound = async (frontlineCharacter, backlineCharacter, enemy, userName
 
   const actions = []
 
-  if (frontlineCharacter.current_health > 0) {
-    const action1 = await applyDamage(frontlineCharacter, enemy);
+  if (frontlaneCharacter.current_health > 0) {
+    const action1 = await applyDamage(frontlaneCharacter, enemy);
     actions.push(action1);
   }
 
-  if (backlineCharacter.current_health > 0) {
-    const action2 = await applyDamage(backlineCharacter, enemy);
+  if (backlaneCharacter.current_health > 0) {
+    const action2 = await applyDamage(backlaneCharacter, enemy);
     actions.push(action2);
   }
 
-    // Enemy attacks frontline character first, then backline if frontline is down
+    // Enemy attacks frontlane character first, then backlane if frontlane is down
     if (enemy.current_health > 0) {
       let actionEnemy;
-      if (frontlineCharacter.current_health > 0) {
-        actionEnemy = await applyDamage(enemy, frontlineCharacter);
-      } else if (backlineCharacter.current_health > 0) {
-        actionEnemy = await applyDamage(enemy, backlineCharacter);
+      if (frontlaneCharacter.current_health > 0) {
+        actionEnemy = await applyDamage(enemy, frontlaneCharacter);
+      } else if (backlaneCharacter.current_health > 0) {
+        actionEnemy = await applyDamage(enemy, backlaneCharacter);
       }
       if (actionEnemy) {
         actions.push(actionEnemy);
@@ -105,8 +105,8 @@ const applyRound = async (frontlineCharacter, backlineCharacter, enemy, userName
    const roundEmbed = createRoundEmbed(
     actions,
     userName,
-    frontlineCharacter,
-    backlineCharacter, // Include backline character in summary
+    frontlaneCharacter,
+    backlaneCharacter, // Include backlane character in summary
     enemy,
     turnNum
   );
