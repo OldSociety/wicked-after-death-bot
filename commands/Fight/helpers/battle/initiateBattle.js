@@ -8,14 +8,16 @@ async function initiateBattle(frontlaneCharacterId, backlaneCharacterId, enemyId
   try {
     // Initialize frontlane character
     const frontlaneCharacterStats = await CharacterInstance.initCharacter(
-      frontlaneCharacterId,
-      userId
+      masterCharacterId, // This needs to be the ID of the master character for the frontlane character
+      userId,
+      frontlaneCharacterId // This is the specific ID of the frontlane character
     );
 
     // Initialize backlane character
     const backlaneCharacterStats = await CharacterInstance.initCharacter(
-      backlaneCharacterId,
-      userId
+      backlaneMasterCharacterId, // Master character ID for backlane character
+      userId,
+      backlaneCharacterId // Specific ID of the backlane character
     );
 
     // Fetch the enemy from the database

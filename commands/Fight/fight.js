@@ -131,16 +131,17 @@ collector.on('collect', async (i) => {
       components: [new ActionRowBuilder().addComponents(backlaneSelectMenu)],
     });
   } else if (!backlaneCharacter && i.customId === 'backlaneCharacterSelect') {
+    const selectedbacklaneCharacterId = i.values[0];
     // Handle backlane character selection
     backlaneCharacter = userCharacters.find(
-      (char) => char.dataValues.character_id.toString() === i.values[0]
+      (char) => char.dataValues.character_id.toString() === selectedbacklaneCharacterId
     )
 
      // Log the found character
      if (backlaneCharacter) {
-      console.log("backlane character found:", backlaneCharacter);
+      console.log("backlane character found:", backlaneCharacter.masterCharacter.character_name);
     } else {
-      console.log("backlane character not found");
+      console.log("backlane character not found", selectedbacklaneCharacterId);
     }
 
 
