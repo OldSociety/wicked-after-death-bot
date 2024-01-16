@@ -116,7 +116,7 @@ collector.on('collect', async (i) => {
 
     if (frontlaneCharacter) {
       // Log the name of the selected frontlane character
-      console.log("frontlane character selected:", frontlaneCharacter.masterCharacter.character_name);
+      console.log("frontlane character selected (master Character):", frontlaneCharacter.masterCharacter.character_name);
   } else {
       console.log("frontlane character not found for ID:", selectedfrontlaneCharacterId);
   }
