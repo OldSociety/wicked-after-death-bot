@@ -15,8 +15,9 @@ module.exports = {
     	.addFields(
             { name: 'account', value: '`/account` ' },
             { name: 'fighting', value: '`/fight` ' },
+            { name: 'store', value: '`/store` ' },
             // { name: 'scavenging', value: '`/scavenge` ' },
-            { name: 'misc', value: '`/server`, `/story`' },
+            { name: 'misc', value: '`/backstory`, `/server` ' },
         );
 
       await interaction.reply({

@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
-    .setName('story')
+    .setName('backstory')
     .setDescription('Read the story behind Hellbound: Wicked after Death.'),
   async execute(interaction) {
     try {
