@@ -25,7 +25,7 @@ sequelize
   .catch(console.error)
 
 // Sync changes and populate database
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync({ alter: true }).then(async () => {
   try {
     await Shop.bulkCreate(shopData, { updateOnDuplicate: ['name', 'cost'] }) // Replace field1 and field2 with the actual field names
 

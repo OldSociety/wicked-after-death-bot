@@ -26,14 +26,9 @@ async function applyDamage(attacker, defender, userId) {
 
   if (randHit < attacker.chance_to_hit * 100) {
     // Attack hits
-    console.log('About to call calcDamage') // Add this
-    ;[minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit)
-    console.log(
-      'Received values from calcDamage:',
-      minDamage,
-      maxDamage,
-      isCrit
-    )
+    [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit)
+   
+
 
     // Apply Traits
     if (traits[defender.character_name]) {
@@ -43,9 +38,12 @@ async function applyDamage(attacker, defender, userId) {
     actualDamage = calcActualDamage(minDamage, maxDamage)
     bufferDamage = Math.min(actualDamage, defender.buffer_health)
 
+    console.log(`APPLY DAMAGE: ${attacker.character_name} dealt ${bufferDamage} damage to ${defender.character_name}. Was it a critical? ${isCrit}.`)
+
+
     updateBufferHealth(defender, bufferDamage)
     updateHealth(defender, actualDamage - bufferDamage)
-    console.log(`ERROR:`, defender.current_health)
+  
   } else {
     // Attack misses
     didMiss = true
