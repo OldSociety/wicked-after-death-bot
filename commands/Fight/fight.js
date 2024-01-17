@@ -100,50 +100,70 @@ module.exports = {
         time: 30000,
       })
 
-      let frontlaneCharacter, backlaneCharacter;
-collector.on('collect', async (i) => {
-  if (userBattles[userId]) {
-    await interaction.followUp('You are already in an ongoing battle.');
-    return;
-  }
+      let frontlaneCharacter, backlaneCharacter
+      collector.on('collect', async (i) => {
+        if (userBattles[userId]) {
+          await interaction.followUp('You are already in an ongoing battle.')
+          return
+        }
 
-  if (!frontlaneCharacter && i.customId === 'characterSelect') {
-    // Handle frontlane character selection
-    const selectedfrontlaneCharacterId = i.values[0]; // Correctly capturing the selected ID
-    frontlaneCharacter = userCharacters.find(
-      (char) => char.dataValues.character_id.toString() === selectedfrontlaneCharacterId
-    );
+        if (!frontlaneCharacter && i.customId === 'characterSelect') {
+          // Handle frontlane character selection
+          const selectedfrontlaneCharacterId = i.values[0] // Correctly capturing the selected ID
+          frontlaneCharacter = userCharacters.find(
+            (char) =>
+              char.dataValues.character_id.toString() ===
+              selectedfrontlaneCharacterId
+          )
 
-    if (frontlaneCharacter) {
-      // Log the name of the selected frontlane character
-      console.log("frontlane character selected (master Character):", frontlaneCharacter.masterCharacter.character_name);
-  } else {
-      console.log("frontlane character not found for ID:", selectedfrontlaneCharacterId);
-  }
-    
-    const backlaneSelectMenu = new StringSelectMenuBuilder()
-      .setCustomId('backlaneCharacterSelect')
-      .setPlaceholder('Select your backlane character...')
-      .addOptions(options);
+          if (frontlaneCharacter) {
+            // Log the name of the selected frontlane character
+            console.log(
+              'frontlane character selected (master Character):',
+              frontlaneCharacter.masterCharacter.character_name
+            )
+          } else {
+            console.log(
+              'frontlane character not found for ID:',
+              selectedfrontlaneCharacterId
+            )
+          }
 
-    await interaction.editReply({
-      content: 'Select your backlane character',
-      components: [new ActionRowBuilder().addComponents(backlaneSelectMenu)],
-    });
-  } else if (!backlaneCharacter && i.customId === 'backlaneCharacterSelect') {
-    const selectedbacklaneCharacterId = i.values[0];
-    // Handle backlane character selection
-    backlaneCharacter = userCharacters.find(
-      (char) => char.dataValues.character_id.toString() === selectedbacklaneCharacterId
-    )
+          const backlaneSelectMenu = new StringSelectMenuBuilder()
+            .setCustomId('backlaneCharacterSelect')
+            .setPlaceholder('Select your backlane character...')
+            .addOptions(options)
 
-     // Log the found character
-     if (backlaneCharacter) {
-      console.log("backlane character found:", backlaneCharacter.masterCharacter.character_name);
-    } else {
-      console.log("backlane character not found", selectedbacklaneCharacterId);
-    }
+          await interaction.editReply({
+            content: 'Select your backlane character',
+            components: [
+              new ActionRowBuilder().addComponents(backlaneSelectMenu),
+            ],
+          })
+        } else if (
+          !backlaneCharacter &&
+          i.customId === 'backlaneCharacterSelect'
+        ) {
+          const selectedbacklaneCharacterId = i.values[0]
+          // Handle backlane character selection
+          backlaneCharacter = userCharacters.find(
+            (char) =>
+              char.dataValues.character_id.toString() ===
+              selectedbacklaneCharacterId
+          )
 
+          // Log the found character
+          if (backlaneCharacter) {
+            console.log(
+              'backlane character found:',
+              backlaneCharacter.masterCharacter.character_name
+            )
+          } else {
+            console.log(
+              'backlane character not found',
+              selectedbacklaneCharacterId
+            )
+          }
 
           // Proceed with battle setup if both characters are selected
           if (frontlaneCharacter && backlaneCharacter) {
@@ -165,14 +185,21 @@ collector.on('collect', async (i) => {
             // Initiate battle with selected characters and enemy
             const battleResult = await initiateBattle(
               frontlaneCharacter.dataValues.character_id,
+              frontlaneCharacter.masterCharacter.master_character_id,
               backlaneCharacter.dataValues.character_id,
+              backlaneCharacter.masterCharacter.master_character_id,
               enemy.id,
               userId
-            );
+            )
 
-            console.log("frontlane character ID:", frontlaneCharacter.dataValues.character_id);
-            console.log("backlane character ID:", backlaneCharacter.dataValues.character_id);
-            
+            console.log(
+              'frontlane character ID:',
+              frontlaneCharacter.dataValues.character_id
+            )
+            console.log(
+              'backlane character ID:',
+              backlaneCharacter.dataValues.character_id
+            )
 
             const battleKey = `${frontlaneCharacter.dataValues.character_id}-${backlaneCharacter.dataValues.character_id}-${enemy.id}`
             battleManager[battleKey] = battleResult
@@ -185,12 +212,16 @@ collector.on('collect', async (i) => {
               )
               .addFields(
                 {
-                  name: `${frontlaneCharacter.masterCharacter.character_name} (frontlane)`,
+                  name: `${frontlaneCharacter.masterCharacter.character_name} (Frontlane)`,
                   value: `⚔️ Damage: ${frontlaneCharacter.effective_damage}, 🧡 Health: ${frontlaneCharacter.effective_health}`,
                 },
                 {
-                  name: `${backlaneCharacter.masterCharacter.character_name} (backlane)`,
+                  name: `${backlaneCharacter.masterCharacter.character_name} (Backlane)`,
                   value: `⚔️ Damage: ${backlaneCharacter.effective_damage}, 🧡 Health: ${backlaneCharacter.effective_health}`,
+                },
+                {
+                  name: '\u200B', // Zero-width space
+                  value: '\u200B', // Zero-width space
                 },
                 {
                   name: `${enemy.character_name} (Enemy)`,

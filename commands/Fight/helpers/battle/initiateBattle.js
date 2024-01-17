@@ -4,11 +4,11 @@ const {
 const { CharacterInstance } = require('../characterFiles/characterInstance');
 const battleManager = require('./battleManager');
 
-async function initiateBattle(frontlaneCharacterId, backlaneCharacterId, enemyId, userId) {
+async function initiateBattle(frontlaneCharacterId, frontlaneMasterCharacterId, backlaneCharacterId, backlaneMasterCharacterId, enemyId, userId) {
   try {
     // Initialize frontlane character
     const frontlaneCharacterStats = await CharacterInstance.initCharacter(
-      masterCharacterId, // This needs to be the ID of the master character for the frontlane character
+      frontlaneMasterCharacterId, // This needs to be the ID of the master character for the frontlane character
       userId,
       frontlaneCharacterId // This is the specific ID of the frontlane character
     );
