@@ -92,6 +92,17 @@ sequelize.sync({ force: true }).then(async () => {
       }
     }
 
+    // Populate StandardFight
+for (const fight of fightData) {
+  await StandardFight.findOrCreate({
+    where: { fight_id: fight.fight_id },
+    defaults: {
+      raid_id: fight.raid_id,
+      enemy_id: fight.enemy_id,
+    },
+  });
+}
+
     console.log('All databases synced successfully.')
   } catch (error) {
     console.error('Error syncing databases:', error)
