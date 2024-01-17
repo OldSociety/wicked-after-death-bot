@@ -1,10 +1,10 @@
-# Fate Points Bot
+# Wicked After Death Bot
 
-This Discord bot is designed to create an economy system within your server. Users can create accounts and check their balances. It is built using Discord.js, sqlite3, and sequelize.
+Wicked After Death is an fighting and economy text game, where you can collect heroes and use them to fight the horrors of the apocalypse. Users can create accounts and check their balances. It is built using Discord.js, sqlite3, and sequelize.
 
 ## Features
 
-- **Account Creation**: Users can create accounts to participate in the economy system.
+- **Account Creation**: Users can create accounts using '/account'.
 
 - **Check Balance**: Users can check their account balance at any time.
 
