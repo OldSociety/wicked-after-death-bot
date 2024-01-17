@@ -27,6 +27,35 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
+      // // Fetch user progress
+      // const userProgress = await UserProgress.findOne({
+      //   where: { user_id: userId },
+      // })
+      // const currentLevel = userProgress ? userProgress.level_id : 1 // Default to level 1 if no progress
+
+      // // Fetch levels available to the user
+      // const availableLevels = await Levels.findAll({
+      //   where: { level_id: currentLevel }, // Adjust logic based on your progression rules
+      // })
+
+      // // Create an embed for level selection
+      // const levelEmbed = new EmbedBuilder()
+      //   .setTitle('Choose a Level')
+      //   .setDescription('Select a level to start fighting.')
+      //   .setColor('#0099ff')
+
+      // availableLevels.forEach((level) => {
+      //   levelEmbed.addFields({
+      //     name: level.name,
+      //     value: `Description: ${level.description}`,
+      //   })
+      // })
+
+      // // Respond with the embed
+      // await interaction.reply({ embeds: [levelEmbed], ephemeral: true })
+
+      // Implement logic for user to select a level and start a raid
+
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
         await interaction.reply('You have no characters to select.')
@@ -125,23 +154,25 @@ module.exports = {
             .map((char) => {
               let rarityColor
 
-        // Decide the font color based on the rarity
-        switch (userCharacters.rarity) {
-          case 'folk hero':
-            rarityColor = '🟩'
-            break
-          case 'legend':
-            rarityColor = '🟦'
-            break
-          case 'unique':
-            rarityColor = '🟪'
-            break
-          default:
-            rarityColor = '⬜'
-        }
+              // Decide the font color based on the rarity
+              switch (userCharacters.rarity) {
+                case 'folk hero':
+                  rarityColor = '🟩'
+                  break
+                case 'legend':
+                  rarityColor = '🟦'
+                  break
+                case 'unique':
+                  rarityColor = '🟪'
+                  break
+                default:
+                  rarityColor = '⬜'
+              }
 
               return new StringSelectMenuOptionBuilder()
-                .setLabel(`${rarityColor} ${char.masterCharacter.character_name}`)
+                .setLabel(
+                  `${rarityColor} ${char.masterCharacter.character_name}`
+                )
                 .setValue(char.dataValues.character_id.toString())
             })
 

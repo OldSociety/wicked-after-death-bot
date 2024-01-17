@@ -8,6 +8,9 @@ const {
   GearParts,
   UserGearParts,
   Store,
+  StandardFight,
+  StandardLevel,
+  StandardRaid,
 } = require('./Models/model')
 
 const storeData = require('./db/dbStore')
@@ -15,6 +18,9 @@ const characterData = require('./db/dbMasterCharacters')
 const enemyData = require('./db/dbEnemies')
 const gearPartsData = require('./db/dbGearParts')
 const gearSetsData = require('./db/dbGearSets')
+const levelData = require('./db/dbBattles/dbLevels')
+const raidData = require('./db/dbBattles/dbRaids')
+const fightData = require('./db/dbBattles/dbFights')
 
 // Authenticates connection to the database.
 sequelize
@@ -38,7 +44,7 @@ sequelize.sync({ force: true }).then(async () => {
 
     await Enemy.bulkCreate(enemyData, {
       updateOnDuplicate: [
-        'id',
+        'enemy_id',
         'name',
         'description',
         'type',
@@ -50,20 +56,41 @@ sequelize.sync({ force: true }).then(async () => {
         'crit_damage',
       ],
     })
+
+    // GEAR MODELS
     await GearSets.bulkCreate(gearSetsData, {
       updateOnDuplicate: ['name', 'rarity'],
     })
 
-    console.log(GearSets)
     await GearParts.bulkCreate(gearPartsData, {
       updateOnDuplicate: ['parts_id', 'type', 'rarity'],
-    }) 
+    })
 
+    // LEVEL MODELS
+    // Populate StandardLevel
+    for (const level of levelData) {
+      await StandardLevel.findOrCreate({
+        where: { level_id: level.level_id },
+        defaults: level,
+      })
+    }
 
-console.log(UserGearParts);
+    // Populate StandardRaid
+    for (const raid of raidData) {
+      const level = await StandardLevel.findOne({
+        where: { level_id: raid.level_id },
+      })
 
-// and so on for each model
-
+      if (level) {
+        await StandardRaid.findOrCreate({
+          where: { raid_id: raid.raid_id },
+          defaults: {
+            level_id: raid.level_id,
+            fight_number: raid.fight_number,
+          },
+        })
+      }
+    }
 
     console.log('All databases synced successfully.')
   } catch (error) {
