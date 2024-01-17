@@ -229,6 +229,9 @@ module.exports = {
                 }
               )
 
+            // Call setupBattleLogic after initiating the battle
+            setupBattleLogic(userId, userName, interaction)
+
             await interaction.followUp({ embeds: [embed] })
             // Stop the collector as we have both selections
             collector.stop()
