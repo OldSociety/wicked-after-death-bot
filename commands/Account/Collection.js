@@ -189,10 +189,12 @@ module.exports = {
               // }
             )
 
-          await interaction.followUp({ embeds: [detailEmbed], ephemeral: true })
-        } else {
-          await interaction.followUp('Character not found.')
-        }
+            await interaction.followUp({ embeds: [detailEmbed], ephemeral: true });
+            collector.stop(); // Stop the collector after sending the character details
+          } else {
+            await interaction.followUp('Character not found.');
+            collector.stop(); // Optionally, also stop the collector in case of not found
+          }
       })
     } catch (error) {
       console.error(error)

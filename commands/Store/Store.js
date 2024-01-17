@@ -10,7 +10,7 @@ const {
   MasterCharacter,
   Store,
 } = require('../../Models/model.js')
-
+const sequelize = require('../../Utils/sequelize')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('store')
@@ -58,36 +58,34 @@ module.exports = {
         time: 30000, // Adjust time as needed
       });
 
+      
       collector.on('collect', async (i) => {
         try {
+          await i.deferReply({ ephemeral: true }); // Defer the reply
           const selectedPackName = i.values[0];
           const purchaseResult = await handleCharacterPackPurchase(user, selectedPackName);
-          if (purchaseResult.success) {
-            await interaction.followUp({
-              content: `You have successfully purchased the ${selectedPackName}.`,
-              ephemeral: true,
-            });
-          } else {
-            await interaction.followUp({
-              content: purchaseResult.message,
-              ephemeral: true,
-            });
-          }
+      
+          // Edit the deferred reply with the purchase result
+          await i.editReply({
+            content: purchaseResult.message,
+          });
+          collector.stop(); // Stop the collector after handling the purchase
         } catch (error) {
           console.error(error);
-          interaction.followUp({
+          // Edit the deferred reply in case of an error
+          await i.editReply({
             content: 'There was an error processing your purchase.',
-            ephemeral: true,
           });
         }
       });
+      
 
-      collector.on('end', () => {
-        interaction.followUp({
-          content: 'Store session ended.',
-          ephemeral: true,
-        });
-      });
+      // collector.on('end', () => {
+      //   interaction.followUp({
+      //     content: 'Store session ended.',
+      //     ephemeral: true,
+      //   });
+      // });
     } catch (error) {
       console.error(error);
       interaction.reply('Something went wrong while retrieving the store.');
@@ -101,7 +99,7 @@ async function handleCharacterPackPurchase(user, packName) {
   let rarity;
   switch (packName) {
     case 'Bronze Box':
-      rarity = 'commoner';
+      rarity = 'Commoner';
       break;
     // ... handle other cases
   }
@@ -133,10 +131,12 @@ async function handleCharacterPackPurchase(user, packName) {
       }, { transaction });
 
       await transaction.commit(); // Commit the transaction if all goes well
-      return { success: true, message: 'Purchase successful.' };
+      return { success: true, message: `You have successfully purchased the ${packName} and found ${randomCharacter.character_name}.` };
+      
     } catch (error) {
       await transaction.rollback(); // Rollback transaction on error
       console.error(error);
+      collector.stop(); // Stop the collector after sending the character details
       return { success: false, message: 'Error processing purchase.' };
     }
   }

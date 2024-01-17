@@ -7,10 +7,10 @@ const {
   GearSets,
   GearParts,
   UserGearParts,
-  Shop,
+  Store,
 } = require('./Models/model')
 
-const shopData = require('./db/dbShop')
+const storeData = require('./db/dbStore')
 const characterData = require('./db/dbMasterCharacters')
 const enemyData = require('./db/dbEnemies')
 const gearPartsData = require('./db/dbGearParts')
@@ -25,9 +25,9 @@ sequelize
   .catch(console.error)
 
 // Sync changes and populate database
-sequelize.sync({ alter: true }).then(async () => {
+sequelize.sync({ force: true }).then(async () => {
   try {
-    await Shop.bulkCreate(shopData, { updateOnDuplicate: ['name', 'cost'] }) // Replace field1 and field2 with the actual field names
+    await Store.bulkCreate(storeData, { updateOnDuplicate: ['name', 'cost'] })
 
     for (const item of characterData) {
       await MasterCharacter.findOrCreate({
@@ -53,9 +53,17 @@ sequelize.sync({ alter: true }).then(async () => {
     await GearSets.bulkCreate(gearSetsData, {
       updateOnDuplicate: ['name', 'rarity'],
     })
+
+    console.log(GearSets)
     await GearParts.bulkCreate(gearPartsData, {
       updateOnDuplicate: ['parts_id', 'type', 'rarity'],
     }) 
+
+
+console.log(UserGearParts);
+
+// and so on for each model
+
 
     console.log('All databases synced successfully.')
   } catch (error) {
