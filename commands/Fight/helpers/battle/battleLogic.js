@@ -4,6 +4,7 @@ const { battleManager, userBattles } = require('./battleManager')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
 const { createRoundEmbed } = require('./battleEmbeds')
+const { Character } = require('../../../../Models/model'); // Adjust the path as needed
 const {
   calcDamage,
   calcActualDamage,
@@ -32,7 +33,7 @@ async function applyDamage(attacker, defender, userId) {
       minDamage,
       maxDamage,
       isCrit
-    ) 
+    )
 
     // Apply Traits
     if (traits[defender.character_name]) {
@@ -85,42 +86,45 @@ const applyRound = async (
   //   await executeSpecial(enemy, { id: specialId })
   // }
 
- 
-  
-    const actions = [];
-  
-    // Frontlane Character attacks Enemy
-    if (frontlaneCharacter.current_health > 0) {
-      const action1 = await applyDamage(frontlaneCharacter, enemy);
-      actions.push(action1);
-    }
-  
-    // Backlane Character attacks Enemy, but only if Frontlane Character has fallen
-  if (frontlaneCharacter.current_health <= 0 && backlaneCharacter.current_health > 0) {
-    const action2 = await applyDamage(backlaneCharacter, enemy);
-    actions.push(action2);
+  const actions = []
+
+  // Frontlane Character attacks Enemy
+  if (frontlaneCharacter.current_health > 0) {
+    const action1 = await applyDamage(frontlaneCharacter, enemy)
+    actions.push(action1)
   }
-  
-    // Enemy attacks Frontlane or Backlane Character
-    if (enemy.current_health > 0) {
-      let targetCharacter = frontlaneCharacter.current_health > 0 ? frontlaneCharacter : backlaneCharacter;
-      const actionEnemy = await applyDamage(enemy, targetCharacter);
-      actions.push(actionEnemy);
-    }
-  
-    // Create and send round summary embed
-    const roundEmbed = createRoundEmbed(
-      actions,
-      userName,
-      frontlaneCharacter,
-      backlaneCharacter,
-      enemy,
-      turnNum
-    );
-  
-    await interaction.followUp({ embeds: [roundEmbed], ephemeral: true });
-  };
-  
+
+  // Backlane Character attacks Enemy, but only if Frontlane Character has fallen
+  if (
+    frontlaneCharacter.current_health <= 0 &&
+    backlaneCharacter.current_health > 0
+  ) {
+    const action2 = await applyDamage(backlaneCharacter, enemy)
+    actions.push(action2)
+  }
+
+  // Enemy attacks Frontlane or Backlane Character
+  if (enemy.current_health > 0) {
+    let targetCharacter =
+      frontlaneCharacter.current_health > 0
+        ? frontlaneCharacter
+        : backlaneCharacter
+    const actionEnemy = await applyDamage(enemy, targetCharacter)
+    actions.push(actionEnemy)
+  }
+
+  // Create and send round summary embed
+  const roundEmbed = createRoundEmbed(
+    actions,
+    userName,
+    frontlaneCharacter,
+    backlaneCharacter,
+    enemy,
+    turnNum
+  )
+
+  await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
+}
 
 function initializeCharacterFlagsAndCounters(character) {
   character.sp1Counter = 0
@@ -225,17 +229,42 @@ const setupBattleLogic = async (userId, userName, interaction) => {
             await interaction.followUp({ embeds: [winEmbed] })
           }
 
-          // Save updated consecutive_kill value to the database
+          // Update consecutive_kill value for the frontlane character
           try {
-            // await Character.update(
-            //   { consecutive_kill: characterInstance.consecutive_kill },
-            //   { where: { character_id: characterInstance.character_id } }
-            // )
+            await Character.update(
+              { consecutive_kill: frontlaneCharacterInstance.consecutive_kill },
+              {
+                where: {
+                  character_id: frontlaneCharacterInstance.character_id,
+                },
+              }
+            )
             console.log(
-              'Successfully updated consecutive_kill counter in the database.'
-            ) // Log on successful update
+              'Successfully updated consecutive_kill for frontlane character.'
+            )
           } catch (e) {
-            console.error('Failed to update consecutive_kill:', e) // Log on failed update
+            console.error(
+              'Failed to update consecutive_kill for frontlane character:',
+              e
+            )
+          }
+
+          // Update consecutive_kill value for the backlane character
+          try {
+            await Character.update(
+              { consecutive_kill: backlaneCharacterInstance.consecutive_kill },
+              {
+                where: { character_id: backlaneCharacterInstance.character_id },
+              }
+            )
+            console.log(
+              'Successfully updated consecutive_kill for backlane character.'
+            )
+          } catch (e) {
+            console.error(
+              'Failed to update consecutive_kill for backlane character:',
+              e
+            )
           }
 
           delete battleManager[battleKey]

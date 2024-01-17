@@ -101,6 +101,8 @@ module.exports = {
       })
 
       let frontlaneCharacter, backlaneCharacter
+      let frontlaneCharacterId
+
       collector.on('collect', async (i) => {
         if (userBattles[userId]) {
           await interaction.followUp('You are already in an ongoing battle.')
@@ -108,18 +110,45 @@ module.exports = {
         }
 
         if (!frontlaneCharacter && i.customId === 'characterSelect') {
-          // Handle frontlane character selection
-          const selectedfrontlaneCharacterId = i.values[0] // Correctly capturing the selected ID
+          frontlaneCharacterId = i.values[0] // Capture the selected frontlane character ID
           frontlaneCharacter = userCharacters.find(
             (char) =>
-              char.dataValues.character_id.toString() ===
-              selectedfrontlaneCharacterId
+              char.dataValues.character_id.toString() === frontlaneCharacterId
           )
+
+          // Filter options to exclude the selected frontlane character
+          const backlaneOptions = userCharacters
+            .filter(
+              (char) =>
+                char.dataValues.character_id.toString() !== frontlaneCharacterId
+            )
+            .map((char) => {
+              let rarityColor
+
+        // Decide the font color based on the rarity
+        switch (userCharacters.rarity) {
+          case 'folk hero':
+            rarityColor = '🟩'
+            break
+          case 'legend':
+            rarityColor = '🟦'
+            break
+          case 'unique':
+            rarityColor = '🟪'
+            break
+          default:
+            rarityColor = '⬜'
+        }
+
+              return new StringSelectMenuOptionBuilder()
+                .setLabel(`${rarityColor} ${char.masterCharacter.character_name}`)
+                .setValue(char.dataValues.character_id.toString())
+            })
 
           const backlaneSelectMenu = new StringSelectMenuBuilder()
             .setCustomId('backlaneCharacterSelect')
             .setPlaceholder('Select your backlane character...')
-            .addOptions(options)
+            .addOptions(backlaneOptions)
 
           await interaction.editReply({
             content: 'Select your backlane character',
@@ -131,12 +160,18 @@ module.exports = {
           !backlaneCharacter &&
           i.customId === 'backlaneCharacterSelect'
         ) {
-          const selectedbacklaneCharacterId = i.values[0]
-          // Handle backlane character selection
+          const selectedBacklaneCharacterId = i.values[0]
+          // Ensure backlane character is different from frontlane character
+          if (selectedBacklaneCharacterId === frontlaneCharacterId) {
+            await interaction.followUp(
+              "You can't select the same character for both frontlane and backlane."
+            )
+            return
+          }
           backlaneCharacter = userCharacters.find(
             (char) =>
               char.dataValues.character_id.toString() ===
-              selectedbacklaneCharacterId
+              selectedBacklaneCharacterId
           )
 
           // Proceed with battle setup if both characters are selected
