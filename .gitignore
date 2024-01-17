@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+# database
+/db/
+/Models/
+
 # testing
 /coverage
 
