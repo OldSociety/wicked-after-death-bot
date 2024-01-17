@@ -6,7 +6,7 @@ const {
   StringSelectMenuBuilder,
 } = require('discord.js')
 
-async function selectfight(interaction) {
+async function selectfight(interaction, raidId) {
   try {
     const fights = await StandardFight.findAll({
       where: { raid_id: raidId },
@@ -20,7 +20,7 @@ async function selectfight(interaction) {
 
     const fightEmbed = new EmbedBuilder()
       .setColor('#0099ff')
-      .setTitle('Choose Your fight')
+      .setTitle('Choose Your Fight')
       .setDescription('Select a fight to start your adventure.')
 
     const fightSelectMenu = new StringSelectMenuBuilder()
@@ -28,8 +28,8 @@ async function selectfight(interaction) {
       .setPlaceholder('Select a fight')
       .addOptions(
         fights.map((fight) => ({
-          label: fight.character_name,
-          description: fight.description,
+          label: `Fight ${fight.fight_id}`, // Adjusted label
+          description: `Enemy: ${fight.Enemy ? fight.Enemy.name : 'Unknown'}`, // Adjusted description
           value: fight.fight_id.toString(),
         }))
       )
@@ -63,6 +63,7 @@ async function selectfight(interaction) {
             components: [],
           })
           resolve(null)
+          collector.stop() // Stop the collector
           return
         }
 
@@ -72,6 +73,7 @@ async function selectfight(interaction) {
           components: [],
         })
         resolve({ fightId: selectedFightId, enemy: selectedFight.Enemy })
+        collector.stop() // Stop the collector
       })
 
       collector.on('end', (collected) => {

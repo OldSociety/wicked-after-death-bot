@@ -7,7 +7,6 @@ const {
   ChannelType,
 } = require('discord.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
-const { selectEnemy } = require('./helpers/enemySelection')
 const { selectLevel } = require('./helpers/levelSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleLogic } = require('./helpers/battle/battleLogic')
@@ -199,18 +198,11 @@ module.exports = {
           if (frontlaneCharacter && backlaneCharacter) {
             userBattles[userId] = true
 
-            // let enemy
-            // try {
-            //   enemy = await selectEnemy()
-            // } catch (err) {
-            //   await interaction.followUp('No enemies available for selection.')
-            //   return
-            // }
 
-            // if (!enemy) {
-            //   await interaction.followUp('Enemy not found.')
-            //   return
-            // }
+            if (!enemy) {
+              await interaction.followUp('Enemy not found.')
+              return
+            }
 
             // Initiate battle with selected characters and enemy
             const battleResult = await initiateBattle(

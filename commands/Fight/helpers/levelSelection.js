@@ -1,59 +1,74 @@
 // levelSelection.js
-const { StandardLevel } = require('../../../Models/model');
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { StandardLevel } = require('../../../Models/model')
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  StringSelectMenuBuilder,
+} = require('discord.js')
 
 async function selectLevel(interaction) {
   try {
-    const levels = await StandardLevel.findAll();
+    const levels = await StandardLevel.findAll()
 
     if (!levels.length) {
-      await interaction.reply('There are currently no levels available.');
-      return null;
+      await interaction.reply('There are currently no levels available.')
+      return null
     }
 
     const levelEmbed = new EmbedBuilder()
       .setColor('#0099ff')
       .setTitle('Choose Your Level')
-      .setDescription('Select a level to start your adventure.');
+      .setDescription('Select a level to start your adventure.')
 
     const levelSelectMenu = new StringSelectMenuBuilder()
       .setCustomId('levelSelect')
       .setPlaceholder('Select a level')
       .addOptions(
-        levels.map(level => ({
-          label: level.character_name,
+        levels.map((level) => ({
+          label: level.level_name,
           description: level.description,
           value: level.level_id.toString(),
         }))
-      );
+      )
 
-    const actionRow = new ActionRowBuilder().addComponents(levelSelectMenu);
+    const actionRow = new ActionRowBuilder().addComponents(levelSelectMenu)
 
-    await interaction.reply({ embeds: [levelEmbed], components: [actionRow], ephemeral: true });
+    await interaction.reply({
+      embeds: [levelEmbed],
+      components: [actionRow],
+      ephemeral: true,
+    })
 
-    const filter = (i) => i.customId === 'levelSelect' && i.user.id === interaction.user.id;
-    const collector = interaction.channel.createMessageComponentCollector({ filter, time: 15000 });
+    const filter = (i) =>
+      i.customId === 'levelSelect' && i.user.id === interaction.user.id
+    const collector = interaction.channel.createMessageComponentCollector({
+      filter,
+      time: 15000,
+    })
 
     return new Promise((resolve) => {
       collector.on('collect', async (i) => {
-        const selectedLevelId = i.values[0];
-        await i.update({ content: `You have selected level ${selectedLevelId}.`, components: [] });
-        resolve(selectedLevelId);
-      });
+        const selectedLevelId = i.values[0]
+        await i.update({
+          content: `You have selected level ${selectedLevelId}.`,
+          components: [],
+        })
+        collector.stop() // Stop the collector
+        resolve(selectedLevelId)
+      })
 
-      collector.on('end', collected => {
+      collector.on('end', (collected) => {
         if (!collected.size) {
-          interaction.followUp('No level was selected.');
-          resolve(null);
+          interaction.followUp('No level was selected.')
+          resolve(null)
         }
-      });
-    });
-
+      })
+    })
   } catch (error) {
-    console.error(error);
-    await interaction.reply('Something went wrong while fetching levels.');
-    return null;
+    console.error(error)
+    await interaction.reply('Something went wrong while fetching levels.')
+    return null
   }
 }
 
-module.exports = { selectLevel };
+module.exports = { selectLevel }
