@@ -116,19 +116,6 @@ module.exports = {
               selectedfrontlaneCharacterId
           )
 
-          // if (frontlaneCharacter) {
-          //   // Log the name of the selected frontlane character
-          //   console.log(
-          //     'frontlane character selected (master Character):',
-          //     frontlaneCharacter.masterCharacter.character_name
-          //   )
-          // } else {
-          //   console.log(
-          //     'frontlane character not found for ID:',
-          //     selectedfrontlaneCharacterId
-          //   )
-          // }
-
           const backlaneSelectMenu = new StringSelectMenuBuilder()
             .setCustomId('backlaneCharacterSelect')
             .setPlaceholder('Select your backlane character...')
@@ -151,19 +138,6 @@ module.exports = {
               char.dataValues.character_id.toString() ===
               selectedbacklaneCharacterId
           )
-
-          // // Log the found character
-          // if (backlaneCharacter) {
-          //   console.log(
-          //     'backlane character found:',
-          //     backlaneCharacter.masterCharacter.character_name
-          //   )
-          // } else {
-          //   console.log(
-          //     'backlane character not found',
-          //     selectedbacklaneCharacterId
-          //   )
-          // }
 
           // Proceed with battle setup if both characters are selected
           if (frontlaneCharacter && backlaneCharacter) {
@@ -191,15 +165,6 @@ module.exports = {
               enemy.id,
               userId
             )
-
-            // console.log(
-            //   'frontlane character ID:',
-            //   frontlaneCharacter.dataValues.character_id
-            // )
-            // console.log(
-            //   'backlane character ID:',
-            //   backlaneCharacter.dataValues.character_id
-            // )
 
             const battleKey = `${frontlaneCharacter.dataValues.character_id}-${backlaneCharacter.dataValues.character_id}-${enemy.id}`
             battleManager[battleKey] = battleResult
