@@ -8,6 +8,7 @@ const {
 } = require('discord.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { selectEnemy } = require('./helpers/enemySelection')
+const { selectLevel } = require('./helpers/levelSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleLogic } = require('./helpers/battle/battleLogic')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
@@ -27,34 +28,23 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
-      // // Fetch user progress
-      // const userProgress = await UserProgress.findOne({
-      //   where: { user_id: userId },
-      // })
-      // const currentLevel = userProgress ? userProgress.level_id : 1 // Default to level 1 if no progress
+      const selectedLevelId = await selectLevel(interaction);
+      if (!selectedLevelId) {
+        return; // Exit if no level was selected
+      }
+    
+      const selectedRaidId = await selectRaid(interaction, selectedLevelId);
+      if (!selectedRaidId) {
+        return; // Exit if no raid was selected
+      }
+    
+      const selectedFightId = await selectFight(interaction, selectedRaidId);
+      if (!selectedFightId) {
+        return; // Exit if no fight was selected
+      }
 
-      // // Fetch levels available to the user
-      // const availableLevels = await Levels.findAll({
-      //   where: { level_id: currentLevel }, // Adjust logic based on your progression rules
-      // })
-
-      // // Create an embed for level selection
-      // const levelEmbed = new EmbedBuilder()
-      //   .setTitle('Choose a Level')
-      //   .setDescription('Select a level to start fighting.')
-      //   .setColor('#0099ff')
-
-      // availableLevels.forEach((level) => {
-      //   levelEmbed.addFields({
-      //     name: level.name,
-      //     value: `Description: ${level.description}`,
-      //   })
-      // })
-
-      // // Respond with the embed
-      // await interaction.reply({ embeds: [levelEmbed], ephemeral: true })
-
-      // Implement logic for user to select a level and start a raid
+      // Use fightResult.enemy to set up the battle
+      const enemy = fightResult.enemy;
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
@@ -209,18 +199,18 @@ module.exports = {
           if (frontlaneCharacter && backlaneCharacter) {
             userBattles[userId] = true
 
-            let enemy
-            try {
-              enemy = await selectEnemy()
-            } catch (err) {
-              await interaction.followUp('No enemies available for selection.')
-              return
-            }
+            // let enemy
+            // try {
+            //   enemy = await selectEnemy()
+            // } catch (err) {
+            //   await interaction.followUp('No enemies available for selection.')
+            //   return
+            // }
 
-            if (!enemy) {
-              await interaction.followUp('Enemy not found.')
-              return
-            }
+            // if (!enemy) {
+            //   await interaction.followUp('Enemy not found.')
+            //   return
+            // }
 
             // Initiate battle with selected characters and enemy
             const battleResult = await initiateBattle(
