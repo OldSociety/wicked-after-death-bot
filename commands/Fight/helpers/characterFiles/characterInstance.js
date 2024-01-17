@@ -3,7 +3,7 @@ const { Character, MasterCharacter } = require('../../../../Models/model')
 class CharacterInstance {
   static async initCharacter(masterCharacterId, userId, characterId) {
     try {
-      console.log("Initializing character with ID:", characterId);
+      // console.log("Initializing character with ID:", characterId);
       const character = await Character.findByPk(characterId);
 
       if (!character) {

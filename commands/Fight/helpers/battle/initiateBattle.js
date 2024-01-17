@@ -1,55 +1,60 @@
 const {
+  Character,
+  MasterCharacter,
   Enemy,
-} = require('../../../../Models/model');
+} = require('../../../../Models/model')
 const { CharacterInstance } = require('../characterFiles/characterInstance');
 const battleManager = require('./battleManager');
 
 async function initiateBattle(frontlaneCharacterId, frontlaneMasterCharacterId, backlaneCharacterId, backlaneMasterCharacterId, enemyId, userId) {
   try {
     // Initialize frontlane character
-    const frontlaneCharacterStats = await CharacterInstance.initCharacter(
-      frontlaneMasterCharacterId, // This needs to be the ID of the master character for the frontlane character
-      userId,
-      frontlaneCharacterId // This is the specific ID of the frontlane character
+    await CharacterInstance.initCharacter(
+      frontlaneMasterCharacterId, userId, frontlaneCharacterId
+    );
+    const frontlaneCharacterData = await Character.findByPk(frontlaneCharacterId);
+    const frontlaneMasterCharacterData = await MasterCharacter.findByPk(
+      frontlaneMasterCharacterId
     );
 
     // Initialize backlane character
-    const backlaneCharacterStats = await CharacterInstance.initCharacter(
-      backlaneMasterCharacterId, // Master character ID for backlane character
-      userId,
-      backlaneCharacterId // Specific ID of the backlane character
+    await CharacterInstance.initCharacter(
+      backlaneMasterCharacterId, userId, backlaneCharacterId
+    );
+    const backlaneCharacterData = await Character.findByPk(backlaneCharacterId);
+    const backlaneMasterCharacterData = await MasterCharacter.findByPk(
+      backlaneMasterCharacterId
     );
 
     // Fetch the enemy from the database
     const enemyData = await Enemy.findByPk(enemyId);
 
-    // Create in-memory instances
+    // Create combined stats for the in-memory copy of the characters
     const frontlaneCharacterInstance = {
-      ...frontlaneCharacterStats,
+      ...frontlaneCharacterData.get(),
+      ...frontlaneMasterCharacterData.get(),
+      current_health: frontlaneCharacterData.effective_health,
+      current_damage: frontlaneCharacterData.effective_damage,
       actionQueue: [],
       buffer_health: 0
     };
 
     const backlaneCharacterInstance = {
-      ...backlaneCharacterStats,
+      ...backlaneCharacterData.get(),
+      ...backlaneMasterCharacterData.get(),
+      current_health: backlaneCharacterData.effective_health,
+      current_damage: backlaneCharacterData.effective_damage,
       actionQueue: [],
       buffer_health: 0
     };
 
+    // Create in-memory copy for the enemy
     const enemyInstance = {
       ...enemyData.get(),
       current_health: enemyData.effective_health,
       current_damage: enemyData.effective_damage,
       actionQueue: [],
       buffer_health: 0
-    };
-
-    // Create a unique identifier for the battle
-    const battleKey = `${frontlaneCharacterId}-${backlaneCharacterId}-${enemyId}`;
-    battleManager[battleKey] = {
-      frontlaneCharacterInstance,
-      backlaneCharacterInstance,
-      enemyInstance,
     };
 
     return { frontlaneCharacterInstance, backlaneCharacterInstance, enemyInstance };

@@ -1,7 +1,6 @@
 const cron = require('node-cron')
 const { EmbedBuilder } = require('discord.js')
 const { battleManager, userBattles } = require('./battleManager')
-const { Character } = require('../../../../Models/model')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
 const { createRoundEmbed } = require('./battleEmbeds')
@@ -17,35 +16,39 @@ const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
 let cronTask = null
 
 async function applyDamage(attacker, defender, userId) {
-  const randHit = Math.random() * 100;
+  // console.log('check for working code', attacker, defender)
+  const randHit = Math.random() * 100
   let isCrit = false,
     didMiss = false,
     actualDamage,
-    bufferDamage = 0; // Initialize bufferDamage to 0
+    bufferDamage = 0 // Initialize bufferDamage to 0
 
   if (randHit < attacker.chance_to_hit * 100) {
     // Attack hits
-    console.log("About to call calcDamage");  // Add this
-    [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit);
-    console.log("Received values from calcDamage:", minDamage, maxDamage, isCrit);  // And this
-  
+    console.log('About to call calcDamage') // Add this
+    ;[minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit)
+    console.log(
+      'Received values from calcDamage:',
+      minDamage,
+      maxDamage,
+      isCrit
+    ) 
+
     // Apply Traits
     if (traits[defender.character_name]) {
-      traits[defender.character_name](defender, isCrit, attacker);
+      traits[defender.character_name](defender, isCrit, attacker)
     }
 
-    actualDamage = calcActualDamage(minDamage, maxDamage);
-    bufferDamage = Math.min(actualDamage, defender.buffer_health);
+    actualDamage = calcActualDamage(minDamage, maxDamage)
+    bufferDamage = Math.min(actualDamage, defender.buffer_health)
 
-    updateBufferHealth(defender, bufferDamage);
-    updateHealth(defender, actualDamage - bufferDamage);
-
-    
+    updateBufferHealth(defender, bufferDamage)
+    updateHealth(defender, actualDamage - bufferDamage)
+    console.log(`ERROR:`, defender.current_health)
   } else {
     // Attack misses
-    didMiss = true;
+    didMiss = true
   }
-
 
   return compileDamageResult(
     attacker,
@@ -54,65 +57,70 @@ async function applyDamage(attacker, defender, userId) {
     bufferDamage,
     isCrit,
     didMiss
-  );
+  )
 }
 
-
 // ROUND LOGIC
-const applyRound = async (frontlaneCharacter, backlaneCharacter, enemy, userName, interaction, turnNum) => {
-  // Step 1: Check specials
-  await checkSpecialTrigger(frontlaneCharacter, frontlaneCharacter.activeSpecials)
-  await checkSpecialTrigger(backlaneCharacter, backlaneCharacter.activeSpecials)
-  // await checkSpecialTrigger(enemy, specialsArray)
+const applyRound = async (
+  frontlaneCharacter,
+  backlaneCharacter,
+  enemy,
+  userName,
+  interaction,
+  turnNum
+) => {
+  // // Step 1: Check specials
+  // await checkSpecialTrigger(frontlaneCharacter, frontlaneCharacter.activeSpecials)
+  // await checkSpecialTrigger(backlaneCharacter, backlaneCharacter.activeSpecials)
+  // // await checkSpecialTrigger(enemy, specialsArray)
 
-  // Step 2: Execute specials
-  for (const specialId of frontlaneCharacter.activeSpecials) {
-    await executeSpecial(frontlaneCharacter, { id: specialId })
-  }
-  for (const specialId of backlaneCharacter.activeSpecials) {
-    await executeSpecial(backlaneCharacter, { id: specialId })
-  }
+  // // Step 2: Execute specials
+  // for (const specialId of frontlaneCharacter.activeSpecials) {
+  //   await executeSpecial(frontlaneCharacter, { id: specialId })
+  // }
+  // for (const specialId of backlaneCharacter.activeSpecials) {
+  //   await executeSpecial(backlaneCharacter, { id: specialId })
+  // }
   // for (const specialId of enemy.activeSpecials) {
   //   await executeSpecial(enemy, { id: specialId })
   // }
 
-  const actions = []
-
-  if (frontlaneCharacter.current_health > 0) {
-    const action1 = await applyDamage(frontlaneCharacter, enemy);
-    actions.push(action1);
-  }
-
-  if (backlaneCharacter.current_health > 0) {
+ 
+  
+    const actions = [];
+  
+    // Frontlane Character attacks Enemy
+    if (frontlaneCharacter.current_health > 0) {
+      const action1 = await applyDamage(frontlaneCharacter, enemy);
+      actions.push(action1);
+    }
+  
+    // Backlane Character attacks Enemy, but only if Frontlane Character has fallen
+  if (frontlaneCharacter.current_health <= 0 && backlaneCharacter.current_health > 0) {
     const action2 = await applyDamage(backlaneCharacter, enemy);
     actions.push(action2);
   }
-
-    // Enemy attacks frontlane character first, then backlane if frontlane is down
+  
+    // Enemy attacks Frontlane or Backlane Character
     if (enemy.current_health > 0) {
-      let actionEnemy;
-      if (frontlaneCharacter.current_health > 0) {
-        actionEnemy = await applyDamage(enemy, frontlaneCharacter);
-      } else if (backlaneCharacter.current_health > 0) {
-        actionEnemy = await applyDamage(enemy, backlaneCharacter);
-      }
-      if (actionEnemy) {
-        actions.push(actionEnemy);
-      }
+      let targetCharacter = frontlaneCharacter.current_health > 0 ? frontlaneCharacter : backlaneCharacter;
+      const actionEnemy = await applyDamage(enemy, targetCharacter);
+      actions.push(actionEnemy);
     }
-
-   // Create and send round summary embed
-   const roundEmbed = createRoundEmbed(
-    actions,
-    userName,
-    frontlaneCharacter,
-    backlaneCharacter, // Include backlane character in summary
-    enemy,
-    turnNum
-  );
-
-  await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
-}
+  
+    // Create and send round summary embed
+    const roundEmbed = createRoundEmbed(
+      actions,
+      userName,
+      frontlaneCharacter,
+      backlaneCharacter,
+      enemy,
+      turnNum
+    );
+  
+    await interaction.followUp({ embeds: [roundEmbed], ephemeral: true });
+  };
+  
 
 function initializeCharacterFlagsAndCounters(character) {
   character.sp1Counter = 0
@@ -127,7 +135,7 @@ function initializeCharacterFlagsAndCounters(character) {
 
 // BATTLE LOGIC
 let turnNum = 1
-let initializedCharacters = {};
+let initializedCharacters = {}
 
 const setupBattleLogic = async (userId, userName, interaction) => {
   // const user = await client.users.fetch(userId)
@@ -149,26 +157,39 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
         if (!battle) continue
 
-        const { characterInstance, enemyInstance } = battle
+        const {
+          frontlaneCharacterInstance,
+          backlaneCharacterInstance,
+          enemyInstance,
+        } = battle
 
-        if (!initializedCharacters[characterInstance.character_id]) {
-          initializeCharacterFlagsAndCounters(characterInstance);
-          initializedCharacters[characterInstance.character_id] = true;
+        if (!initializedCharacters[frontlaneCharacterInstance.character_id]) {
+          initializeCharacterFlagsAndCounters(frontlaneCharacterInstance)
+          initializedCharacters[frontlaneCharacterInstance.character_id] = true
         }
-    
+
+        if (!initializedCharacters[backlaneCharacterInstance.character_id]) {
+          initializeCharacterFlagsAndCounters(backlaneCharacterInstance)
+          initializedCharacters[backlaneCharacterInstance.character_id] = true
+        }
+
         if (!initializedCharacters[enemyInstance.character_id]) {
-          initializeCharacterFlagsAndCounters(enemyInstance);
-          initializedCharacters[enemyInstance.character_id] = true;
+          initializeCharacterFlagsAndCounters(enemyInstance)
+          initializedCharacters[enemyInstance.character_id] = true
         }
 
-        if (!characterInstance || !enemyInstance) continue
-
-
+        if (
+          !frontlaneCharacterInstance ||
+          !backlaneCharacterInstance ||
+          !enemyInstance
+        )
+          continue
 
         // Apply damage and handle battles here
 
         await applyRound(
-          characterInstance,
+          frontlaneCharacterInstance,
+          backlaneCharacterInstance,
           enemyInstance,
           userName,
           interaction,
@@ -179,15 +200,16 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
         // Check for battle results and perform necessary actions
         if (
-          characterInstance.current_health <= 0 ||
+          backlaneCharacterInstance.current_health <= 0 ||
           enemyInstance.current_health <= 0
         ) {
           // Check if character survived the battle
-          if (characterInstance.current_health > 0) {
+          if (backlaneCharacterInstance.current_health > 0) {
             try {
-              characterInstance.consecutive_kill++
+              // characterInstance.consecutive_kill++
               await LevelUpSystem.levelUp(
-                characterInstance.character_id,
+                frontlaneCharacterInstance.character_id,
+                backlaneCharacterInstance.character_id,
                 enemyInstance.id,
                 interaction
               )
@@ -196,7 +218,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
               console.log('XP update failed:', err) // Log if level up fails
             }
           } else {
-            characterInstance.consecutive_kill = 0
+            // characterInstance.consecutive_kill = 0
             const winEmbed = new EmbedBuilder().setDescription(
               `${enemyInstance.character_name} wins.`
             )
@@ -205,10 +227,10 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
           // Save updated consecutive_kill value to the database
           try {
-            await Character.update(
-              { consecutive_kill: characterInstance.consecutive_kill },
-              { where: { character_id: characterInstance.character_id } }
-            )
+            // await Character.update(
+            //   { consecutive_kill: characterInstance.consecutive_kill },
+            //   { where: { character_id: characterInstance.character_id } }
+            // )
             console.log(
               'Successfully updated consecutive_kill counter in the database.'
             ) // Log on successful update

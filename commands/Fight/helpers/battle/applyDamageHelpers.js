@@ -18,24 +18,24 @@ function calcDamage(attacker, randHit) {
   let minDamage = Math.round(attacker.effective_damage * 0.08)
   let maxDamage = Math.round(attacker.effective_damage * 0.12)
 
-  console.log('normal damage min', attacker.character_name, minDamage)
-  console.log('normal damage max', attacker.character_name, maxDamage)
+  // console.log('normal damage min', attacker.character_name, minDamage)
+  // console.log('normal damage max', attacker.character_name, maxDamage)
 
   // Modify damage based on critical hit
   if (isCrit) {
-    console.log('Before crit modification:', minDamage, maxDamage)
+    // console.log('Before crit modification:', minDamage, maxDamage)
     minDamage = maxDamage // Min critical damage is set to max normal damage
     maxDamage = Math.round(maxDamage * attacker.crit_damage)
-    console.log('After crit modification:', minDamage, maxDamage)
-    console.log('attacker.crit_damage:', attacker.crit_damage)
+    // console.log('After crit modification:', minDamage, maxDamage)
+    // console.log('attacker.crit_damage:', attacker.crit_damage)
   }
 
   if (autoCritCharacters.has(attacker.character_id)) {
     isCrit = isNextAttackAutoCrit(attacker.character_id) // Check and reset the flag
   }
 
-  console.log('crit damage min', attacker.character_name, minDamage)
-  console.log('crit damage max', attacker.character_name, maxDamage)
+  // console.log('crit damage min', attacker.character_name, minDamage)
+  // console.log('crit damage max', attacker.character_name, maxDamage)
 
   return [minDamage, maxDamage, isCrit]
 }

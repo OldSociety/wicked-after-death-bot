@@ -1,67 +1,46 @@
-const { EmbedBuilder } = require('discord.js')
+const { EmbedBuilder } = require('discord.js');
 
-const createRoundEmbed = (
-  actions,
-  userName,
-  character1,
-  character2,
-  turnNum
-) => {
-  const healthPercent =
-    (character1.current_health / character1.effective_health) * 100
+const createRoundEmbed = (actions, userName, frontlaneCharacter, backlaneCharacter, enemy, turnNum) => {
+  // console.log("Received actions:", actions); // Log the actions array
+  const embed = new EmbedBuilder().setTitle(`Battle Status: Turn ${turnNum}`);
 
-  const embed = new EmbedBuilder().setTitle(`Battle Status: Turn ${turnNum}`)
+  actions.forEach((action, index) => {
+    // console.log(`Processing action ${index}:`, action); // Log each action
 
-  actions.forEach((action) => {
-    embed.addFields(
-      {
-        name: `Action`,
-        value: action.didMiss
-          ? `${action.attacker.character_name} missed.`
-          : action.isCrit
-          ? `${action.attacker.character_name} landed a critical hit! ` +
-            '`' +
-            `💥${action.actualDamage} damage` +
-            '`'
-          : `${action.attacker.character_name} strikes for ` +
-            '`' +
-            `⚔️${action.actualDamage} damage` +
-            '`',
-      },
+    let actionDesc = action.didMiss
+      ? `${action.attacker.character_name} missed.`
+      : `${action.attacker.character_name} ${action.isCrit ? 'landed a critical hit!' : 'strikes'} for ${action.isCrit ? '💥' : '⚔️'}${action.actualDamage} damage`;
 
-      {
-        name: `${action.defender.character_name}'s Health`,
-        value:
-          action.defender.character_name === character1.character_name
-            ? '`🧡' + character1.current_health.toString() + '`'
-            : '`🧡' + character2.current_health.toString() + '`',
+      let healthDesc;
+
+      if (action.defender.character_name === frontlaneCharacter.character_name) {
+        healthDesc = `🧡 ${frontlaneCharacter.current_health}`;
+      } else if (action.defender.character_name === backlaneCharacter.character_name) {
+        healthDesc = `🧡 ${backlaneCharacter.current_health}`;
+      } else {
+        // Assuming the only other option is the enemy
+        healthDesc = `🧡 ${enemy.current_health}`;
       }
-    )
+      
+
+    embed.addFields(
+      { name: `Action`, value: actionDesc },
+      { name: `${action.defender.character_name}'s Health`, value: healthDesc }
+    );
 
     if (action.bufferDamage > 0) {
-      const initialBufferHealth =
-        action.defender.buffer_health + action.bufferDamage // Calculate the buffer health before the damage
-      const remainingBufferHealth = action.defender.buffer_health // Remaining buffer health after the damage
+      const initialBufferHealth = action.defender.buffer_health + action.bufferDamage;
+      const remainingBufferHealth = action.defender.buffer_health;
 
       embed.addFields({
         name: `${action.defender.character_name}'s Buffer`,
-        value:
-          `Activated 🛡️\n` +
-          `Initial: ${initialBufferHealth} ➡️ Damage Absorbed: ${action.bufferDamage} ➡️ Remaining: ${remainingBufferHealth}`,
-      })
+        value: `Activated 🛡️\nInitial: ${initialBufferHealth} ➡️ Damage Absorbed: ${action.bufferDamage} ➡️ Remaining: ${remainingBufferHealth}`
+      });
     }
+  });
 
-    // This is just not working at allowedNodeEnvironmentFlags.
-    // console.log(character1.sp1Counter)
-    //     if ("counter for embed", character1.sp1Counter > 0) {
-    //         embed.addFields({
-    //           name: 'Special Ability',
-    //           value: 'SP1 is ready! Click the button to activate!',
-    //         });
-    //       }
-  })
+  // console.log("Embed fields:", embed.data.fields); // Log the fields added to the embed
+  return embed;
+};
 
-  return embed
-}
-
-module.exports = { createRoundEmbed }
+module.exports = { createRoundEmbed };
