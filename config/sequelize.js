@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const config = require('./config/config.json')['development']; // Make sure it's the correct environment
+const config = require('./config.json')['development']; // Make sure it's the correct environment
 
 const sequelize = new Sequelize({
   dialect: config.dialect,

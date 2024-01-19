@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
-const sequelize = require('../../Utils/sequelize.js')
+const sequelize = require('../../config/sequelize.js')
 // const {
 //   scavengeHelper,
 //   getChanceToFind,

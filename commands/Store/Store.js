@@ -10,7 +10,7 @@ const {
   MasterCharacter,
   Store,
 } = require('../../Models/model.js')
-const sequelize = require('../../Utils/sequelize.js')
+const sequelize = require('../../config/sequelize.js')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('store')

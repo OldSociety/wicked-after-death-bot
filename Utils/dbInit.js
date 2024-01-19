@@ -1,4 +1,4 @@
-const sequelize = require('./Utils/sequelize')
+const sequelize = require('../config/sequelize')
 
 const {
   User,
@@ -11,16 +11,16 @@ const {
   StandardFight,
   StandardLevel,
   StandardRaid,
-} = require('./Models/model')
+} = require('../Models/model')
 
-const storeData = require('./db/dbStore')
-const characterData = require('./db/dbMasterCharacters')
-const enemyData = require('./db/dbEnemies')
-const gearPartsData = require('./db/dbGearParts')
-const gearSetsData = require('./db/dbGearSets')
-const levelData = require('./db/dbBattles/dbLevels')
-const raidData = require('./db/dbBattles/dbRaids')
-const fightData = require('./db/dbBattles/dbFights')
+const storeData = require('../db/dbStore')
+const characterData = require('../db/dbMasterCharacters')
+const enemyData = require('../db/dbEnemies')
+const gearPartsData = require('../db/dbGearParts')
+const gearSetsData = require('../db/dbGearSets')
+const levelData = require('../db/dbBattles/dbLevels')
+const raidData = require('../db/dbBattles/dbRaids')
+const fightData = require('../db/dbBattles/dbFights')
 
 // Authenticates connection to the database.
 sequelize
@@ -93,15 +93,15 @@ sequelize.sync({ force: true }).then(async () => {
     }
 
     // Populate StandardFight
-for (const fight of fightData) {
-  await StandardFight.findOrCreate({
-    where: { fight_id: fight.fight_id },
-    defaults: {
-      raid_id: fight.raid_id,
-      enemy_id: fight.enemy_id,
-    },
-  });
-}
+    for (const fight of fightData) {
+      await StandardFight.findOrCreate({
+        where: { fight_id: fight.fight_id },
+        defaults: {
+          raid_id: fight.raid_id,
+          enemy_id: fight.enemy_id,
+        },
+      })
+    }
 
     console.log('All databases synced successfully.')
   } catch (error) {
