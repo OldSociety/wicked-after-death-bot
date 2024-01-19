@@ -1,9 +1,11 @@
-'use strict';
+'use strict'
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-      await queryInterface.createTable('Character', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable(
+      'Characters',
+      {
         character_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
@@ -55,11 +57,14 @@ module.exports = {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
         },
-    
+      },
+      {
         timestamps: false,
-      })},
+      }
+    )
+  },
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('Character');
-  }
-};
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('Characters')
+  },
+}

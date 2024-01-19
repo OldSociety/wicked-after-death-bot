@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('User', { // Ensure this matches your Sequelize model's table name
+    await queryInterface.createTable('Users', { // Ensure this matches your Sequelize model's table name
       user_id: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -49,6 +49,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('User'); // This should match the name used in the up function
+    await queryInterface.dropTable('Users'); // This should match the name used in the up function
   },
 };
