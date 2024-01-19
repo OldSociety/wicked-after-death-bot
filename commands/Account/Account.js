@@ -107,12 +107,12 @@ module.exports = {
             {
               name: 'Current Balance',
               value:
-                '730 gold has been added to your balance to get you started.\nUse `/account` again at any time to see your balance and other account stats.',
+                '🪙730 gold has been added to your balance to get you started.\nUse `/account` again at any time to see your balance and other account stats.',
             },
             {
               name: 'Characters',
               value:
-                'Three new characters have been added to your collection.\nUse `/collection` or `/collection CHARACTER_NAME` to learn more.',
+                'Three new characters have been added to your collection.\nUse `/account` or `/collection CHARACTER_NAME` to learn more.',
             },
             // {
             //   name: 'Scavenging',
