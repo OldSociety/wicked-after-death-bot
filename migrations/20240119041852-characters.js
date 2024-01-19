@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-      await queryInterface.createTable('Character', { // Ensure this matches your Sequelize model's table name
+      await queryInterface.createTable('Character', {
         character_id: {
           type: Sequelize.INTEGER,
           allowNull: false,

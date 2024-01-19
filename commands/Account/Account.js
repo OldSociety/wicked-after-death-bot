@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
-const sequelize = require('../../Utils/sequelize')
+const sequelize = require('../../Utils/sequelize.js')
 // const {
 //   scavengeHelper,
 //   getChanceToFind,
@@ -195,7 +195,7 @@ module.exports = {
             {
               name: 'Characters Owned:',
               value: `${charactersInfo}`,
-              inline: true
+              inline: true,
             }
           )
 

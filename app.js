@@ -27,10 +27,6 @@ const buttonInteractionHandler = require('./helpers/buttonInteraction')
 //   }
 // });
 
-
-
-
-
 // Create a new client instance
 const client = new Client({
   intents: [
@@ -40,7 +36,7 @@ const client = new Client({
   ],
 })
 
-global.client = client;
+global.client = client
 
 client.cooldowns = new Collection()
 client.commands = new Collection()

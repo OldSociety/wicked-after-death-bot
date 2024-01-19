@@ -1,11 +1,9 @@
-const { Sequelize } = require('sequelize');
+const Sequelize = require('sequelize');
+const config = require('./config/config.json')['development']; // Make sure it's the correct environment
 
-// Create a Sequelize instance with your configuration
-const sequelize = new Sequelize('database', 'username', 'password', {
-  host: 'localhost',
-  dialect: 'sqlite',
-  logging: console.log,
-  storage: 'database.sqlite',
+const sequelize = new Sequelize({
+  dialect: config.dialect,
+  storage: config.storage,
 });
 
 module.exports = sequelize;

@@ -5,7 +5,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
       await queryInterface.createTable('Enemy',  {
         enemy_id: {
-          type: Sequelize.INTEGER, // Define the appropriate data type for your primary key
+          type: Sequelize.INTEGER, 
           allowNull: false,
           primaryKey: true,
         },

@@ -10,7 +10,7 @@ const {
   MasterCharacter,
   Store,
 } = require('../../Models/model.js')
-const sequelize = require('../../Utils/sequelize')
+const sequelize = require('../../Utils/sequelize.js')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('store')
@@ -56,29 +56,30 @@ module.exports = {
       const collector = interaction.channel.createMessageComponentCollector({
         filter: (i) => i.customId === 'storeSelect' && i.user.id === userId,
         time: 30000, // Adjust time as needed
-      });
+      })
 
-      
       collector.on('collect', async (i) => {
         try {
-          await i.deferReply({ ephemeral: true }); // Defer the reply
-          const selectedPackName = i.values[0];
-          const purchaseResult = await handleCharacterPackPurchase(user, selectedPackName);
-      
+          await i.deferReply({ ephemeral: true }) // Defer the reply
+          const selectedPackName = i.values[0]
+          const purchaseResult = await handleCharacterPackPurchase(
+            user,
+            selectedPackName
+          )
+
           // Edit the deferred reply with the purchase result
           await i.editReply({
             content: purchaseResult.message,
-          });
-          collector.stop(); // Stop the collector after handling the purchase
+          })
+          collector.stop() // Stop the collector after handling the purchase
         } catch (error) {
-          console.error(error);
+          console.error(error)
           // Edit the deferred reply in case of an error
           await i.editReply({
             content: 'There was an error processing your purchase.',
-          });
+          })
         }
-      });
-      
+      })
 
       // collector.on('end', () => {
       //   interaction.followUp({
@@ -87,37 +88,37 @@ module.exports = {
       //   });
       // });
     } catch (error) {
-      console.error(error);
-      interaction.reply('Something went wrong while retrieving the store.');
+      console.error(error)
+      interaction.reply('Something went wrong while retrieving the store.')
     }
   },
-};
-
+}
 
 // Assuming you have a function to handle character pack purchase
 async function handleCharacterPackPurchase(user, packName) {
-  let rarity;
+  let rarity
   switch (packName) {
     case 'Bronze Box':
-      rarity = 'Commoner';
-      break;
+      rarity = 'Commoner'
+      break
     // ... handle other cases
   }
 
-  const transaction = await sequelize.transaction(); // Start a new transaction
+  const transaction = await sequelize.transaction() // Start a new transaction
   try {
     const randomCharacter = await MasterCharacter.findOne({
       where: { rarity: rarity },
       order: sequelize.random(),
-    });
+    })
 
     if (!randomCharacter) {
-      throw new Error('No characters found for the specified rarity.');
+      throw new Error('No characters found for the specified rarity.')
     }
 
     // Create a new Character instance for the user
-    await Character.create({
-      user_id: user.user_id,
+    await Character.create(
+      {
+        user_id: user.user_id,
         master_character_id: randomCharacter.master_character_id, // Set the master character ID
         level: 1, // Assuming a new character starts at level 1
         experience: 0, // Starting experience
@@ -128,15 +129,19 @@ async function handleCharacterPackPurchase(user, packName) {
         crit_chance: randomCharacter.crit_chance,
         crit_damage: randomCharacter.crit_damage,
         // ... any other fields you need to set
-      }, { transaction });
+      },
+      { transaction }
+    )
 
-      await transaction.commit(); // Commit the transaction if all goes well
-      return { success: true, message: `You have successfully purchased the ${packName} and found ${randomCharacter.character_name}.` };
-      
-    } catch (error) {
-      await transaction.rollback(); // Rollback transaction on error
-      console.error(error);
-      collector.stop(); // Stop the collector after sending the character details
-      return { success: false, message: 'Error processing purchase.' };
+    await transaction.commit() // Commit the transaction if all goes well
+    return {
+      success: true,
+      message: `You have successfully purchased the ${packName} and found ${randomCharacter.character_name}.`,
     }
+  } catch (error) {
+    await transaction.rollback() // Rollback transaction on error
+    console.error(error)
+    collector.stop() // Stop the collector after sending the character details
+    return { success: false, message: 'Error processing purchase.' }
   }
+}
