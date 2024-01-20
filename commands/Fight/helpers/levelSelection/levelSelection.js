@@ -10,8 +10,8 @@ async function selectLevel(interaction) {
   try {
     const levels = await StandardLevel.findAll()
 
-    if (!levels.length) {
-      await interaction.reply('There are currently no levels available.')
+    if (levels.length === 0) {
+      await interaction.editReply('There are currently no levels available.')
       return null
     }
 
@@ -33,7 +33,7 @@ async function selectLevel(interaction) {
 
     const actionRow = new ActionRowBuilder().addComponents(levelSelectMenu)
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [levelEmbed],
       components: [actionRow],
       ephemeral: true,

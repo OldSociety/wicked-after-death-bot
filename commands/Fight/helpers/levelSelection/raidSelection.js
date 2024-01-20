@@ -12,8 +12,8 @@ async function selectRaid(interaction, levelId) {
       where: { level_id: levelId },
     })
 
-    if (!raids.length) {
-      await interaction.followUp('No raids available for this level.')
+    if (raids.length === 0) {
+      await interaction.editReply('No raids available for this level.')
       return null
     }
 
@@ -34,7 +34,7 @@ async function selectRaid(interaction, levelId) {
 
     const actionRow = new ActionRowBuilder().addComponents(raidSelectMenu)
 
-    await interaction.followUp({
+    await interaction.editReply({
       embeds: [raidEmbed],
       components: [actionRow],
       ephemeral: true,

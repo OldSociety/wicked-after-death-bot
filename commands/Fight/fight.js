@@ -31,34 +31,39 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
-     // Defer the reply if the operation might take time
-     await interaction.deferReply();
+      // Defer the reply if the operation might take time
+      await interaction.deferReply()
 
-     // Select level, raid, and fight
-     const selectedLevelId = await selectLevel(interaction);
-     const selectedRaidId = await selectRaid(interaction, selectedLevelId);
-     const selectedFight = await selectFight(interaction, selectedRaidId);
+      // Select level, raid, and fight
+      const selectedLevelId = await selectLevel(interaction)
+      if (!selectedLevelId) {
+        await interaction.editReply('No level selected.')
+        return
+      }
 
-     if (selectedFight && selectedFight.enemy) {
-         // Edit the initial reply
-         await interaction.editReply(`You have selected a fight with ${selectedFight.enemy.name}.`);
+      const selectedRaidId = await selectRaid(interaction, selectedLevelId)
+      if (!selectedRaidId) {
+        await interaction.editReply('No raid selected.')
+        return
+      }
 
-         // Follow up with additional information
-         await interaction.followUp('Setting up your fight...');
-         
-         // Setup fight...
-     } else {
-         // Edit the reply to indicate that something went wrong
-         await interaction.editReply('No fight selected.');
-     }
+      const selectedFight = await selectFight(interaction, selectedRaidId)
+      if (!selectedFight || !selectedFight.enemy) {
+        await interaction.editReply('No fight selected.')
+        return
+      }
 
       // Use selectedFight.enemy to set up the battle
-      const enemy = selectedFight.enemy
-      console.log('ENEMY ID', enemy)
+      const enemy = selectedFight.enemy.dataValues
+      // console.log('ENEMY ID', enemy, enemy.character_name)
+
+      await interaction.editReply(
+        `You have selected a fight with ${enemy.character_name}. Setting up your fight...`
+      )
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
-        await interaction.reply('You have no characters to select.')
+        await interaction.editReply('You have no characters to select.')
         return
       }
 
@@ -93,7 +98,7 @@ module.exports = {
       })
 
       if (userBattles[userId]) {
-        await interaction.reply('You are already in an ongoing battle.')
+        await interaction.editReply('You are already in an ongoing battle.')
         return
       }
 
@@ -108,7 +113,7 @@ module.exports = {
         .setColor('#0099ff')
         .setTitle('Character Selection')
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [characterEmbed],
         components: [actionRow],
         ephemeral: true,

@@ -25,22 +25,9 @@ module.exports = {
     try {
       console.log('Seeding data...');
 
-      // await queryInterface.bulkInsert('Stores', storeData, { updateOnDuplicate: ['name', 'cost'] });
+      await queryInterface.bulkInsert('Store', storeData);
       await seedMasterCharacters(characterData);
-      // await queryInterface.bulkInsert('Enemies', enemyData, {
-      //   updateOnDuplicate: [
-      //     'enemy_id',
-      //     'name',
-      //     'description',
-      //     'type',
-      //     'unique_skill',
-      //     'base_damage',
-      //     'base_health',
-      //     'chance_to_hit',
-      //     'crit_chance',
-      //     'crit_damage',
-      //   ],
-      // });
+      await queryInterface.bulkInsert('Enemies', enemyData);
 
 // await queryInterface.bulkInsert('GearSets', gearSetsData);
 
