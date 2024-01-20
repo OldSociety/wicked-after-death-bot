@@ -21,7 +21,18 @@ const createRoundEmbed = (actions, userName, frontlaneCharacter, backlaneCharact
         // Assuming the only other option is the enemy
         healthDesc = `🧡 ${enemy.current_health}`;
       }
-      
+      // Example usage: health bar [■■■■■■■■■■■■■■■■■■■■]
+      // 
+// let healthDesc;
+// if (action.defender.character_name === frontlaneCharacter.character_name) {
+//   healthDesc = createHealthBar(frontlaneCharacter.current_health, frontlaneCharacter.effective_health);
+// } else if (action.defender.character_name === backlaneCharacter.character_name) {
+//   healthDesc = createHealthBar(backlaneCharacter.current_health, backlaneCharacter.effective_health);
+// } else {
+//   // Assuming the only other option is the enemy
+//   healthDesc = createHealthBar(enemy.current_health, enemy.effective_health);
+    // }
+
 
     embed.addFields(
       { name: `Action`, value: actionDesc },
@@ -42,5 +53,16 @@ const createRoundEmbed = (actions, userName, frontlaneCharacter, backlaneCharact
   // console.log("Embed fields:", embed.data.fields); // Log the fields added to the embed
   return embed;
 };
+
+function createHealthBar(currentHealth, maxHealth) {
+  const totalSegments = 20; // Number of segments in the health bar
+  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments);
+  const unfilledSegments = totalSegments - filledSegments;
+  
+  const filledBar = '■'.repeat(filledSegments);
+  const unfilledBar = ' '.repeat(unfilledSegments);
+  
+  return `[${filledBar}${unfilledBar}]`;
+}
 
 module.exports = { createRoundEmbed };
