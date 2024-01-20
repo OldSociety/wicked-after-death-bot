@@ -1,5 +1,5 @@
 // raidSelection.js
-const { StandardRaid } = require('../../../Models/model')
+const { StandardRaid } = require('../../../../Models/model')
 const {
   EmbedBuilder,
   ActionRowBuilder,

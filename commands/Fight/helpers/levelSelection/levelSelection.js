@@ -1,5 +1,5 @@
 // levelSelection.js
-const { StandardLevel } = require('../../../Models/model')
+const { StandardLevel } = require('../../../../Models/model')
 const {
   EmbedBuilder,
   ActionRowBuilder,

@@ -6,8 +6,12 @@ const {
   StringSelectMenuOptionBuilder,
   ChannelType,
 } = require('discord.js')
+
+// HELPERS
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
-const { selectLevel } = require('./helpers/levelSelection')
+const { selectLevel } = require('./helpers/levelSelection/levelSelection')
+const { selectRaid } = require('./helpers/levelSelection/raidSelection')
+const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleLogic } = require('./helpers/battle/battleLogic')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
@@ -27,23 +31,36 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
-      const selectedLevelId = await selectLevel(interaction);
+      const selectedLevelId = await selectLevel(interaction)
       if (!selectedLevelId) {
-        return; // Exit if no level was selected
+        interaction.followUp('No level selected.')
+        return // Exit if no level was selected
       }
-    
-      const selectedRaidId = await selectRaid(interaction, selectedLevelId);
-      if (!selectedRaidId) {
-        return; // Exit if no raid was selected
+
+      try {
+        console.log('LEVEL ID: ', selectedLevelId)
+        const selectedRaidId = await selectRaid(interaction, selectedLevelId)
+        if (!selectedRaidId) {
+          interaction.followUp('No raid selected.')
+          return // Exit if no raid was selected
+        }
+      } catch (err) {
+        console.log('Error', err)
       }
-    
-      const selectedFightId = await selectFight(interaction, selectedRaidId);
-      if (!selectedFightId) {
-        return; // Exit if no fight was selected
+
+      try {
+        console.log('RAID ID: ', selectedRaidId)
+        const selectedFightId = await selectRaid(interaction, selectedRaidId)
+        if (!selectedFightId) {
+          interaction.followUp('No fight selected.')
+          return // Exit if no raid was selected
+        }
+      } catch (err) {
+        console.log('Error', err)
       }
 
       // Use fightResult.enemy to set up the battle
-      const enemy = fightResult.enemy;
+      const enemy = fightResult.enemy
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
@@ -197,7 +214,6 @@ module.exports = {
           // Proceed with battle setup if both characters are selected
           if (frontlaneCharacter && backlaneCharacter) {
             userBattles[userId] = true
-
 
             if (!enemy) {
               await interaction.followUp('Enemy not found.')

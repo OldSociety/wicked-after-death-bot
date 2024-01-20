@@ -1,5 +1,5 @@
 // fightSelection.js
-const { StandardFight, Enemy } = require('../../../Models/model')
+const { StandardFight, Enemy } = require('../../../../Models/model')
 const {
   EmbedBuilder,
   ActionRowBuilder,
