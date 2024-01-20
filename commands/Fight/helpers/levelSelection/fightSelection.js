@@ -6,7 +6,7 @@ const {
   StringSelectMenuBuilder,
 } = require('discord.js')
 
-async function selectfight(interaction, raidId) {
+async function selectFight(interaction, raidId) {
   try {
     const fights = await StandardFight.findAll({
       where: { raid_id: raidId },
@@ -29,7 +29,7 @@ async function selectfight(interaction, raidId) {
       .addOptions(
         fights.map((fight) => ({
           label: `Fight ${fight.fight_id}`, // Adjusted label
-          description: `Enemy: ${fight.Enemy ? fight.Enemy.name : 'Unknown'}`, // Adjusted description
+          description: `Enemy: ${fight.Enemy ? fight.Enemy : 'Unknown'}`, // Adjusted description
           value: fight.fight_id.toString(),
         }))
       )
@@ -90,4 +90,4 @@ async function selectfight(interaction, raidId) {
   }
 }
 
-module.exports = { selectfight }
+module.exports = { selectFight }

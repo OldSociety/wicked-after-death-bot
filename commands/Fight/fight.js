@@ -31,36 +31,30 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
-      const selectedLevelId = await selectLevel(interaction)
-      if (!selectedLevelId) {
-        interaction.followUp('No level selected.')
-        return // Exit if no level was selected
-      }
+     // Defer the reply if the operation might take time
+     await interaction.deferReply();
 
-      try {
-        console.log('LEVEL ID: ', selectedLevelId)
-        const selectedRaidId = await selectRaid(interaction, selectedLevelId)
-        if (!selectedRaidId) {
-          interaction.followUp('No raid selected.')
-          return // Exit if no raid was selected
-        }
-      } catch (err) {
-        console.log('Error', err)
-      }
+     // Select level, raid, and fight
+     const selectedLevelId = await selectLevel(interaction);
+     const selectedRaidId = await selectRaid(interaction, selectedLevelId);
+     const selectedFight = await selectFight(interaction, selectedRaidId);
 
-      try {
-        console.log('RAID ID: ', selectedRaidId)
-        const selectedFightId = await selectRaid(interaction, selectedRaidId)
-        if (!selectedFightId) {
-          interaction.followUp('No fight selected.')
-          return // Exit if no raid was selected
-        }
-      } catch (err) {
-        console.log('Error', err)
-      }
+     if (selectedFight && selectedFight.enemy) {
+         // Edit the initial reply
+         await interaction.editReply(`You have selected a fight with ${selectedFight.enemy.name}.`);
 
-      // Use fightResult.enemy to set up the battle
-      const enemy = fightResult.enemy
+         // Follow up with additional information
+         await interaction.followUp('Setting up your fight...');
+         
+         // Setup fight...
+     } else {
+         // Edit the reply to indicate that something went wrong
+         await interaction.editReply('No fight selected.');
+     }
+
+      // Use selectedFight.enemy to set up the battle
+      const enemy = selectedFight.enemy
+      console.log('ENEMY ID', enemy)
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {

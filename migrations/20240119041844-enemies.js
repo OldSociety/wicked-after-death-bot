@@ -60,6 +60,9 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: true,
         },
+      },
+      {
+        timestamps: false,
       })},
 
   async down (queryInterface, Sequelize) {
