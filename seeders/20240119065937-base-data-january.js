@@ -42,8 +42,16 @@ module.exports = {
       //   ],
       // });
 
-      // await queryInterface.bulkInsert('GearSets', gearSetsData, { updateOnDuplicate: ['name', 'rarity'] });
-      // await queryInterface.bulkInsert('GearParts', gearPartsData, { updateOnDuplicate: ['parts_id', 'type', 'rarity'] });
+// await queryInterface.bulkInsert('GearSets', gearSetsData);
+
+      try {
+        console.log('Seeding GearParts data:', gearPartsData);
+        
+        await queryInterface.bulkInsert('GearParts', gearPartsData);
+        // rest of your seeding logic
+      } catch (error) {
+        console.error('Error seeding GearParts data:', error);
+      }      
       await seedStandardLevels(levelData);
       await seedStandardRaids(raidData);
       await seedStandardFights(fightData);
