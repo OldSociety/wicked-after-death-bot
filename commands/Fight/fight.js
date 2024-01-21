@@ -4,16 +4,16 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-} = require('discord.js');
+} = require('discord.js')
 
 // HELPERS
-const { retrieveCharacters } = require('./helpers/characterRetrieval');
-const { selectLevel } = require('./helpers/levelSelection/levelSelection');
-const { selectRaid } = require('./helpers/levelSelection/raidSelection');
-const { selectFight } = require('./helpers/levelSelection/fightSelection');
-const { initiateBattle } = require('./helpers/battle/initiateBattle');
-const { battleManager, userBattles } = require('./helpers/battle/battleManager');
-const { setupBattleLogic } = require('./helpers/battle/battleLogic');
+const { retrieveCharacters } = require('./helpers/characterRetrieval')
+const { selectLevel } = require('./helpers/levelSelection/levelSelection')
+const { selectRaid } = require('./helpers/levelSelection/raidSelection')
+const { selectFight } = require('./helpers/levelSelection/fightSelection')
+const { initiateBattle } = require('./helpers/battle/initiateBattle')
+const { battleManager, userBattles } = require('./helpers/battle/battleManager')
+const { setupBattleLogic } = require('./helpers/battle/battleLogic')
 
 module.exports = {
   cooldown: 5,
@@ -23,68 +23,61 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const userId = interaction.user.id;
-      const userName = interaction.user.username;
+      const userId = interaction.user.id
+      const userName = interaction.user.username
 
-      // Defer the reply if the operation might take time
-      await interaction.deferReply();
+      await interaction.deferReply({ ephemeral: true })
 
-      // Select level, raid, and fight
-      const selectedLevelId = await selectLevel(interaction);
+      const selectedLevelId = await selectLevel(interaction)
       if (!selectedLevelId) {
-        return interaction.editReply('No level selected.');
+        return interaction.editReply('No level selected.')
       }
 
-      const selectedRaidId = await selectRaid(interaction, selectedLevelId);
+      const selectedRaidId = await selectRaid(interaction, selectedLevelId)
       if (!selectedRaidId) {
-        return interaction.editReply('No raid selected.');
+        return interaction.editReply('No raid selected.')
       }
 
-      const selectedFight = await selectFight(interaction, selectedRaidId);
+      const selectedFight = await selectFight(interaction, selectedRaidId)
       if (!selectedFight || !selectedFight.enemy) {
-        return interaction.editReply('No fight selected.');
+        return interaction.editReply('No fight selected.')
       }
 
-      const enemy = selectedFight.enemy.dataValues;
-      // await interaction.editReply(`You have selected a fight with ${enemy.character_name}. Setting up your fight...`);
+      const enemy = selectedFight.enemy.dataValues
 
-      if (userBattles[userId]) {
-        return interaction.followUp('You are already in an ongoing battle.');
-      }
-
-      const userCharacters = await retrieveCharacters(userId);
+      const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
-        return interaction.editReply('You have no characters to select.');
+        return interaction.editReply('You have no characters to select.')
       }
 
       const options = userCharacters.map((char) => {
-        let rarityColor;
-        switch (char.rarity) {  // Changed from userCharacters.rarity to char.rarity
-          case 'folk hero': rarityColor = '🟩'; break;
-          case 'legend': rarityColor = '🟦'; break;
-          case 'unique': rarityColor = '🟪'; break;
-          default: rarityColor = '⬜';
-        }
+        const rarityColor =
+          {
+            'folk hero': '🟩',
+            legend: '🟦',
+            unique: '🟪',
+          }[char.rarity] || '⬜'
+
         return new StringSelectMenuOptionBuilder()
           .setLabel(`${rarityColor} ${char.masterCharacter.character_name}`)
-          .setValue(char.character_id.toString());  // Changed from dataValues.character_id
-      });
+          .setValue(char.character_id.toString())
+      })
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('characterSelect')
         .setPlaceholder('Select your frontlane character...')
-        .addOptions(options);
+        .addOptions(options)
 
-      const actionRow = new ActionRowBuilder().addComponents(selectMenu);
+      const actionRow = new ActionRowBuilder().addComponents(selectMenu)
       const characterEmbed = new EmbedBuilder()
         .setColor('#0099ff')
-        .setTitle('Character Selection');
+        .setTitle('Character Selection')
 
       await interaction.editReply({
         embeds: [characterEmbed],
         components: [actionRow],
         ephemeral: true,
-      });
+      })
 
       const filter = (i) => {
         i.deferUpdate()
@@ -239,12 +232,16 @@ module.exports = {
         }
       })
     } catch (error) {
-      console.error('Error in execute:', error);
-      if (!interaction.replied) {
-        await interaction.reply('An error occurred while executing the command.');
+      console.error('Error in execute:', error)
+      if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply(
+          'An error occurred while executing the command.'
+        )
       } else {
-        await interaction.followUp('An error occurred while executing the command.');
+        await interaction.followUp(
+          'An error occurred while executing the command.'
+        )
       }
     }
   },
-};
+}
