@@ -64,7 +64,7 @@ async function selectFight(interaction, raidId) {
           return;
         }
 
-        await interaction.followUp(`You have selected Fight ${selectedFightId}. Enemy: ${enemy.character_name}`);
+        // await interaction.followUp(`You have selected Fight ${selectedFightId}. Enemy: ${enemy.character_name}`);
         resolve({ fightId: selectedFightId, enemy });
       });
 

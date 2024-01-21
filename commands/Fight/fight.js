@@ -4,21 +4,16 @@ const {
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
-  ChannelType,
-} = require('discord.js')
+} = require('discord.js');
 
 // HELPERS
-const { retrieveCharacters } = require('./helpers/characterRetrieval')
-const { selectLevel } = require('./helpers/levelSelection/levelSelection')
-const { selectRaid } = require('./helpers/levelSelection/raidSelection')
-const { selectFight } = require('./helpers/levelSelection/fightSelection')
-const { initiateBattle } = require('./helpers/battle/initiateBattle')
-const { battleLogic } = require('./helpers/battle/battleLogic')
-const { battleManager, userBattles } = require('./helpers/battle/battleManager')
-const {
-  characterInstance,
-} = require('./helpers/characterFiles/characterInstance')
-const { setupBattleLogic } = require('./helpers/battle/battleLogic')
+const { retrieveCharacters } = require('./helpers/characterRetrieval');
+const { selectLevel } = require('./helpers/levelSelection/levelSelection');
+const { selectRaid } = require('./helpers/levelSelection/raidSelection');
+const { selectFight } = require('./helpers/levelSelection/fightSelection');
+const { initiateBattle } = require('./helpers/battle/initiateBattle');
+const { battleManager, userBattles } = require('./helpers/battle/battleManager');
+const { setupBattleLogic } = require('./helpers/battle/battleLogic');
 
 module.exports = {
   cooldown: 5,
@@ -28,97 +23,68 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const userId = interaction.user.id
-      const userName = interaction.user.username
+      const userId = interaction.user.id;
+      const userName = interaction.user.username;
 
       // Defer the reply if the operation might take time
-      await interaction.deferReply()
+      await interaction.deferReply();
 
       // Select level, raid, and fight
-      const selectedLevelId = await selectLevel(interaction)
+      const selectedLevelId = await selectLevel(interaction);
       if (!selectedLevelId) {
-        await interaction.editReply('No level selected.')
-        return
+        return interaction.editReply('No level selected.');
       }
 
-      const selectedRaidId = await selectRaid(interaction, selectedLevelId)
+      const selectedRaidId = await selectRaid(interaction, selectedLevelId);
       if (!selectedRaidId) {
-        await interaction.editReply('No raid selected.')
-        return
+        return interaction.editReply('No raid selected.');
       }
 
-      const selectedFight = await selectFight(interaction, selectedRaidId)
+      const selectedFight = await selectFight(interaction, selectedRaidId);
       if (!selectedFight || !selectedFight.enemy) {
-        await interaction.editReply('No fight selected.')
-        return
+        return interaction.editReply('No fight selected.');
       }
 
-      // Use selectedFight.enemy to set up the battle
-      const enemy = selectedFight.enemy.dataValues
-      // console.log('ENEMY ID', enemy, enemy.character_name)
+      const enemy = selectedFight.enemy.dataValues;
+      // await interaction.editReply(`You have selected a fight with ${enemy.character_name}. Setting up your fight...`);
 
-      await interaction.editReply(
-        `You have selected a fight with ${enemy.character_name}. Setting up your fight...`
-      )
+      if (userBattles[userId]) {
+        return interaction.followUp('You are already in an ongoing battle.');
+      }
 
-      const userCharacters = await retrieveCharacters(userId)
+      const userCharacters = await retrieveCharacters(userId);
       if (!userCharacters.length) {
-        await interaction.editReply('You have no characters to select.')
-        return
+        return interaction.editReply('You have no characters to select.');
       }
 
       const options = userCharacters.map((char) => {
-        let rarityColor
-
-        // Decide the font color based on the rarity
-        switch (userCharacters.rarity) {
-          case 'folk hero':
-            rarityColor = '🟩'
-            break
-          case 'legend':
-            rarityColor = '🟦'
-            break
-          case 'unique':
-            rarityColor = '🟪'
-            break
-          default:
-            rarityColor = '⬜'
+        let rarityColor;
+        switch (char.rarity) {  // Changed from userCharacters.rarity to char.rarity
+          case 'folk hero': rarityColor = '🟩'; break;
+          case 'legend': rarityColor = '🟦'; break;
+          case 'unique': rarityColor = '🟪'; break;
+          default: rarityColor = '⬜';
         }
-
-        const {
-          dataValues: { character_id },
-          masterCharacter: {
-            dataValues: { character_name, base_health, base_damage },
-          },
-        } = char
-
         return new StringSelectMenuOptionBuilder()
-          .setLabel(`${rarityColor} ${character_name}`)
-          .setValue(character_id.toString())
-      })
-
-      if (userBattles[userId]) {
-        await interaction.editReply('You are already in an ongoing battle.')
-        return
-      }
+          .setLabel(`${rarityColor} ${char.masterCharacter.character_name}`)
+          .setValue(char.character_id.toString());  // Changed from dataValues.character_id
+      });
 
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('characterSelect')
         .setPlaceholder('Select your frontlane character...')
-        .addOptions(options)
+        .addOptions(options);
 
-      const actionRow = new ActionRowBuilder().addComponents(selectMenu)
-
+      const actionRow = new ActionRowBuilder().addComponents(selectMenu);
       const characterEmbed = new EmbedBuilder()
         .setColor('#0099ff')
-        .setTitle('Character Selection')
+        .setTitle('Character Selection');
 
       await interaction.editReply({
         embeds: [characterEmbed],
         components: [actionRow],
         ephemeral: true,
-        content: 'Select your frontlane character',
-      })
+      });
 
       const filter = (i) => {
         i.deferUpdate()
@@ -225,7 +191,7 @@ module.exports = {
               frontlaneCharacter.masterCharacter.master_character_id,
               backlaneCharacter.dataValues.character_id,
               backlaneCharacter.masterCharacter.master_character_id,
-              enemy.id,
+              enemy.enemy_id,
               userId
             )
 
@@ -273,8 +239,12 @@ module.exports = {
         }
       })
     } catch (error) {
-      console.error('Error in execute:', error)
-      await interaction.reply('An error occurred while executing the command.')
+      console.error('Error in execute:', error);
+      if (!interaction.replied) {
+        await interaction.reply('An error occurred while executing the command.');
+      } else {
+        await interaction.followUp('An error occurred while executing the command.');
+      }
     }
   },
-}
+};
