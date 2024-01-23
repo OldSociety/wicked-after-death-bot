@@ -66,7 +66,7 @@ const applyRound = async (
   enemy,
   userName,
   interaction,
-  turnNum
+  turnNum = 1
 ) => {
   // // Step 1: Check specials
   // await checkSpecialTrigger(frontlaneCharacter, frontlaneCharacter.activeSpecials)
