@@ -1,5 +1,5 @@
 const userBattles = {};
 module.exports = {
-  battleManager: {}, // your existing battleManager object
+  battleManager: {}, // existing battleManager object
   userBattles,
 };

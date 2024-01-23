@@ -66,7 +66,7 @@ const applyRound = async (
   enemy,
   userName,
   interaction,
-  turnNum = 1
+  turnNum
 ) => {
   // // Step 1: Check specials
   // await checkSpecialTrigger(frontlaneCharacter, frontlaneCharacter.activeSpecials)
@@ -271,6 +271,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           if (cronTask) {
             cronTask.stop()
           }
+          turnNum = 1;
         }
       }
     } catch (error) {
