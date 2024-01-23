@@ -4,7 +4,7 @@ const { battleManager, userBattles } = require('./battleManager')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
 const { createRoundEmbed } = require('./battleEmbeds')
-const { Character } = require('../../../../Models/model'); // Adjust the path as needed
+const { Character } = require('../../../../Models/model') // Adjust the path as needed
 const {
   calcDamage,
   calcActualDamage,
@@ -26,9 +26,7 @@ async function applyDamage(attacker, defender, userId) {
 
   if (randHit < attacker.chance_to_hit * 100) {
     // Attack hits
-    [minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit)
-   
-
+    ;[minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit)
 
     // Apply Traits
     if (traits[defender.character_name]) {
@@ -38,12 +36,12 @@ async function applyDamage(attacker, defender, userId) {
     actualDamage = calcActualDamage(minDamage, maxDamage)
     bufferDamage = Math.min(actualDamage, defender.buffer_health)
 
-    console.log(`APPLY DAMAGE: ${attacker.character_name} dealt ${bufferDamage} damage to ${defender.character_name}. Was it a critical? ${isCrit}.`)
-
+    console.log(
+      `APPLY DAMAGE: ${attacker.character_name} dealt ${bufferDamage} damage to ${defender.character_name}. Was it a critical? ${isCrit}.`
+    )
 
     updateBufferHealth(defender, bufferDamage)
     updateHealth(defender, actualDamage - bufferDamage)
-  
   } else {
     // Attack misses
     didMiss = true
@@ -208,7 +206,8 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           // Check if character survived the battle
           if (backlaneCharacterInstance.current_health > 0) {
             try {
-              // characterInstance.consecutive_kill++
+              frontlaneCharacterInstance.consecutive_kill++
+              backlaneCharacterInstance.consecutive_kill++
               await LevelUpSystem.levelUp(
                 frontlaneCharacterInstance.character_id,
                 backlaneCharacterInstance.character_id,
@@ -220,7 +219,8 @@ const setupBattleLogic = async (userId, userName, interaction) => {
               console.log('XP update failed:', err) // Log if level up fails
             }
           } else {
-            // characterInstance.consecutive_kill = 0
+            frontlaneCharacterInstance.consecutive_kill = 0
+            backlaneCharacterInstance.consecutive_kill = 0
             const winEmbed = new EmbedBuilder().setDescription(
               `${enemyInstance.character_name} wins.`
             )
@@ -271,7 +271,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           if (cronTask) {
             cronTask.stop()
           }
-          turnNum = 1;
+          turnNum = 1
         }
       }
     } catch (error) {

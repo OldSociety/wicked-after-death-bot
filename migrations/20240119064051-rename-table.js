@@ -3,11 +3,11 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    //  await queryInterface.renameTable('StandardLevel', 'StandardLevels');
+    //  await queryInterface.renameTable('Store', 'Stores');
      
   },
 
   async down (queryInterface, Sequelize) {
-    // await queryInterface.renameTable('StandardLevels', 'StandardLevel');
+    // await queryInterface.renameTable('Stores', 'Store');
   }
 };

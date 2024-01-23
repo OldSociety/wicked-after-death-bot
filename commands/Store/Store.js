@@ -94,7 +94,6 @@ module.exports = {
   },
 }
 
-// Assuming you have a function to handle character pack purchase
 async function handleCharacterPackPurchase(user, packName) {
   let rarity
   switch (packName) {
@@ -104,8 +103,24 @@ async function handleCharacterPackPurchase(user, packName) {
     // ... handle other cases
   }
 
-  const transaction = await sequelize.transaction() // Start a new transaction
+  const transaction = await sequelize.transaction()
   try {
+    // Retrieve the cost of the pack
+    const pack = await Store.findOne({
+      where: { name: packName },
+    })
+    if (!pack) {
+      throw new Error(`Pack ${packName} not found.`)
+    }
+
+    // Check if user has enough balance
+    if (user.balance < pack.cost) {
+      return {
+        success: false,
+        message: `Insufficient balance to purchase ${packName}.`,
+      }
+    }
+
     const randomCharacter = await MasterCharacter.findOne({
       where: { rarity: rarity },
       order: sequelize.random(),
@@ -115,28 +130,49 @@ async function handleCharacterPackPurchase(user, packName) {
       throw new Error('No characters found for the specified rarity.')
     }
 
-    // Create a new Character instance for the user
-    await Character.create(
-      {
+    // Check if the user already has this character
+    const existingCharacter = await Character.findOne({
+      where: {
         user_id: user.user_id,
-        master_character_id: randomCharacter.master_character_id, // Set the master character ID
-        level: 1, // Assuming a new character starts at level 1
-        experience: 0, // Starting experience
-        // Copy other fields from the MasterCharacter
-        base_damage: randomCharacter.base_damage,
-        base_health: randomCharacter.base_health,
-        chance_to_hit: randomCharacter.chance_to_hit,
-        crit_chance: randomCharacter.crit_chance,
-        crit_damage: randomCharacter.crit_damage,
-        // ... any other fields you need to set
+        master_character_id: randomCharacter.master_character_id,
       },
-      { transaction }
-    )
+      transaction,
+    })
+
+    if (existingCharacter) {
+      // User already has this character, increment copies
+      existingCharacter.copies += 1
+      await existingCharacter.save({ transaction })
+    } else {
+      // Create a new Character instance for the user
+      await Character.create(
+        {
+          user_id: user.user_id,
+          master_character_id: randomCharacter.master_character_id,
+          level: 1,
+          rank: 1,
+          copies: 0,
+          experience: 0,
+          base_damage: randomCharacter.base_damage,
+          base_health: randomCharacter.base_health,
+          chance_to_hit: randomCharacter.chance_to_hit,
+          crit_chance: randomCharacter.crit_chance,
+          crit_damage: randomCharacter.crit_damage,
+        },
+        { transaction }
+      )
+    }
+
+    // Deduct the cost from user's balance and save
+    user.balance -= pack.cost
+    await user.save({ transaction })
 
     await transaction.commit() // Commit the transaction if all goes well
     return {
       success: true,
-      message: `You have successfully purchased the ${packName} and found ${randomCharacter.character_name}.`,
+      message: existingCharacter
+        ? `You found another copy of ${randomCharacter.character_name}.`
+        : `You have successfully purchased the ${packName} and found ${randomCharacter.character_name}.`,
     }
   } catch (error) {
     await transaction.rollback() // Rollback transaction on error

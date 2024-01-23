@@ -25,7 +25,7 @@ module.exports = {
     try {
       console.log('Seeding data...');
 
-      await queryInterface.bulkInsert('Store', storeData);
+      await queryInterface.bulkInsert('Stores', storeData);
       await seedMasterCharacters(characterData);
       await queryInterface.bulkInsert('Enemies', enemyData);
       await queryInterface.bulkInsert('GearParts', gearPartsData);

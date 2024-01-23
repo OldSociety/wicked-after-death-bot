@@ -24,6 +24,16 @@ module.exports = {
           allowNull: false,
           defaultValue: 1,
         },
+        rank: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 1,
+        },
+        copies: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0,
+        },
         experience: {
           type: Sequelize.INTEGER,
           allowNull: false,
