@@ -198,23 +198,40 @@ module.exports = {
                 `**${userName}'s team** is looking for a fight and has found **${enemy.character_name}**!`
               )
               .addFields(
-                {
-                  name: `${frontlaneCharacter.masterCharacter.character_name} (Frontlane) | Level ` + '`' + frontlaneCharacter.level.toString() + '`',
-                  value: `⚔️ Damage: ${frontlaneCharacter.effective_damage}, 🧡 Health: ${frontlaneCharacter.effective_health}`,
-                },
-                {
-                  name: `${backlaneCharacter.masterCharacter.character_name} (Backlane) | Level ` + '`' + backlaneCharacter.level.toString() + '`',
-                  value: `⚔️ Damage: ${backlaneCharacter.effective_damage}, 🧡 Health: ${backlaneCharacter.effective_health}`,
-                },
+                createCharacterField(frontlaneCharacter, 'Frontlane'),
+                createCharacterField(backlaneCharacter, 'Backlane'),
                 {
                   name: '\u200B', // Zero-width space
                   value: '\u200B', // Zero-width space
                 },
                 {
-                  name: `${enemy.character_name} (Enemy) | Level ` + '`' + enemy.level.toString() + '`',
+                  name:
+                    `${enemy.character_name} (Enemy) | Level ` +
+                    '`' +
+                    enemy.level.toString() +
+                    '`',
                   value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
                 }
               )
+
+            // Function to create a field for a character
+            function createCharacterField(character, position) {
+              const effectiveDamage =
+                character.effective_damage ||
+                character.masterCharacter.base_damage
+              const effectiveHealth =
+                character.effective_health ||
+                character.masterCharacter.base_health
+
+              return {
+                name:
+                  `${character.masterCharacter.character_name} (${position}) | Level ` +
+                  '`' +
+                  character.level.toString() +
+                  '`',
+                value: `⚔️ Damage: ${effectiveDamage}, 🧡 Health: ${effectiveHealth}`,
+              }
+            }
 
             // Call setupBattleLogic after initiating the battle
             setupBattleLogic(userId, userName, interaction)

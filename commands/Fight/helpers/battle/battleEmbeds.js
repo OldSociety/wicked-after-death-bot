@@ -85,7 +85,7 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
 }
 
 // Example usage
-const healthBar = createHealthBar(50, 100, 10); // Current health 50, Max health 100, Buffer health 10
-console.log(healthBar);
+// const healthBar = createHealthBar(50, 100, 10); // Current health 50, Max health 100, Buffer health 10
+// console.log(healthBar);
 
 module.exports = { createRoundEmbed }

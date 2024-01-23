@@ -1,5 +1,9 @@
 const { EmbedBuilder } = require('discord.js')
-const { Character, Enemy, MasterCharacter } = require('../../../../Models/model')
+const {
+  Character,
+  Enemy,
+  MasterCharacter,
+} = require('../../../../Models/model')
 
 function generateLevelData(maxLevel) {
   let levelData = []
@@ -42,15 +46,28 @@ const levelData = generateLevelData(maxLevel)
 
 // Add constants for the formula
 const e = 2.71828
-const alpha = 0.1 
+const alpha = 0.1
 
 class LevelUpSystem {
-  static async levelUp(frontlaneCharacterId, backlaneCharacterId, enemyId, interaction) {
+  static async levelUp(
+    frontlaneCharacterId,
+    backlaneCharacterId,
+    enemyId,
+    interaction
+  ) {
     // Process level up for frontlane character
-    await this.processCharacterLevelUp(frontlaneCharacterId, enemyId, interaction);
+    await this.processCharacterLevelUp(
+      frontlaneCharacterId,
+      enemyId,
+      interaction
+    )
 
     // Process level up for backlane character
-    await this.processCharacterLevelUp(backlaneCharacterId, enemyId, interaction);
+    await this.processCharacterLevelUp(
+      backlaneCharacterId,
+      enemyId,
+      interaction
+    )
   }
 
   static async processCharacterLevelUp(characterId, enemyId, interaction) {
@@ -62,75 +79,80 @@ class LevelUpSystem {
           attributes: { exclude: ['master_character_id'] },
         },
       ],
-    });
+    })
 
-    const enemy = await Enemy.findByPk(enemyId);
+    const enemy = await Enemy.findByPk(enemyId)
 
     if (!character || !enemy) {
-      console.error('Character or enemy not found');
-      throw new Error('Character or enemy not found');
+      console.error('Character or enemy not found')
+      throw new Error('Character or enemy not found')
     }
 
     const earnedXP = Math.round(
       enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
-    );
+    )
 
-    let earnedGold = 0;
+    let earnedGold = 0
     if (enemy.type !== 'boss' || enemy.type !== 'mini-boss') {
-      earnedGold = Math.round(enemy.gold_awarded + (20 * enemy.level));
+      earnedGold = Math.round(enemy.gold_awarded + 20 * enemy.level)
     }
 
     if (earnedXP <= 0) {
-      console.warn('No positive experience earned. Skipping update.');
-      return;
+      console.warn('No positive experience earned. Skipping update.')
+      return
     }
 
-    character.experience += Math.round(earnedXP);
+    character.experience += earnedXP
 
-    let newLevelData = null;
-    for (const ld of levelData) {
-      if (character.experience >= ld.cumulativeXP) {
-        newLevelData = ld;
-      } else {
-        break;
+    let levelUpOccurred = false
+    let currentLevelData = levelData.find((ld) => ld.level === character.level);
+    let newLevelData = levelData.find((ld) => ld.level === character.level + 1)
+
+    // Level up process
+    if (character.experience >= currentLevelData.xpToNextLevel) {
+      if (newLevelData && character.level < newLevelData.level) {
+        levelUpOccurred = true
+        character.experience -= currentLevelData.xpToNextLevel
+        character.level = newLevelData.level
+        
+        character.effective_health = Math.floor(
+          character.masterCharacter.base_health * newLevelData.healthMultiplier
+        )
+        character.effective_damage = Math.floor(
+          character.masterCharacter.base_damage * newLevelData.damageMultiplier
+        )
+
+        // Update xp_needed to the total XP required for the next level
+        const nextLevelData = levelData.find(
+          (ld) => ld.level === character.level + 1
+        )
+        character.xp_needed = nextLevelData ? nextLevelData.xpToNextLevel : 0
       }
     }
 
-    try {
-      if (newLevelData && character.experience >= newLevelData.cumulativeXP) {
-        if (character.level < newLevelData.level) {
-            character.level = newLevelData.level;
-            character.xp_needed = newLevelData.cumulativeXP - character.experience;
-    
-            // Update health and damage based on level
-            character.effective_health = Math.floor(
-              character.effective_health * newLevelData.healthMultiplier
-            );
-            character.effective_damage = Math.floor(
-              character.effective_damage * newLevelData.damageMultiplier
-            );
-        } else {
-            // If the character is already at the level, just update xp_needed
-            character.xp_needed -= earnedXP;
-        }
-    }
-    
+    await character.save()
 
-      await character.save();
+    const critEmbed = new EmbedBuilder()
+      .setTitle(`${character.masterCharacter.character_name} wins.`)
+      .addFields({
+        name: `Rewards`,
+        value:
+          `Earned ` +
+          '`' +
+          `⏫${earnedXP}` +
+          '`' +
+          ` XP and found ` +
+          '`' +
+          `🪙${earnedGold}` +
+          '`' +
+          ` gold.`,
+      })
 
-      const critEmbed = new EmbedBuilder()
-        .setTitle(`${character.masterCharacter.character_name} wins.`)
-        .addFields({
-          name: `Rewards`,
-          value: `Earned ` + '`' + `⏫${earnedXP}` + '`' + ` XP and found ` + '`' + `🪙${earnedGold}` + '`' + ` gold.`,
-        });
-
-      await interaction.followUp({ embeds: [critEmbed]});
-    } catch (e) {
-      console.error('Failed to update character:', e);
-    }
+    await interaction.followUp({ embeds: [critEmbed] })
+  }
+  catch(e) {
+    console.error('Failed to update character:', e)
   }
 }
-
 
 module.exports = LevelUpSystem
