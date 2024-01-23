@@ -67,19 +67,25 @@ const createRoundEmbed = (
     }
   })
 
-  // console.log("Embed fields:", embed.data.fields); // Log the fields added to the embed
+  // console.log("Embed fields:", embed.data.fields); // 
   return embed
 }
 
-function createHealthBar(currentHealth, maxHealth) {
-  const totalSegments = 20 // Number of segments in the health bar
-  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments)
-  const unfilledSegments = totalSegments - filledSegments
+function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
+  const totalSegments = 20; // Number of segments in the health bar
+  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments);
+  const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments);
+  const unfilledSegments = totalSegments - filledSegments - bufferSegments;
 
-  const filledBar = (`🟥`).repeat(filledSegments)
-  const unfilledBar = (`\u200B`).repeat(unfilledSegments)
+  const filledBar = ('🟥').repeat(filledSegments);
+  const bufferBar = ('🟦').repeat(bufferSegments); // Represent buffer with a blue square
+  const unfilledBar = ('⬛').repeat(unfilledSegments);
 
-  return `[${filledBar}${unfilledBar}]`
+  return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`';
 }
+
+// Example usage
+const healthBar = createHealthBar(50, 100, 10); // Current health 50, Max health 100, Buffer health 10
+console.log(healthBar);
 
 module.exports = { createRoundEmbed }

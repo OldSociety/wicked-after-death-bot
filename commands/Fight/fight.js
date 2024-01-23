@@ -199,11 +199,11 @@ module.exports = {
               )
               .addFields(
                 {
-                  name: `${frontlaneCharacter.masterCharacter.character_name} (Frontlane)`,
+                  name: `${frontlaneCharacter.masterCharacter.character_name} (Frontlane) | Level ` + '`' + frontlaneCharacter.level.toString() + '`',
                   value: `⚔️ Damage: ${frontlaneCharacter.effective_damage}, 🧡 Health: ${frontlaneCharacter.effective_health}`,
                 },
                 {
-                  name: `${backlaneCharacter.masterCharacter.character_name} (Backlane)`,
+                  name: `${backlaneCharacter.masterCharacter.character_name} (Backlane) | Level ` + '`' + backlaneCharacter.level.toString() + '`',
                   value: `⚔️ Damage: ${backlaneCharacter.effective_damage}, 🧡 Health: ${backlaneCharacter.effective_health}`,
                 },
                 {
@@ -211,7 +211,7 @@ module.exports = {
                   value: '\u200B', // Zero-width space
                 },
                 {
-                  name: `${enemy.character_name} (Enemy)`,
+                  name: `${enemy.character_name} (Enemy) | Level ` + '`' + enemy.level.toString() + '`',
                   value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
                 }
               )

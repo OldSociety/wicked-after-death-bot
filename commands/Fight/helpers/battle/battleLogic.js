@@ -212,7 +212,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
               await LevelUpSystem.levelUp(
                 frontlaneCharacterInstance.character_id,
                 backlaneCharacterInstance.character_id,
-                enemyInstance.id,
+                enemyInstance.enemy_id,
                 interaction
               )
               console.log('XP updated.') // Log on successful

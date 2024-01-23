@@ -7,7 +7,7 @@ const traits = {
   },
   'Huntsman Hyrum': (defender, isCrit) => {
     if (isCrit) {
-      defender.buffer_health += Math.round(defender.effective_health * 0.1); // 10%
+      defender.buffer_health += Math.round(defender.effective_health * 0.2); // 20%
     }
   },
   // ... Other traits ...

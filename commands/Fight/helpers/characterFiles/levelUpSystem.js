@@ -97,16 +97,24 @@ class LevelUpSystem {
     }
 
     try {
-      if (newLevelData && newLevelData.level > character.level) {
-        character.level = newLevelData.level;
-        character.xp_needed = newLevelData.xpToNextLevel;
-        character.effective_health = Math.floor(
-          character.effective_health * newLevelData.healthMultiplier
-        );
-        character.effective_damage = Math.floor(
-          character.effective_damage * newLevelData.damageMultiplier
-        );
-      }
+      if (newLevelData && character.experience >= newLevelData.cumulativeXP) {
+        if (character.level < newLevelData.level) {
+            character.level = newLevelData.level;
+            character.xp_needed = newLevelData.cumulativeXP - character.experience;
+    
+            // Update health and damage based on level
+            character.effective_health = Math.floor(
+              character.effective_health * newLevelData.healthMultiplier
+            );
+            character.effective_damage = Math.floor(
+              character.effective_damage * newLevelData.damageMultiplier
+            );
+        } else {
+            // If the character is already at the level, just update xp_needed
+            character.xp_needed -= earnedXP;
+        }
+    }
+    
 
       await character.save();
 
