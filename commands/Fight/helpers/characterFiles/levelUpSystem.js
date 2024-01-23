@@ -42,7 +42,7 @@ const levelData = generateLevelData(maxLevel)
 
 // Add constants for the formula
 const e = 2.71828
-const alpha = 0.1 // You can set alpha to whatever decay constant you desire
+const alpha = 0.1 
 
 class LevelUpSystem {
   static async levelUp(frontlaneCharacterId, backlaneCharacterId, enemyId, interaction) {

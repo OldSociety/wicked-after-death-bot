@@ -77,7 +77,7 @@ module.exports = {
           .setDescription(
             `Successfully reset the balance of ${user.tag} to ${amount}.`
           )
-        .setColor(0x0099ff)
+          .setColor(0x0099ff)
 
         await interaction.reply({
           embeds: [embedReset],
@@ -137,21 +137,27 @@ module.exports = {
         const userId = customId.split('_').pop()
 
         if (customId.startsWith('delete_account_yes')) {
+          const transaction = await sequelize.transaction()
           try {
             const userAccount = await User.findOne({
               where: { user_id: userId },
+              transaction,
             })
 
             if (!userAccount) {
               await interaction.reply(`No account found for user ID ${userId}`)
+              await transaction.rollback()
               return
             }
 
-            await userAccount.destroy()
+            await userAccount.destroy({ transaction })
+            await transaction.commit()
+
             await interaction.reply(
               `Successfully deleted account for user ID ${userId}`
             )
           } catch (error) {
+            await transaction.rollback()
             console.error('Error deleting account:', error)
             await interaction.reply(
               `An error occurred while deleting the account.`

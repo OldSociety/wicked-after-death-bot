@@ -1,22 +1,22 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { DataTypes, Sequelize } = require('sequelize')
 const sequelize = require('../../config/sequelize.js')
-// const {
-//   scavengeHelper,
-//   getChanceToFind,
-// } = require('../../helpers/scavengeHelper')
+const {
+  scavengeHelper,
+  getChanceToFind,
+} = require('../../helpers/scavengeHelper')
 
 const {
   User,
   Character,
   MasterCharacter,
-  // UserGear,
-  // GearParts,
-  // UserGearParts,
+  UserGear,
+  GearParts,
+  UserGearParts,
 } = require('../../Models/model.js')
 
 const startingCharacterIds = [0, 1, 2]
-// const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 function formatTimestampAndCalculateDays(timestamp) {
   const date = new Date(timestamp)
@@ -60,8 +60,8 @@ module.exports = {
 
         transaction: t,
       })
-      // const chanceToFind = getChanceToFind(userId) // Assuming this returns a number like 0.03
-      // const findPercentage = (chanceToFind * 100).toFixed(0)
+      const chanceToFind = getChanceToFind(userId) // Assuming this returns a number like 0.03
+      const findPercentage = (chanceToFind * 100).toFixed(0)
       const userCreatedAt = user.createdAt
       const result = formatTimestampAndCalculateDays(userCreatedAt)
       if (created) {
@@ -77,27 +77,27 @@ module.exports = {
           })
         )
 
-        //   const gearPartsDetails = await GearParts.findAll({
-        //     where: { parts_id: startingGearParts },
-        //   })
+          const gearPartsDetails = await GearParts.findAll({
+            where: { parts_id: startingGearParts },
+          })
 
-        //   if (!gearPartsDetails || gearPartsDetails.length === 0) {
-        //     throw new Error('Failed to fetch gear parts details')
-        //   }
+          if (!gearPartsDetails || gearPartsDetails.length === 0) {
+            throw new Error('Failed to fetch gear parts details')
+          }
 
-        //   // Create initial UserGear record
-        //   await Promise.all(
-        //     gearPartsDetails.map((part) => {
-        //       return UserGearParts.create(
-        //         {
-        //           user_id: userId,
-        //           parts_id: part.parts_id,
-        //           rarity: part.rarity,
-        //         },
-        //         { transaction: t }
-        //       )
-        //     })
-        //   )
+          // Create initial UserGear record
+          await Promise.all(
+            gearPartsDetails.map((part) => {
+              return UserGearParts.create(
+                {
+                  user_id: userId,
+                  parts_id: part.parts_id,
+                  rarity: part.rarity,
+                },
+                { transaction: t }
+              )
+            })
+          )
         await t.commit()
 
         const embed = new EmbedBuilder()
@@ -114,11 +114,11 @@ module.exports = {
               value:
                 'Three new characters have been added to your collection.\nUse `/account` or `/collection CHARACTER_NAME` to learn more.',
             },
-            // {
-            //   name: 'Scavenging',
-            //   value:
-            //     'Your characters have already begun scavenging the for new gear parts.\nUse `/scavenge` to learn more.',
-            // },
+            {
+              name: 'Scavenging',
+              value:
+                'Your characters have already begun scavenging the for new gear parts.\nUse `/scavenge` to learn more.',
+            },
             {
               name: 'Help',
               value:
@@ -176,9 +176,8 @@ module.exports = {
               nameSpaces
             )}\`  \`${levelField}${' '.repeat(levelSpaces)}\`  \`${xpField}\``
           })
-          .join('\n') // joins each character info with a newline
+          .join('\n') 
 
-        // Then you can add it to your embed like this:
         const embed = new EmbedBuilder()
           .setTitle(`${userName}`)
           .setDescription(`**Created on:** ${result}`)
@@ -187,11 +186,11 @@ module.exports = {
               name: 'Balance:',
               value: '`' + `🪙${user.balance}` + '`',
             },
-            // {
-            //   name: 'Scavenge:',
-            //   value: '`' + `${findPercentage}% chance` + '`',
-            //   inline: true,
-            // },
+            {
+              name: 'Scavenge:',
+              value: '`' + `${findPercentage}% chance` + '`',
+              inline: true,
+            },
             {
               name: 'Characters Owned:',
               value: `${charactersInfo}`,

@@ -28,17 +28,9 @@ module.exports = {
       await queryInterface.bulkInsert('Store', storeData);
       await seedMasterCharacters(characterData);
       await queryInterface.bulkInsert('Enemies', enemyData);
+      await queryInterface.bulkInsert('GearParts', gearPartsData);
+      await queryInterface.bulkInsert('GearSets', gearSetsData);
 
-// await queryInterface.bulkInsert('GearSets', gearSetsData);
-
-      try {
-        console.log('Seeding GearParts data:', gearPartsData);
-        
-        await queryInterface.bulkInsert('GearParts', gearPartsData);
-        // rest of your seeding logic
-      } catch (error) {
-        console.error('Error seeding GearParts data:', error);
-      }      
       await seedStandardLevels(levelData);
       await seedStandardRaids(raidData);
       await seedStandardFights(fightData);
@@ -49,7 +41,15 @@ module.exports = {
     }
   },
   down: async (queryInterface, Sequelize) => {
-    // Add code to revert seed here if necessary.
+    // Revert seed here if necessary.
+    await queryInterface.bulkDelete('StandardFights', null, {});
+    await queryInterface.bulkDelete('StandardRaids', null, {});
+    await queryInterface.bulkDelete('StandardLevels', null, {});
+    await queryInterface.bulkDelete('GearSets', null, {});
+    await queryInterface.bulkDelete('GearParts', null, {});
+    await queryInterface.bulkDelete('Enemies', null, {});
+    await queryInterface.bulkDelete('Store', null, {});
+    console.log('Data seeding reverted.');
   },
 };
 
@@ -80,10 +80,7 @@ async function seedStandardRaids(data) {
     if (level) {
       await StandardRaid.findOrCreate({
         where: { raid_id: raid.raid_id },
-        defaults: {
-          level_id: raid.level_id,
-          fight_number: raid.fight_number,
-        },
+        defaults: raid,
       });
     }
   }
@@ -91,12 +88,15 @@ async function seedStandardRaids(data) {
 
 async function seedStandardFights(data) {
   for (const fight of data) {
-    await StandardFight.findOrCreate({
-      where: { fight_id: fight.fight_id },
-      defaults: {
-        raid_id: fight.raid_id,
-        enemy_id: fight.enemy_id,
-      },
+    const raid = await StandardRaid.findOne({
+      where: { raid_id: fight.raid_id },
     });
+
+    if (raid) {
+      await StandardFight.findOrCreate({
+        where: { fight_id: fight.fight_id },
+        defaults: fight,
+      });
+    }
   }
 }
