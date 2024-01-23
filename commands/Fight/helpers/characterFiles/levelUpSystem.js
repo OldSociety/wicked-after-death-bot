@@ -109,26 +109,27 @@ class LevelUpSystem {
     let newLevelData = levelData.find((ld) => ld.level === character.level + 1)
 
     // Level up process
-    if (character.experience >= currentLevelData.xpToNextLevel) {
-      if (newLevelData && character.level < newLevelData.level) {
-        levelUpOccurred = true
-        character.experience -= currentLevelData.xpToNextLevel
-        character.level = newLevelData.level
-        
-        character.effective_health = Math.floor(
-          character.masterCharacter.base_health * newLevelData.healthMultiplier
-        )
-        character.effective_damage = Math.floor(
-          character.masterCharacter.base_damage * newLevelData.damageMultiplier
-        )
+// Level up process
+if (character.experience >= currentLevelData.xpToNextLevel) {
+  if (newLevelData && character.level < newLevelData.level) {
+    levelUpOccurred = true;
+    character.level = newLevelData.level;
+    
+    // Update health and damage based on new level
+    character.effective_health = Math.floor(
+      character.masterCharacter.base_health * newLevelData.healthMultiplier
+    );
+    character.effective_damage = Math.floor(
+      character.masterCharacter.base_damage * newLevelData.damageMultiplier
+    );
 
-        // Update xp_needed to the total XP required for the next level
-        const nextLevelData = levelData.find(
-          (ld) => ld.level === character.level + 1
-        )
-        character.xp_needed = nextLevelData ? nextLevelData.xpToNextLevel : 0
-      }
-    }
+    // Calculate and update experience for the next level
+    character.experience -= currentLevelData.xpToNextLevel;
+    character.xp_needed = newLevelData.xpToNextLevel;
+  }
+}
+
+
 
     await character.save()
 
