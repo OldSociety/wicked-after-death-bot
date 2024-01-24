@@ -38,40 +38,28 @@ async function selectFight(interaction, raidId) {
 
     const filter = (i) =>
       i.customId.startsWith('fightSelect_') && i.user.id === interaction.user.id;
-    const collector = interaction.channel.createMessageComponentCollector({
-      filter,
-      time: 15000,
-    });
+    
+    // Await the user's button interaction
+    const res = await interaction.channel.awaitMessageComponent({ filter, time: 15000 });
 
-    return new Promise((resolve) => {
-      collector.on('collect', async (i) => {
-        const selectedFightId = i.customId.split('_')[1];
-        const selectedFight = fights.find(fight => fight.fight_id.toString() === selectedFightId);
+    const selectedFightId = res.customId.split('_')[1];
+    const selectedFight = fights.find(fight => fight.fight_id.toString() === selectedFightId);
 
-        if (!selectedFight) {
-          await interaction.followUp('Error: Fight not found.');
-          resolve(null);
-          return;
-        }
+    if (!selectedFight) {
+      await res.reply('Error: Fight not found.');
+      return null;
+    }
 
-        const enemy = await Enemy.findByPk(selectedFight.enemy_id);
+    const enemy = await Enemy.findByPk(selectedFight.enemy_id);
 
-        if (!enemy) {
-          await interaction.followUp('Error: No enemy data found for this fight.');
-          resolve(null);
-          return;
-        }
+    if (!enemy) {
+      await res.reply('Error: No enemy data found for this fight.');
+      return null;
+    }
 
-        resolve({ fightId: selectedFightId, enemy });
-      });
+    await res.deferUpdate();
+    return { fightId: selectedFightId, enemy };
 
-      collector.on('end', (collected) => {
-        if (!collected.size) {
-          interaction.followUp('No fight was selected.');
-          resolve(null);
-        }
-      });
-    });
   } catch (error) {
     console.error('Error in selectFight:', error);
     if (!interaction.replied && !interaction.deferred) {

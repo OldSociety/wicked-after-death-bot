@@ -5,7 +5,7 @@ async function selectRaid(interaction, levelId) {
   try {
     const raids = await StandardRaid.findAll({
       where: { level_id: levelId },
-    }); 
+    });
 
     if (raids.length === 0) {
       await interaction.editReply('No raids available for this level.');
@@ -41,31 +41,19 @@ async function selectRaid(interaction, levelId) {
     const filter = (i) =>
       i.customId.startsWith('raidSelect_') && i.user.id === interaction.user.id;
     
-    const collector = interaction.channel.createMessageComponentCollector({
-      filter,
-      time: 15000,
+    // Await the user's button interaction
+    const res = await interaction.channel.awaitMessageComponent({ filter, time: 15000 });
+
+    const selectedRaidId = res.customId.split('_')[1];
+    await res.update({
+      content: `You have selected Raid ${selectedRaidId}.`,
+      components: [],
     });
 
-    return new Promise((resolve) => {
-      collector.on('collect', async (i) => {
-        const selectedRaidId = i.customId.split('_')[1];
-        await i.update({
-          content: `You have selected Raid ${selectedRaidId}.`,
-          components: [],
-        });
-        collector.stop(); // Stop the collector
-        resolve(selectedRaidId);
-      });
+    return selectedRaidId;
 
-      collector.on('end', (collected) => {
-        if (!collected.size) {
-          interaction.followUp('No raid was selected.');
-          resolve(null);
-        }
-      });
-    });
   } catch (error) {
-    console.error(error);
+    console.error('Error in selectRaid:', error);
     await interaction.followUp('Something went wrong while fetching raids.');
     return null;
   }
