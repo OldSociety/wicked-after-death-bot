@@ -6,6 +6,8 @@ const {
   StringSelectMenuOptionBuilder,
 } = require('discord.js')
 
+const { User } = require('../../Models/model.js')
+
 // HELPERS
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { selectLevel } = require('./helpers/levelSelection/levelSelection')
@@ -25,6 +27,18 @@ module.exports = {
     try {
       const userId = interaction.user.id
       const userName = interaction.user.username
+
+      const user = await User.findOne({
+        where: { user_id: interaction.user.id },
+      })
+
+      if (!user) {
+        await interaction.reply({
+          content: "You don't have an account. Use `/account` to create one.",
+          ephemeral: true,
+        })
+        return
+      }
 
       await interaction.deferReply({ ephemeral: true })
 

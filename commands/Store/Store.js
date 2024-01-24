@@ -21,7 +21,7 @@ module.exports = {
 
     try {
       const user = await User.findOne({ where: { user_id: userId } })
-      if (!user) return interaction.reply('You do not have an account.')
+      if (!user) return interaction.reply('You do not have an account. Use `/account` to get started.')
 
       const storeItems = await Store.findAll()
 

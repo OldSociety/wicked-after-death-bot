@@ -5,7 +5,7 @@ async function selectRaid(interaction, levelId) {
   try {
     const raids = await StandardRaid.findAll({
       where: { level_id: levelId },
-    });
+    }); 
 
     if (raids.length === 0) {
       await interaction.editReply('No raids available for this level.');
