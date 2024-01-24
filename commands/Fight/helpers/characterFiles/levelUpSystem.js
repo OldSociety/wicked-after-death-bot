@@ -105,35 +105,31 @@ class LevelUpSystem {
     character.experience += earnedXP
 
     let levelUpOccurred = false
-    let currentLevelData = levelData.find((ld) => ld.level === character.level);
+    let currentLevelData = levelData.find((ld) => ld.level === character.level)
     let newLevelData = levelData.find((ld) => ld.level === character.level + 1)
 
     // Level up process
-// Level up process
-if (character.experience >= currentLevelData.xpToNextLevel) {
-  if (newLevelData && character.level < newLevelData.level) {
-    levelUpOccurred = true;
-    character.level = newLevelData.level;
-    
-    // Update health and damage based on new level
-    character.effective_health = Math.floor(
-      character.masterCharacter.base_health * newLevelData.healthMultiplier
-    );
-    character.effective_damage = Math.floor(
-      character.masterCharacter.base_damage * newLevelData.damageMultiplier
-    );
+    if (character.experience >= currentLevelData.xpToNextLevel) {
+      if (newLevelData && character.level < newLevelData.level) {
+        levelUpOccurred = true
+        character.level = newLevelData.level
 
-    // Calculate and update experience for the next level
-    character.experience -= currentLevelData.xpToNextLevel;
-    character.xp_needed = newLevelData.xpToNextLevel;
-  }
-}
+        // Update health and damage based on new level
+        character.effective_health = Math.floor(
+          character.masterCharacter.base_health * newLevelData.healthMultiplier
+        )
+        character.effective_damage = Math.floor(
+          character.masterCharacter.base_damage * newLevelData.damageMultiplier
+        )
 
-
-
+        // Calculate and update experience for the next level
+        character.experience -= currentLevelData.xpToNextLevel
+        character.xp_needed = newLevelData.xpToNextLevel
+      }
+    }
     await character.save()
 
-    const critEmbed = new EmbedBuilder()
+    const rewardEmbed = new EmbedBuilder()
       .setTitle(`${character.masterCharacter.character_name} wins.`)
       .addFields({
         name: `Rewards`,
@@ -149,7 +145,51 @@ if (character.experience >= currentLevelData.xpToNextLevel) {
           ` gold.`,
       })
 
-    await interaction.followUp({ embeds: [critEmbed] })
+    await interaction.followUp({ embeds: [rewardEmbed] })
+
+    const levelUpEmbed = new EmbedBuilder()
+      .setTitle(
+        `${character.masterCharacter.character_name} reaches level ${character.level}!`
+      )
+      .addFields(
+        {
+          name: 'Level',
+          value: '`' + character.level.toString() + '`',
+          inline: true,
+        },
+        {
+          name: 'Experience',
+          value:
+            '`' +
+            character.experience.toString() +
+            ' / ' +
+            character.xp_needed.toString() +
+            '`',
+          inline: true,
+        },
+        {
+          name: 'Damage',
+          value: '`⚔️' + character.effective_damage.toString() + '`',
+          inline: true,
+        },
+        {
+          name: 'Health',
+          value: '`🧡' + character.effective_health.toString() + '`',
+          inline: true,
+        },
+        {
+          name: 'Crit Chances',
+          value: '`🎯' + character.masterCharacter.crit_chance.toString() + '`',
+          inline: true,
+        },
+        {
+          name: 'Crit Damage',
+          value: '`💥' + character.masterCharacter.crit_damage.toString() + '`',
+          inline: true,
+        }
+      )
+
+    await interaction.followUp({ embeds: [levelUpEmbed], ephemeral: true })
   }
   catch(e) {
     console.error('Failed to update character:', e)
