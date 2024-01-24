@@ -6,8 +6,18 @@ const cooldowns = new Map();
 
 // Function to check if a user is on cooldown
 function isOnCooldown(userId) {
-  return cooldowns.has(userId);
-}
+    const now = Date.now();
+    if (cooldowns.has(userId)) {
+      const cooldownEndTime = cooldowns.get(userId);
+      if (now > cooldownEndTime) {
+        // Cooldown has expired, remove the user from the map
+        cooldowns.delete(userId);
+        return false; // No longer on cooldown
+      }
+      return true; // Still on cooldown
+    }
+    return false; // Not on cooldown
+  }
 
 // Function to start the cooldown for a user
 function startCooldown(userId) {
@@ -86,7 +96,6 @@ module.exports = {
           `You can scavenge again in ${timeRemaining.toFixed(0)} seconds.`
         );
       }
-
       const currentTime = new Date();
       console.log('Current time:', currentTime);
 

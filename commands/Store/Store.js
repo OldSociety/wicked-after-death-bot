@@ -60,7 +60,7 @@ module.exports = {
 
       collector.on('collect', async (i) => {
         try {
-          await i.deferReply({ ephemeral: true }) // Defer the reply
+          await i.deferReply({ ephemeral: false }) // Defer the reply
           const selectedPackName = i.values[0]
           const purchaseResult = await handleCharacterPackPurchase(
             user,
