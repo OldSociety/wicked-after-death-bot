@@ -54,6 +54,16 @@ module.exports = {
           allowNull: false,
           defaultValue: 0,
         },
+        crit_chance: {
+          type: Sequelize.FLOAT,
+          allowNull: false,
+          defaultValue: 0.0,
+        },
+        crit_damage: {
+          type: Sequelize.FLOAT,
+          allowNull: false,
+          defaultValue: 1.5,
+        },
         consecutive_kill: {
           type: Sequelize.INTEGER,
           allowNull: false,

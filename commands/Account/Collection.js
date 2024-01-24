@@ -160,7 +160,7 @@ module.exports = {
                 inline: true,
               },
               {
-                name: 'Crit Chances',
+                name: 'Crit Chance',
                 value:
                   '`🎯' +
                   selectedCharacter.masterCharacter.crit_chance.toString() +

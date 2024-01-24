@@ -126,28 +126,7 @@ class LevelUpSystem {
         character.experience -= currentLevelData.xpToNextLevel
         character.xp_needed = newLevelData.xpToNextLevel
       }
-    }
-    await character.save()
-
-    const rewardEmbed = new EmbedBuilder()
-      .setTitle(`${character.masterCharacter.character_name} wins.`)
-      .addFields({
-        name: `Rewards`,
-        value:
-          `Earned ` +
-          '`' +
-          `⏫${earnedXP}` +
-          '`' +
-          ` XP and found ` +
-          '`' +
-          `🪙${earnedGold}` +
-          '`' +
-          ` gold.`,
-      })
-
-    await interaction.followUp({ embeds: [rewardEmbed] })
-
-    const levelUpEmbed = new EmbedBuilder()
+      const levelUpEmbed = new EmbedBuilder()
       .setTitle(
         `${character.masterCharacter.character_name} reaches level ${character.level}!`
       )
@@ -178,7 +157,7 @@ class LevelUpSystem {
           inline: true,
         },
         {
-          name: 'Crit Chances',
+          name: 'Crit Chance',
           value: '`🎯' + character.masterCharacter.crit_chance.toString() + '`',
           inline: true,
         },
@@ -190,6 +169,28 @@ class LevelUpSystem {
       )
 
     await interaction.followUp({ embeds: [levelUpEmbed], ephemeral: true })
+    }
+    await character.save()
+
+    const rewardEmbed = new EmbedBuilder()
+      .setTitle(`${character.masterCharacter.character_name} wins.`)
+      .addFields({
+        name: `Rewards`,
+        value:
+          `Earned ` +
+          '`' +
+          `⏫${earnedXP}` +
+          '`' +
+          ` XP and found ` +
+          '`' +
+          `🪙${earnedGold}` +
+          '`' +
+          ` gold.`,
+      })
+
+    await interaction.followUp({ embeds: [rewardEmbed] })
+
+
   }
   catch(e) {
     console.error('Failed to update character:', e)
