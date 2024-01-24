@@ -20,24 +20,19 @@ const createRoundEmbed = (
           action.isCrit ? 'landed a critical hit!' : 'strikes'
         } for ${action.isCrit ? '💥' : '⚔️'}${action.actualDamage} damage`
 
-    // let healthDesc;
 
-    // if (action.defender.character_name === frontlaneCharacter.character_name) {
-    //   healthDesc = `🧡 ${frontlaneCharacter.current_health}`;
-    // } else if (action.defender.character_name === backlaneCharacter.character_name) {
-    //   healthDesc = `🧡 ${backlaneCharacter.current_health}`;
-    // } else {
-    //   // Assuming the only other option is the enemy
-    //   healthDesc = `🧡 ${enemy.current_health}`;
-    // }
     // Example usage: health bar [■■■■■■■■■■■■■■■■■■■■]
 
     let healthDesc
     if (action.defender.character_name === frontlaneCharacter.character_name) {
-      healthDesc = createHealthBar(
+      healthDesc = `${createHealthBar(
         frontlaneCharacter.current_health,
         frontlaneCharacter.effective_health
-      )
+      )}\n\n${backlaneCharacter.character_name}'s health ${createBacklaneHealthBar(
+        backlaneCharacter.current_health,
+        backlaneCharacter.effective_health
+      )}`
+
     } else if (
       action.defender.character_name === backlaneCharacter.character_name
     ) {
@@ -52,7 +47,7 @@ const createRoundEmbed = (
 
     embed.addFields(
       { name: '`' + `Action` + '`', value: actionDesc },
-      { name: `${action.defender.character_name}'s Health`, value: healthDesc }
+      { name: `\n${action.defender.character_name}'s Health`, value: healthDesc }
     )
 
     if (action.bufferDamage > 0) {
@@ -82,6 +77,18 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   const unfilledBar = ('⬛').repeat(unfilledSegments);
 
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`';
+}
+
+function createBacklaneHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
+  const totalSegments = 20; // Number of segments in the health bar
+  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments);
+  const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments);
+  const unfilledSegments = totalSegments - filledSegments - bufferSegments;
+
+  const filledBar = ('■').repeat(filledSegments);
+  const unfilledBar = ('□').repeat(unfilledSegments);
+
+  return '`' + '『' + `${filledBar}${unfilledBar}` + '』' + '`';
 }
 
 // Example usage

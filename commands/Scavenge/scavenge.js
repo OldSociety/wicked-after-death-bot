@@ -51,7 +51,7 @@ async function scavengeGearParts(userId, chanceToFind) {
 
     return embed;
   } else {
-    const embed = new EmbedBuilder().setDescription('Nothing found.');
+    const embed = new EmbedBuilder().setDescription('You spent hours scavenging ruins but nothing was found.');
     return embed;
   }
 }
