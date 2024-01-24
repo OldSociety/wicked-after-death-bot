@@ -16,7 +16,7 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
-        fight_number: {
+        fight_total: {
           type: Sequelize.INTEGER,
           allowNull: false,
           defaultValue: 1,

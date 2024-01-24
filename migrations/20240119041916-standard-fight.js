@@ -12,6 +12,10 @@ module.exports = {
           primaryKey: true,
           autoIncrement: true,
         },
+        fight_name: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
         raid_id: {
           type: Sequelize.INTEGER,
           allowNull: false,

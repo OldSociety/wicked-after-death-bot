@@ -25,7 +25,7 @@ async function selectFight(interaction, raidId) {
       .setPlaceholder('Select a fight')
       .addOptions(
         fights.map((fight) => ({
-          label: `Fight ${fight.fight_id}`,
+          label: `${fight.fight_name}`,
           value: fight.fight_id.toString(),
         }))
       )
