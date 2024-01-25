@@ -15,7 +15,7 @@ const createRoundEmbed = (
 
   actions.forEach((action, index) => {
     let actionDesc = action.didMiss
-      ? `${action.attacker.character_name} missed.`
+      ? `${action.attacker.character_name} was partially blocked.`
       : `${action.attacker.character_name} ${
           action.isCrit ? 'landed a critical hit!' : 'strikes'
         } for ${action.isCrit ? '💥' : '⚔️'}${action.actualDamage} damage`

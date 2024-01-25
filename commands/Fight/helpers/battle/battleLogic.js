@@ -19,31 +19,37 @@ const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
 let cronTask = null
 
 async function applyDamage(attacker, defender, userId) {
-  // console.log('check for working code', attacker, defender)
   const randHit = Math.random() * 100
-  let isCrit = false,
-    didMiss = false,
-    actualDamage,
-    bufferDamage = 0 // Initialize bufferDamage to 0
+  let isCrit = false
+  let actualDamage
+  let bufferDamage = 0 // Initialize bufferDamage to 0
+
+  // Calculate damage range
+  const [minDamage, maxDamage, isCriticalHit] = calcDamage(attacker, randHit)
+
+  // Apply Traits
+  if (traits[defender.character_name]) {
+    traits[defender.character_name](defender, isCriticalHit, attacker)
+  }
 
   if (randHit < attacker.chance_to_hit * 100) {
     // Attack hits
-    ;[minDamage, maxDamage, isCrit] = calcDamage(attacker, randHit)
-
-    // Apply Traits
-    if (traits[defender.character_name]) {
-      traits[defender.character_name](defender, isCrit, attacker)
-    }
-
+    isCrit = isCriticalHit
     actualDamage = calcActualDamage(minDamage, maxDamage)
-    bufferDamage = Math.min(actualDamage, defender.buffer_health)
-
-    updateBufferHealth(defender, bufferDamage)
-    updateHealth(defender, actualDamage - bufferDamage)
   } else {
-    // Attack misses
-    didMiss = true
+    // Attack misses - apply 3/4 damage
+    actualDamage = Math.round(calcActualDamage(minDamage, maxDamage) * 0.75)
+    isCrit = false // Ensure critical hit is not considered on a miss
   }
+
+  bufferDamage = Math.min(actualDamage, defender.buffer_health)
+
+  console.log(
+    `APPLY DAMAGE: ${attacker.character_name} dealt ${bufferDamage} damage to ${defender.character_name}. Was it a critical? ${isCrit}.`
+  )
+
+  updateBufferHealth(defender, bufferDamage)
+  updateHealth(defender, actualDamage - bufferDamage)
 
   return compileDamageResult(
     attacker,
@@ -51,7 +57,7 @@ async function applyDamage(attacker, defender, userId) {
     actualDamage,
     bufferDamage,
     isCrit,
-    didMiss
+    randHit >= attacker.chance_to_hit * 100 // didMiss is true if randHit is greater or equal to chance to hit
   )
 }
 
@@ -228,9 +234,9 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           } else {
             frontlaneCharacterInstance.consecutive_kill = 0
             backlaneCharacterInstance.consecutive_kill = 0
-            const lossEmbed = new EmbedBuilder().setColor('DarkRed').setDescription(
-              `${enemyInstance.character_name} wins.`
-            )
+            const lossEmbed = new EmbedBuilder()
+              .setColor('DarkRed')
+              .setDescription(`${enemyInstance.character_name} wins.`)
             await interaction.followUp({ embeds: [lossEmbed] })
           }
 
