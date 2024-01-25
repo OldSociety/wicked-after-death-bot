@@ -61,7 +61,7 @@ async function applyDamage(attacker, defender, userId) {
   )
 }
 
-// ROUND LOGIC
+
 const applyRound = async (
   frontlaneCharacter,
   backlaneCharacter,

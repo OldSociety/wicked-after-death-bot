@@ -25,10 +25,6 @@ module.exports = {
           type: Sequelize.TEXT,
           allowNull: false,
         },
-        type: {
-          type: Sequelize.STRING,
-          allowNull: false,
-        },
         passive: {
           type: Sequelize.STRING,
           allowNull: true,

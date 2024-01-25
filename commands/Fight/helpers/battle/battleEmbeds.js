@@ -6,11 +6,10 @@ const createRoundEmbed = (
   frontlaneCharacter,
   backlaneCharacter,
   enemy,
-  turnNum
 ) => {
   // console.log("Received actions:", actions); // Log the actions array
   const embed = new EmbedBuilder()
-    .setTitle(`Battle Status: Turn ${turnNum}`)
+    .setTitle(`Battle Status`)
     .setColor('DarkBlue')
 
   actions.forEach((action, index) => {
