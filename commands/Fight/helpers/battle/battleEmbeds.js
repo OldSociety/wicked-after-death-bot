@@ -14,40 +14,39 @@ const createRoundEmbed = (
     .setColor('DarkBlue')
 
   actions.forEach((action, index) => {
-    // console.log(`Processing action ${index}:`, action); // Log each action
-
     let actionDesc = action.didMiss
       ? `${action.attacker.character_name} missed.`
       : `${action.attacker.character_name} ${
           action.isCrit ? 'landed a critical hit!' : 'strikes'
         } for ${action.isCrit ? '💥' : '⚔️'}${action.actualDamage} damage`
 
-    // Example usage: health bar [■■■■■■■■■■■■■■■■■■■■]
-
     let healthDesc
+    let healthFieldName
+
     if (action.defender.character_name === frontlaneCharacter.character_name) {
-      // healthDesc = `${createHealthBar(
-      //   frontlaneCharacter.current_health,
-      //   frontlaneCharacter.effective_health
-      // )}\n\n${
-      //   backlaneCharacter.character_name
-      // }'s health ${createBacklaneHealthBar(
-      //   backlaneCharacter.current_health,
-      //   backlaneCharacter.effective_health
-      // )}`
-      healthDesc = `${createHealthBar(
-        frontlaneCharacter.current_health,
-        frontlaneCharacter.effective_health
-      )}`
+      if (frontlaneCharacter.current_health === 0) {
+        // Frontlane character falls
+        healthFieldName = `\n${action.defender.character_name} Falls!`
+        healthDesc = `${backlaneCharacter.character_name} steps forward.`
+      } else {
+        // Regular health bar display for frontlane character
+        healthFieldName = `\n${action.defender.character_name}'s Health`
+        healthDesc = createHealthBar(
+          frontlaneCharacter.current_health,
+          frontlaneCharacter.effective_health
+        )
+      }
     } else if (
       action.defender.character_name === backlaneCharacter.character_name
     ) {
+      healthFieldName = `\n${action.defender.character_name}'s Health`
       healthDesc = createHealthBar(
         backlaneCharacter.current_health,
         backlaneCharacter.effective_health
       )
     } else {
       // Assuming the only other option is the enemy
+      healthFieldName = `\n${action.defender.character_name}'s Health`
       healthDesc = createHealthBar(enemy.current_health, enemy.effective_health)
     }
 
@@ -57,7 +56,7 @@ const createRoundEmbed = (
         value: actionDesc,
       },
       {
-        name: `\n${action.defender.character_name}'s Health`,
+        name: healthFieldName,
         value: healthDesc,
       }
     )
@@ -80,9 +79,20 @@ const createRoundEmbed = (
 
 function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   const totalSegments = 20 // Number of segments in the health bar
-  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments)
+  
+  // Calculate filled segments; ensure at least one if current health is greater than 0
+  let filledSegments = Math.round((currentHealth / maxHealth) * totalSegments)
+  if (currentHealth > 0 && filledSegments < 1) {
+    filledSegments = 1
+  }
+
   const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments)
-  const unfilledSegments = totalSegments - filledSegments - bufferSegments
+
+  // Adjust unfilled segments to account for minimum one filled segment
+  let unfilledSegments = totalSegments - filledSegments - bufferSegments
+  if (unfilledSegments > totalSegments) {
+    unfilledSegments = totalSegments
+  }
 
   const filledBar = '🟥'.repeat(filledSegments)
   const bufferBar = '🟦'.repeat(bufferSegments) // Represent buffer with a blue square

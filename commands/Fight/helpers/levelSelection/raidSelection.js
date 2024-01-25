@@ -25,7 +25,7 @@ async function selectRaid(interaction, levelId) {
         row.addComponents(
           new ButtonBuilder()
             .setCustomId(`raidSelect_${raid.raid_id}`)
-            .setLabel(`Raid ${raid.raid_id}`)
+            .setLabel(raid.raid_name)
             .setStyle('Success')
         );
       });
@@ -45,10 +45,7 @@ async function selectRaid(interaction, levelId) {
     const res = await interaction.channel.awaitMessageComponent({ filter, time: 15000 });
 
     const selectedRaidId = res.customId.split('_')[1];
-    await res.update({
-      content: `You have selected Raid ${selectedRaidId}.`,
-      components: [],
-    });
+    await res.update({ content: `You have selected level ${selectedRaidId}.`, components: [] });
 
     return selectedRaidId;
 

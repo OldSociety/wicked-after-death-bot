@@ -12,6 +12,10 @@ module.exports = {
           primaryKey: true,
           autoIncrement: true,
         },
+        raid_name: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
         level_id: {
           type: Sequelize.INTEGER,
           allowNull: false,

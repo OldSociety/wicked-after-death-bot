@@ -209,7 +209,7 @@ module.exports = {
             const embed = new EmbedBuilder()
               .setTitle('⚡Fight!').setColor('DarkRed')
               .setDescription(
-                `**${userName}'s team** is looking for a fight and has found **${enemy.character_name}**!`
+                `**${userName}'s team** is looking for a fight and has found the **${enemy.character_name}**!`
               )
               .addFields(
                 createCharacterField(frontlaneCharacter, 'Frontlane'),
