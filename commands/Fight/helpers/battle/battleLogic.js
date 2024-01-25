@@ -38,10 +38,6 @@ async function applyDamage(attacker, defender, userId) {
     actualDamage = calcActualDamage(minDamage, maxDamage)
     bufferDamage = Math.min(actualDamage, defender.buffer_health)
 
-    console.log(
-      `APPLY DAMAGE: ${attacker.character_name} dealt ${bufferDamage} damage to ${defender.character_name}. Was it a critical? ${isCrit}.`
-    )
-
     updateBufferHealth(defender, bufferDamage)
     updateHealth(defender, actualDamage - bufferDamage)
   } else {
@@ -232,10 +228,10 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           } else {
             frontlaneCharacterInstance.consecutive_kill = 0
             backlaneCharacterInstance.consecutive_kill = 0
-            const winEmbed = new EmbedBuilder().setDescription(
+            const lossEmbed = new EmbedBuilder().setColor('DarkRed').setDescription(
               `${enemyInstance.character_name} wins.`
             )
-            await interaction.followUp({ embeds: [winEmbed] })
+            await interaction.followUp({ embeds: [lossEmbed] })
           }
 
           // Update consecutive_kill value for the frontlane character

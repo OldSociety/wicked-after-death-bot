@@ -61,7 +61,6 @@ class RewardsHandler {
 
       const frontlaneXP = calculateXP(frontlaneCharacter.level, enemy.level)
       const backlaneXP = calculateXP(backlaneCharacter.level, enemy.level)
-      console.log('frontlane: ', frontlaneXP, ' backlane: ', backlaneXP)
 
       let earnedGold = 0
       if (enemy.type !== 'boss' || enemy.type !== 'mini-boss') {
@@ -75,21 +74,22 @@ class RewardsHandler {
       // Create and send the reward embed
       const rewardEmbed = new EmbedBuilder()
         .setTitle(`${enemy.character_name} defeated!`)
+        .setColor('DarkGreen')
         .addFields(
           {
             name: `${frontlaneCharacter.masterCharacter.character_name} `,
             value: '`' + `⏫${frontlaneXP} XP` + '`' + ` >> ` + '`' + `⏫${frontlaneCharacter.experience} / ${frontlaneCharacter.xp_needed} XP`+ '`' , 
-            inline: true,
+            // inline: true,
           },
           {
             name: `${backlaneCharacter.masterCharacter.character_name} `,
             value: '`' + `⏫${backlaneXP} XP` + '`' +  ` >> ` + '`' + `⏫${backlaneCharacter.experience} / ${backlaneCharacter.xp_needed} XP`+ '`', 
-            inline: true,
+            // inline: true,
           },
           { name: 'Reward ', value: '`' + `🪙${earnedGold}` + '`' + ` >> ` + '`' + `🪙${user.balance}` + '`',}
         )
 
-      await interaction.followUp({ embeds: [rewardEmbed], ephemeral: true })
+      await interaction.followUp({ embeds: [rewardEmbed], ephemeral: false })
     } catch (error) {
       console.error('Error in handleRewards:', error)
       await interaction.followUp('An error occurred while processing rewards.')

@@ -9,7 +9,9 @@ const createRoundEmbed = (
   turnNum
 ) => {
   // console.log("Received actions:", actions); // Log the actions array
-  const embed = new EmbedBuilder().setTitle(`Battle Status: Turn ${turnNum}`)
+  const embed = new EmbedBuilder()
+    .setTitle(`Battle Status: Turn ${turnNum}`)
+    .setColor('DarkBlue')
 
   actions.forEach((action, index) => {
     // console.log(`Processing action ${index}:`, action); // Log each action
@@ -20,19 +22,23 @@ const createRoundEmbed = (
           action.isCrit ? 'landed a critical hit!' : 'strikes'
         } for ${action.isCrit ? '💥' : '⚔️'}${action.actualDamage} damage`
 
-
     // Example usage: health bar [■■■■■■■■■■■■■■■■■■■■]
 
     let healthDesc
     if (action.defender.character_name === frontlaneCharacter.character_name) {
+      // healthDesc = `${createHealthBar(
+      //   frontlaneCharacter.current_health,
+      //   frontlaneCharacter.effective_health
+      // )}\n\n${
+      //   backlaneCharacter.character_name
+      // }'s health ${createBacklaneHealthBar(
+      //   backlaneCharacter.current_health,
+      //   backlaneCharacter.effective_health
+      // )}`
       healthDesc = `${createHealthBar(
         frontlaneCharacter.current_health,
         frontlaneCharacter.effective_health
-      )}\n\n${backlaneCharacter.character_name}'s health ${createBacklaneHealthBar(
-        backlaneCharacter.current_health,
-        backlaneCharacter.effective_health
       )}`
-
     } else if (
       action.defender.character_name === backlaneCharacter.character_name
     ) {
@@ -46,8 +52,14 @@ const createRoundEmbed = (
     }
 
     embed.addFields(
-      { name: '`' + `Action` + '`', value: actionDesc },
-      { name: `\n${action.defender.character_name}'s Health`, value: healthDesc }
+      {
+        name: '\u200B', // Zero-width space
+        value: actionDesc,
+      },
+      {
+        name: `\n${action.defender.character_name}'s Health`,
+        value: healthDesc,
+      }
     )
 
     if (action.bufferDamage > 0) {
@@ -62,33 +74,33 @@ const createRoundEmbed = (
     }
   })
 
-  // console.log("Embed fields:", embed.data.fields); // 
+  // console.log("Embed fields:", embed.data.fields); //
   return embed
 }
 
 function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
-  const totalSegments = 20; // Number of segments in the health bar
-  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments);
-  const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments);
-  const unfilledSegments = totalSegments - filledSegments - bufferSegments;
+  const totalSegments = 20 // Number of segments in the health bar
+  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments)
+  const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments)
+  const unfilledSegments = totalSegments - filledSegments - bufferSegments
 
-  const filledBar = ('🟥').repeat(filledSegments);
-  const bufferBar = ('🟦').repeat(bufferSegments); // Represent buffer with a blue square
-  const unfilledBar = ('⬛').repeat(unfilledSegments);
+  const filledBar = '🟥'.repeat(filledSegments)
+  const bufferBar = '🟦'.repeat(bufferSegments) // Represent buffer with a blue square
+  const unfilledBar = '⬛'.repeat(unfilledSegments)
 
-  return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`';
+  return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 
 function createBacklaneHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
-  const totalSegments = 20; // Number of segments in the health bar
-  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments);
-  const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments);
-  const unfilledSegments = totalSegments - filledSegments - bufferSegments;
+  const totalSegments = 20 // Number of segments in the health bar
+  const filledSegments = Math.round((currentHealth / maxHealth) * totalSegments)
+  const bufferSegments = Math.round((bufferHealth / maxHealth) * totalSegments)
+  const unfilledSegments = totalSegments - filledSegments - bufferSegments
 
-  const filledBar = ('■').repeat(filledSegments);
-  const unfilledBar = ('□').repeat(unfilledSegments);
+  const filledBar = '■'.repeat(filledSegments)
+  const unfilledBar = '□'.repeat(unfilledSegments)
 
-  return '`' + '『' + `${filledBar}${unfilledBar}` + '』' + '`';
+  return '`' + '『' + `${filledBar}${unfilledBar}` + '』' + '`'
 }
 
 // Example usage

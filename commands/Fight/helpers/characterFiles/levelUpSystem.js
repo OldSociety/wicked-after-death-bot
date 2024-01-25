@@ -129,7 +129,7 @@ class LevelUpSystem {
       const levelUpEmbed = new EmbedBuilder()
       .setTitle(
         `${character.masterCharacter.character_name} reaches level ${character.level}!`
-      )
+      ).setColor('DarkGold')
       .addFields(
         {
           name: 'Level',
@@ -168,7 +168,7 @@ class LevelUpSystem {
         }
       )
 
-    await interaction.followUp({ embeds: [levelUpEmbed], ephemeral: true })
+    await interaction.followUp({ embeds: [levelUpEmbed], ephemeral: false })
     }
     await character.save()
   }

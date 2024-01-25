@@ -101,7 +101,7 @@ module.exports = {
         await t.commit()
 
         const embed = new EmbedBuilder()
-          .setTitle('Account Created')
+          .setTitle('Account Created').setColor('DarkGold')
           .setDescription('Your Hellbound: Wicked after Death is now active!')
           .addFields(
             {
@@ -179,7 +179,7 @@ module.exports = {
           .join('\n') 
 
         const embed = new EmbedBuilder()
-          .setTitle(`${userName}`)
+          .setTitle(`${userName}`).setColor('DarkGold')
           .setDescription(`**Created on:** ${result}`)
           .addFields(
             {

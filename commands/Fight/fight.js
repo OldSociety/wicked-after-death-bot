@@ -207,7 +207,7 @@ module.exports = {
 
             // Create and send an embed summarizing the battle initiation
             const embed = new EmbedBuilder()
-              .setTitle('⚡Fight!')
+              .setTitle('⚡Fight!').setColor('DarkRed')
               .setDescription(
                 `**${userName}'s team** is looking for a fight and has found **${enemy.character_name}**!`
               )
