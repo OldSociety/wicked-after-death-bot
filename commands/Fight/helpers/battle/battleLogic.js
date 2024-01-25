@@ -3,6 +3,7 @@ const { EmbedBuilder } = require('discord.js')
 const { battleManager, userBattles } = require('./battleManager')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
+const RewardsHandler = require('../characterFiles/RewardsHandler')
 const { createRoundEmbed } = require('./battleEmbeds')
 const { Character } = require('../../../../Models/model') // Adjust the path as needed
 const {
@@ -12,6 +13,7 @@ const {
   updateHealth,
   compileDamageResult,
 } = require('./applyDamageHelpers')
+
 const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
 
 let cronTask = null
@@ -214,6 +216,15 @@ const setupBattleLogic = async (userId, userName, interaction) => {
                 enemyInstance.enemy_id,
                 interaction
               )
+              // Call RewardsHandler
+              await RewardsHandler.handleRewards(
+                userId,
+                frontlaneCharacterInstance.character_id,
+                backlaneCharacterInstance.character_id,
+                enemyInstance.enemy_id,
+                interaction
+              )
+
               console.log('XP updated.') // Log on successful
             } catch (err) {
               console.log('XP update failed:', err) // Log if level up fails
