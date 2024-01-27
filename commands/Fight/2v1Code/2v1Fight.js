@@ -97,7 +97,8 @@ module.exports = {
       const filter = (i) => {
         i.deferUpdate()
         return (
-          i.customId === 'characterSelect'
+          i.customId === 'characterSelect' ||
+          i.customId === 'backlaneCharacterSelect'
         )
       }
 
@@ -107,8 +108,8 @@ module.exports = {
         time: 30000,
       })
 
-      let character
-      let characterId
+      let frontlaneCharacter, backlaneCharacter
+      let frontlaneCharacterId
 
       collector.on('collect', async (i) => {
         if (userBattles[userId]) {
@@ -116,16 +117,76 @@ module.exports = {
           return
         }
 
-        if (!character && i.customId === 'characterSelect') {
-          characterId = i.values[0] // Capture the selected character ID
-          character = userCharacters.find(
+        if (!frontlaneCharacter && i.customId === 'characterSelect') {
+          frontlaneCharacterId = i.values[0] // Capture the selected frontlane character ID
+          frontlaneCharacter = userCharacters.find(
             (char) =>
-              char.dataValues.character_id.toString() === characterId
+              char.dataValues.character_id.toString() === frontlaneCharacterId
           )
 
+          // Filter options to exclude the selected frontlane character
+          const backlaneOptions = userCharacters
+            .filter(
+              (char) =>
+                char.dataValues.character_id.toString() !== frontlaneCharacterId
+            )
+            .map((char) => {
+              let rarityColor
+
+              // Decide the font color based on the rarity
+              switch (userCharacters.rarity) {
+                case 'folk hero':
+                  rarityColor = '🟩'
+                  break
+                case 'legend':
+                  rarityColor = '🟦'
+                  break
+                case 'unique':
+                  rarityColor = '🟪'
+                  break
+                default:
+                  rarityColor = '⬜'
+              }
+
+              return new StringSelectMenuOptionBuilder()
+                .setLabel(
+                  `${rarityColor} ${char.masterCharacter.character_name}`
+                )
+                .setValue(char.dataValues.character_id.toString())
+            })
+
+          const backlaneSelectMenu = new StringSelectMenuBuilder()
+            .setCustomId('backlaneCharacterSelect')
+            .setPlaceholder('Select your backlane character...')
+            .addOptions(backlaneOptions)
+
+          await interaction.editReply({
+            content: 'Select your backlane character',
+            components: [
+              new ActionRowBuilder().addComponents(backlaneSelectMenu),
+            ],
+          })
+        } else if (
+          !backlaneCharacter &&
+          i.customId === 'backlaneCharacterSelect'
+        ) {
+          const selectedBacklaneCharacterId = i.values[0]
+          // Ensure backlane character is different from frontlane character
+          if (selectedBacklaneCharacterId === frontlaneCharacterId) {
+            await interaction.followUp(
+              "You can't select the same character for both frontlane and backlane."
+            )
+            return
+          }
+          backlaneCharacter = userCharacters.find(
+            (char) =>
+              char.dataValues.character_id.toString() ===
+              selectedBacklaneCharacterId
+          )
 
           // Proceed with battle setup if both characters are selected
-            if (character) {
+          if (frontlaneCharacter && backlaneCharacter) {
+            if (frontlaneCharacter) {
             userBattles[userId] = true
 
             if (!enemy) {
@@ -135,13 +196,15 @@ module.exports = {
 
             // Initiate battle with selected characters and enemy
             const battleResult = await initiateBattle(
-              character.dataValues.character_id,
-              character.masterCharacter.master_character_id,
+              frontlaneCharacter.dataValues.character_id,
+              frontlaneCharacter.masterCharacter.master_character_id,
+              backlaneCharacter.dataValues.character_id,
+              backlaneCharacter.masterCharacter.master_character_id,
               enemy.enemy_id,
               userId
             )
 
-            const battleKey = `${character.dataValues.character_id}-${enemy.id}`
+            const battleKey = `${frontlaneCharacter.dataValues.character_id}-${backlaneCharacter.dataValues.character_id}-${enemy.id}`
 
             battleManager[battleKey] = battleResult
 
@@ -149,10 +212,11 @@ module.exports = {
             const embed = new EmbedBuilder()
               .setTitle('⚡Fight!').setColor('DarkRed')
               .setDescription(
-                `**${userName}'s ${character.masterCharacter.character_name}** is looking for a fight and has found the **${enemy.character_name}**!`
+                `**${userName}'s ${frontlaneCharacter.masterCharacter.character_name}** is looking for a fight and has found the **${enemy.character_name}**!`
               )
               .addFields(
-                createCharacterField(character),
+                createCharacterField(frontlaneCharacter, 'Frontlane'),
+                createCharacterField(backlaneCharacter, 'Backlane'),
                 {
                   name: '\u200B', // Zero-width space
                   value: '\u200B', // Zero-width space
@@ -194,7 +258,7 @@ module.exports = {
             collector.stop()
           }
         }
-      })
+    }})
 
       collector.on('end', (collected) => {
         if (collected.size === 0) {

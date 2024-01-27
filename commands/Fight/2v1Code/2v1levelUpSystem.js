@@ -50,13 +50,21 @@ const alpha = 0.1
 
 class LevelUpSystem {
   static async levelUp(
-    characterId,
+    frontlaneCharacterId,
+    backlaneCharacterId,
     enemyId,
     interaction
   ) {
-    // Process level up for character
+    // Process level up for frontlane character
     await this.processCharacterLevelUp(
-      characterId,
+      frontlaneCharacterId,
+      enemyId,
+      interaction
+    )
+
+    // Process level up for backlane character
+    await this.processCharacterLevelUp(
+      backlaneCharacterId,
       enemyId,
       interaction
     )

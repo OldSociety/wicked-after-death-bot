@@ -63,19 +63,24 @@ async function applyDamage(attacker, defender, userId) {
 
 
 const applyRound = async (
-  character,
+  frontlaneCharacter,
+  backlaneCharacter,
   enemy,
   userName,
   interaction,
   turnNum
 ) => {
   // // Step 1: Check specials
-  // await checkSpecialTrigger(character, character.activeSpecials)
+  // await checkSpecialTrigger(frontlaneCharacter, frontlaneCharacter.activeSpecials)
+  // await checkSpecialTrigger(backlaneCharacter, backlaneCharacter.activeSpecials)
   // // await checkSpecialTrigger(enemy, specialsArray)
 
   // // Step 2: Execute specials
-  // for (const specialId of character.activeSpecials) {
-  //   await executeSpecial(character, { id: specialId })
+  // for (const specialId of frontlaneCharacter.activeSpecials) {
+  //   await executeSpecial(frontlaneCharacter, { id: specialId })
+  // }
+  // for (const specialId of backlaneCharacter.activeSpecials) {
+  //   await executeSpecial(backlaneCharacter, { id: specialId })
   // }
   // for (const specialId of enemy.activeSpecials) {
   //   await executeSpecial(enemy, { id: specialId })
@@ -84,14 +89,27 @@ const applyRound = async (
   const actions = []
 
   // Frontlane Character attacks Enemy
-  if (character.current_health > 0) {
-    const action1 = await applyDamage(character, enemy)
+  if (frontlaneCharacter.current_health > 0) {
+    const action1 = await applyDamage(frontlaneCharacter, enemy)
     actions.push(action1)
   }
 
-  // Enemy attacks character 
+  // Backlane Character attacks Enemy, but only if Frontlane Character has fallen
+  if (
+    frontlaneCharacter.current_health <= 0 &&
+    backlaneCharacter.current_health > 0
+  ) {
+    const action2 = await applyDamage(backlaneCharacter, enemy)
+    actions.push(action2)
+  }
+
+  // Enemy attacks Frontlane or Backlane Character
   if (enemy.current_health > 0) {
-    const actionEnemy = await applyDamage(enemy, character)
+    let targetCharacter =
+      frontlaneCharacter.current_health > 0
+        ? frontlaneCharacter
+        : backlaneCharacter
+    const actionEnemy = await applyDamage(enemy, targetCharacter)
     actions.push(actionEnemy)
   }
 
@@ -99,7 +117,8 @@ const applyRound = async (
   const roundEmbed = createRoundEmbed(
     actions,
     userName,
-    character,
+    frontlaneCharacter,
+    backlaneCharacter,
     enemy,
     turnNum
   )
@@ -143,13 +162,19 @@ const setupBattleLogic = async (userId, userName, interaction) => {
         if (!battle) continue
 
         const {
-          characterInstance,
+          frontlaneCharacterInstance,
+          backlaneCharacterInstance,
           enemyInstance,
         } = battle
 
-        if (!initializedCharacters[characterInstance.character_id]) {
-          initializeCharacterFlagsAndCounters(characterInstance)
-          initializedCharacters[characterInstance.character_id] = true
+        if (!initializedCharacters[frontlaneCharacterInstance.character_id]) {
+          initializeCharacterFlagsAndCounters(frontlaneCharacterInstance)
+          initializedCharacters[frontlaneCharacterInstance.character_id] = true
+        }
+
+        if (!initializedCharacters[backlaneCharacterInstance.character_id]) {
+          initializeCharacterFlagsAndCounters(backlaneCharacterInstance)
+          initializedCharacters[backlaneCharacterInstance.character_id] = true
         }
 
         if (!initializedCharacters[enemyInstance.character_id]) {
@@ -158,7 +183,8 @@ const setupBattleLogic = async (userId, userName, interaction) => {
         }
 
         if (
-          !characterInstance ||
+          !frontlaneCharacterInstance ||
+          !backlaneCharacterInstance ||
           !enemyInstance
         )
           continue
@@ -166,7 +192,8 @@ const setupBattleLogic = async (userId, userName, interaction) => {
         // Apply damage and handle battles here
 
         await applyRound(
-          characterInstance,
+          frontlaneCharacterInstance,
+          backlaneCharacterInstance,
           enemyInstance,
           userName,
           interaction,
@@ -177,22 +204,25 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
         // Check for battle results and perform necessary actions
         if (
-          characterInstance.current_health <= 0 ||
+          backlaneCharacterInstance.current_health <= 0 ||
           enemyInstance.current_health <= 0
         ) {
           // Check if character survived the battle
-          if (characterInstance.current_health > 0) {
+          if (backlaneCharacterInstance.current_health > 0) {
             try {
-              characterInstance.consecutive_kill++
+              frontlaneCharacterInstance.consecutive_kill++
+              backlaneCharacterInstance.consecutive_kill++
               await LevelUpSystem.levelUp(
-                characterInstance.character_id,
+                frontlaneCharacterInstance.character_id,
+                backlaneCharacterInstance.character_id,
                 enemyInstance.enemy_id,
                 interaction
               )
               // Call RewardsHandler
               await RewardsHandler.handleRewards(
                 userId,
-                characterInstance.character_id,
+                frontlaneCharacterInstance.character_id,
+                backlaneCharacterInstance.character_id,
                 enemyInstance.enemy_id,
                 interaction
               )
@@ -202,7 +232,8 @@ const setupBattleLogic = async (userId, userName, interaction) => {
               console.log('XP update failed:', err) // Log if level up fails
             }
           } else {
-            characterInstance.consecutive_kill = 0
+            frontlaneCharacterInstance.consecutive_kill = 0
+            backlaneCharacterInstance.consecutive_kill = 0
             const lossEmbed = new EmbedBuilder()
               .setColor('DarkRed')
               .setDescription(`${enemyInstance.character_name} wins.`)
@@ -212,10 +243,10 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           // Update consecutive_kill value for the frontlane character
           try {
             await Character.update(
-              { consecutive_kill: characterInstance.consecutive_kill },
+              { consecutive_kill: frontlaneCharacterInstance.consecutive_kill },
               {
                 where: {
-                  character_id: characterInstance.character_id,
+                  character_id: frontlaneCharacterInstance.character_id,
                 },
               }
             )
@@ -225,6 +256,24 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           } catch (e) {
             console.error(
               'Failed to update consecutive_kill for frontlane character:',
+              e
+            )
+          }
+
+          // Update consecutive_kill value for the backlane character
+          try {
+            await Character.update(
+              { consecutive_kill: backlaneCharacterInstance.consecutive_kill },
+              {
+                where: { character_id: backlaneCharacterInstance.character_id },
+              }
+            )
+            console.log(
+              'Successfully updated consecutive_kill for backlane character.'
+            )
+          } catch (e) {
+            console.error(
+              'Failed to update consecutive_kill for backlane character:',
               e
             )
           }

@@ -9,7 +9,8 @@ const {
 class RewardsHandler {
   static async handleRewards(
     userId,
-    characterId,
+    frontlaneCharacterId,
+    backlaneCharacterId,
     enemyId,
     interaction
   ) {
@@ -20,8 +21,8 @@ class RewardsHandler {
       const e = 2.71828
       const alpha = 0.1
 
-      const character = await Character.findByPk(
-        characterId,
+      const frontlaneCharacter = await Character.findByPk(
+        frontlaneCharacterId,
         {
           include: [
             {
@@ -31,10 +32,22 @@ class RewardsHandler {
           ],
         }
       )
+      const backlaneCharacter = await Character.findByPk(backlaneCharacterId, {
+        include: [
+          {
+            model: MasterCharacter,
+            as: 'masterCharacter',
+          },
+        ],
+      })
 
       const enemy = await Enemy.findByPk(enemyId)
+      console.log(
+        'Frontlane Character:',
+        frontlaneCharacter.masterCharacter.character_name
+      )
 
-      if (!user || !character || !enemy) {
+      if (!user || !frontlaneCharacter || !backlaneCharacter || !enemy) {
         console.error('User, characters, or enemy not found')
         throw new Error('User, characters, or enemy not found')
       }
@@ -46,7 +59,8 @@ class RewardsHandler {
         )
       }
 
-      const XP = calculateXP(character.level, enemy.level)
+      const frontlaneXP = calculateXP(frontlaneCharacter.level, enemy.level)
+      const backlaneXP = calculateXP(backlaneCharacter.level, enemy.level)
 
       let earnedGold = 0
       if (enemy.type !== 'boss' || enemy.type !== 'mini-boss') {
@@ -63,8 +77,13 @@ class RewardsHandler {
         .setColor('DarkGreen')
         .addFields(
           {
-            name: `${character.masterCharacter.character_name} `,
-            value: '`' + `⏫${XP} XP` + '`' + ` >> ` + '`' + `⏫${character.experience} / ${character.xp_needed} XP`+ '`' , 
+            name: `${frontlaneCharacter.masterCharacter.character_name} `,
+            value: '`' + `⏫${frontlaneXP} XP` + '`' + ` >> ` + '`' + `⏫${frontlaneCharacter.experience} / ${frontlaneCharacter.xp_needed} XP`+ '`' , 
+            // inline: true,
+          },
+          {
+            name: `${backlaneCharacter.masterCharacter.character_name} `,
+            value: '`' + `⏫${backlaneXP} XP` + '`' +  ` >> ` + '`' + `⏫${backlaneCharacter.experience} / ${backlaneCharacter.xp_needed} XP`+ '`', 
             // inline: true,
           },
           { name: 'Reward ', value: '`' + `🪙${earnedGold}` + '`' + ` >> ` + '`' + `🪙${user.balance}` + '`',}
