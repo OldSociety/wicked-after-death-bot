@@ -70,18 +70,15 @@ const applyRound = async (
   const actions = [];
   let actionResult;
 
-  // Determine if the acting character is attacking the enemy or a backlane character stepping forward
+  // Determine if the acting character is attacking the enemy character stepping forward
   if (actingCharacter.role === 'enemy') {
-    // Enemy attacks either Frontlane or Backlane Character
-    let targetCharacter = opposingCharacters.frontlaneCharacter.current_health > 0
-      ? opposingCharacters.frontlaneCharacter
-      : opposingCharacters.backlaneCharacter;
+    // Enemy attacks
     if (targetCharacter.current_health > 0) {
       actionResult = await applyDamage(actingCharacter, targetCharacter);
       actions.push(actionResult);
     }
   } else {
-    // Frontlane or Backlane Character attacks Enemy
+    // Frontlane Character attacks Enemy
     if (actingCharacter.current_health > 0) {
       actionResult = await applyDamage(actingCharacter, opposingCharacters.enemy);
       actions.push(actionResult);
@@ -92,8 +89,7 @@ const applyRound = async (
   const roundEmbed = createRoundEmbed(
     actions,
     userName,
-    opposingCharacters.frontlaneCharacter,
-    opposingCharacters.backlaneCharacter,
+    opposingCharacters.character,
     opposingCharacters.enemy
   );
 
@@ -103,12 +99,11 @@ const applyRound = async (
 // Helper function to generate the opposing characters object
 function getOpposingCharacters(battle, actingCharacterRole) {
   const opposingCharacters = {
-    frontlaneCharacter: battle.frontlaneCharacterInstance,
-    backlaneCharacter: battle.backlaneCharacterInstance,
+    character: battle.characterInstance,
     enemy: battle.enemyInstance
   };
 
-  if (actingCharacterRole === 'frontlane' || actingCharacterRole === 'backlane') {
+  if (actingCharacterRole === 'frontlane') {
     delete opposingCharacters[actingCharacterRole];
   }
 
@@ -118,8 +113,9 @@ function getOpposingCharacters(battle, actingCharacterRole) {
 // Updated handleCharacterAction function
 async function handleCharacterAction(character, role, interaction, battleKey) {
   const battle = battleManager[battleKey];
+  console.log('BATTLEKEY: ALREADY TESTED AND WORKS')
   if (!battle) return;
-console.log('character action')
+console.log('BUT THIS DOESN"T PRINT!')
   const opposingCharacters = getOpposingCharacters(battle, role);
   console.log('Actions', opposingCharacters, character, role, interaction, battleKey)
   await applyRound(
@@ -152,25 +148,17 @@ const setupBattleLogic = async (userId, userName, interaction) => {
     // console.log('hi')
 
     const {
-      frontlaneCharacterInstance,
-      backlaneCharacterInstance,
+      characterInstance,
       enemyInstance,
     } = battle
 
-    initializeCharacterFlagsAndCounters(frontlaneCharacterInstance)
-    initializeCharacterFlagsAndCounters(backlaneCharacterInstance)
+    initializeCharacterFlagsAndCounters(characterInstance)
     initializeCharacterFlagsAndCounters(enemyInstance)
 
     // Set up cron jobs for each character
     setupCharacterCron(
-      frontlaneCharacterInstance,
+      characterInstance,
       'frontlane',
-      interaction,
-      battleKey
-    )
-    setupCharacterCron(
-      backlaneCharacterInstance,
-      'backlane',
       interaction,
       battleKey
     )
@@ -202,8 +190,7 @@ const setupCharacterCron = (
   const attackSpeed = calculateAttackSpeed(characterInstance) // Implement this function based on character attributes
 
   return cron.schedule(`*/${attackSpeed} * * * * *`, async () => {
-    console.log('this is working')
-    await handleCharacterAction(characterInstance, interaction)
+    await handleCharacterAction(characterInstance, interaction, interaction, battleKey)
     // Check if the battle ends
     if (battleEnds(battleKey)) {
       // If the battle ends, execute end-of-battle logic
@@ -219,38 +206,32 @@ async function handleBattleEnd(battleKey, interaction, userId) {
   if (!battle) return
 
   const {
-    frontlaneCharacterInstance,
-    backlaneCharacterInstance,
+    characterInstance,
     enemyInstance,
   } = battle
 
   // Logic for handling the end of the battle
-  // For example, updating consecutive kills, leveling up, handling rewards, etc.
-  // ...
   try {
     if (
-      backlaneCharacterInstance.current_health <= 0 ||
+      characterInstance.current_health <= 0 ||
       enemyInstance.current_health <= 0
     ) {
-      if (backlaneCharacterInstance.current_health > 0) {
+      if (characterInstance.current_health > 0) {
         // Characters survived the battle
         await LevelUpSystem.levelUp(
-          frontlaneCharacterInstance.character_id,
-          backlaneCharacterInstance.character_id,
+          characterInstance.character_id,
           enemyInstance.enemy_id,
           interaction
         )
         await RewardsHandler.handleRewards(
           userId,
-          frontlaneCharacterInstance.character_id,
-          backlaneCharacterInstance.character_id,
+          characterInstance.character_id,
           enemyInstance.enemy_id,
           interaction
         )
         // You might want to send a message indicating the battle result
       } else {
-        frontlaneCharacterInstance.consecutive_kill = 0
-        backlaneCharacterInstance.consecutive_kill = 0
+        characterInstance.consecutive_kill = 0
         const lossEmbed = new EmbedBuilder()
           .setColor('DarkRed')
           .setDescription(`${enemyInstance.character_name} wins.`)
@@ -260,10 +241,10 @@ async function handleBattleEnd(battleKey, interaction, userId) {
       // Update consecutive_kill value for the frontlane character
       try {
         await Character.update(
-          { consecutive_kill: frontlaneCharacterInstance.consecutive_kill },
+          { consecutive_kill: characterInstance.consecutive_kill },
           {
             where: {
-              character_id: frontlaneCharacterInstance.character_id,
+              character_id: characterInstance.character_id,
             },
           }
         )
@@ -277,23 +258,7 @@ async function handleBattleEnd(battleKey, interaction, userId) {
         )
       }
 
-      // Update consecutive_kill value for the backlane character
-      try {
-        await Character.update(
-          { consecutive_kill: backlaneCharacterInstance.consecutive_kill },
-          {
-            where: { character_id: backlaneCharacterInstance.character_id },
-          }
-        )
-        console.log(
-          'Successfully updated consecutive_kill for backlane character.'
-        )
-      } catch (e) {
-        console.error(
-          'Failed to update consecutive_kill for backlane character:',
-          e
-        )
-      }
+     
     }
   } catch (error) {
     console.error('Error handling battle end:', error)
@@ -317,102 +282,12 @@ function calculateAttackSpeed(character) {
   return baseSpeed
 }
 
-// Function to check if the battle has ended
-async function battleEnds(character, role, battleKey) {
-  const battle = battleManager[battleKey]
-  if (!battle) return true
-
-  if (
-    backlaneCharacterInstance.current_health <= 0 ||
-    enemyInstance.current_health <= 0
-  ) {
-    // Check if character survived the battle
-    if (backlaneCharacterInstance.current_health > 0) {
-      try {
-        frontlaneCharacterInstance.consecutive_kill++
-        backlaneCharacterInstance.consecutive_kill++
-        await LevelUpSystem.levelUp(
-          frontlaneCharacterInstance.character_id,
-          backlaneCharacterInstance.character_id,
-          enemyInstance.enemy_id,
-          interaction
-        )
-        // Call RewardsHandler
-        await RewardsHandler.handleRewards(
-          userId,
-          frontlaneCharacterInstance.character_id,
-          backlaneCharacterInstance.character_id,
-          enemyInstance.enemy_id,
-          interaction
-        )
-
-        console.log('XP updated.') // Log on successful
-      } catch (err) {
-        console.log('XP update failed:', err) // Log if level up fails
-      }
-    } else {
-      frontlaneCharacterInstance.consecutive_kill = 0
-      backlaneCharacterInstance.consecutive_kill = 0
-      const lossEmbed = new EmbedBuilder()
-        .setColor('DarkRed')
-        .setDescription(`${enemyInstance.character_name} wins.`)
-      await interaction.followUp({ embeds: [lossEmbed] })
-    }
-
-    // Update consecutive_kill value for the frontlane character
-    try {
-      await Character.update(
-        { consecutive_kill: frontlaneCharacterInstance.consecutive_kill },
-        {
-          where: {
-            character_id: frontlaneCharacterInstance.character_id,
-          },
-        }
-      )
-      console.log(
-        'Successfully updated consecutive_kill for frontlane character.'
-      )
-    } catch (e) {
-      console.error(
-        'Failed to update consecutive_kill for frontlane character:',
-        e
-      )
-    }
-
-    // Update consecutive_kill value for the backlane character
-    try {
-      await Character.update(
-        { consecutive_kill: backlaneCharacterInstance.consecutive_kill },
-        {
-          where: { character_id: backlaneCharacterInstance.character_id },
-        }
-      )
-      console.log(
-        'Successfully updated consecutive_kill for backlane character.'
-      )
-    } catch (e) {
-      console.error(
-        'Failed to update consecutive_kill for backlane character:',
-        e
-      )
-    }
-
-    delete battleManager[battleKey]
-    delete userBattles[userId]
-
-    if (cronTask) {
-      cronTask.stop()
-    }
-  }
-}
-
 // Function to stop all cron jobs associated with a battle
 function stopBattleCronJobs(battleKey) {
   const battle = battleManager[battleKey]
   if (battle) {
-    ;[
-      battle.frontlaneCharacterInstance,
-      battle.backlaneCharacterInstance,
+    [
+      battle.characterInstance,
       battle.enemyInstance,
     ].forEach((character) => {
       if (character && character.cronTask) {

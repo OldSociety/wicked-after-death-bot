@@ -15,7 +15,7 @@ const { selectRaid } = require('./helpers/levelSelection/raidSelection')
 const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
-const { setupBattleLogic } = require('./helpers/battle/battleLogic.js')
+const { setupBattleLogic } = require('./helpers/battle/battleLogicTest.js')
 // const { setupBattleLogic } = require('./helpers/battle/battleLogicTest.js')
 
 module.exports = {
