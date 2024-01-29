@@ -14,6 +14,7 @@ class RewardsHandler {
     interaction
   ) {
     try {
+      console.log(userId)
       const user = await User.findByPk(userId)
 
       // Add constants for the formula

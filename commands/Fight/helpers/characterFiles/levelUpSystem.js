@@ -84,11 +84,6 @@ class LevelUpSystem {
       enemy.xp_awarded * Math.exp(-alpha * (character.level - enemy.level))
     )
 
-    // let earnedGold = 0
-    // if (enemy.type !== 'boss' || enemy.type !== 'mini-boss') {
-    //   earnedGold = Math.round(enemy.gold_awarded + 20 * enemy.level)
-    // }
-
     if (earnedXP <= 0) {
       console.warn('No positive experience earned. Skipping update.')
       return

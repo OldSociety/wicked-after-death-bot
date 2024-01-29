@@ -61,36 +61,48 @@ async function applyDamage(attacker, defender, userId) {
 
 // Function to apply a round of actions
 const applyRound = async (attacker, defender, userName, interaction) => {
-  const actions = []
   if (attacker.current_health > 0 && defender.current_health > 0) {
     const actionResult = await applyDamage(attacker, defender)
-    actions.push(actionResult)
-    // Create and send round summary embed
+    const actions = [actionResult]
     const roundEmbed = createRoundEmbed(actions, userName, attacker, defender)
+
     try {
       await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
     } catch (error) {
       console.error('Error in interaction follow-up:', error)
     }
+    // Check if the battle should end (either attacker or defender has zero health)
+    if (attacker.current_health <= 0 || defender.current_health <= 0) {
+      return true // Indicates the battle has ended
+    }
+    return false // Indicates the battle continues
   } else {
-    console.log('GAME OVER')
+    // One of the characters has zero health, so the battle ends
+    return true
   }
 }
 
-// Function to handle character actions during a battle
 async function handleCharacterAction(character, role, interaction, battleKey) {
-  const battle = battleManager[battleKey]
-  if (!battle) return
+  const battle = battleManager[battleKey];
+  if (!battle || battle.battleEnded) return; // Check if battle has ended
 
-  const defender =
-    role === 'enemy' ? battle.characterInstance : battle.enemyInstance
-  await applyRound(character, defender, battle.userName, interaction)
+  const defender = role === 'enemy' ? battle.characterInstance : battle.enemyInstance;
+  const battleEnded = await applyRound(character, defender, battle.userName, interaction);
 
-  // Check if the battle ends
-  if (await battleEnds(character, defender, battleKey)) {
-    stopBattleCronJobs(battleKey)
+  // Check if the battle ends and ensure it's only processed once
+  if (battleEnded && !battle.battleEnded) {
+    battle.battleEnded = true; // Prevents double execution
+
+    try {
+      await handleBattleEnd(battleKey, interaction);
+    } catch (error) {
+      console.log('handlebattleEnd error: ', error);
+    }
+
+    stopBattleCronJobs(battleKey);
   }
 }
+
 
 // Function to calculate the attack speed of a character
 function calculateAttackSpeed(character) {
@@ -132,22 +144,21 @@ function initializeCharacterFlagsAndCounters(character) {
 }
 
 // Function to handle the end of a battle
-async function handleBattleEnd(battleKey, interaction, userId) {
-  const battle = battleManager[battleKey]
-  if (!battle) return
+async function handleBattleEnd(battleKey, interaction) {
+  const battle = battleManager[battleKey];
+  if (!battle) return;
 
-  const { characterInstance, enemyInstance } = battle
+  const { characterInstance, enemyInstance, userId } = battle;
 
-  // Logic for handling the end of the battle
   try {
+
     if (
       characterInstance.current_health <= 0 ||
       enemyInstance.current_health <= 0
     ) {
-      console.log('BATTLE ENDS')
+
       if (characterInstance.current_health > 0) {
-        console.log('WIN')
-        // Characters survived the battle
+        // Player won the battle
         await LevelUpSystem.levelUp(
           characterInstance.character_id,
           enemyInstance.enemy_id,
@@ -159,9 +170,8 @@ async function handleBattleEnd(battleKey, interaction, userId) {
           enemyInstance.enemy_id,
           interaction
         )
-        // You might want to send a message indicating the battle result
       } else {
-        console.log('LOSS')
+        // Player lost the battle
         characterInstance.consecutive_kill = 0
         const lossEmbed = new EmbedBuilder()
           .setColor('DarkRed')
@@ -169,28 +179,11 @@ async function handleBattleEnd(battleKey, interaction, userId) {
         await interaction.followUp({ embeds: [lossEmbed] })
       }
 
-      // Update consecutive_kill value for the frontlane character
-      try {
-        await Character.update(
-          { consecutive_kill: characterInstance.consecutive_kill },
-          {
-            where: {
-              character_id: characterInstance.character_id,
-            },
-          }
-        )
-        console.log(
-          'Successfully updated consecutive_kill for frontlane character.'
-        )
-      } catch (e) {
-        console.error(
-          'Failed to update consecutive_kill for frontlane character:',
-          e
-        )
-      }
-    }
+      // Update consecutive kills, etc.
+      // ...
+    } 
   } catch (error) {
-    console.error('Error handling battle end:', error)
+    console.error('Error in handleBattleEnd:', error)
   }
 
   // Clear battle from the manager
@@ -202,7 +195,7 @@ async function handleBattleEnd(battleKey, interaction, userId) {
 function stopBattleCronJobs(battleKey) {
   const battle = battleManager[battleKey]
   if (battle) {
-    ;[battle.characterInstance, battle.enemyInstance].forEach((character) => {
+    [battle.characterInstance, battle.enemyInstance].forEach((character) => {
       if (character && character.cronTask) {
         character.cronTask.stop()
       }
@@ -211,14 +204,6 @@ function stopBattleCronJobs(battleKey) {
 
   delete battleManager[battleKey]
   delete userBattles[battleKey]
-}
-
-// Function to check if the battle has ended
-async function battleEnds(attacker, defender, battleKey) {
-  if (attacker.current_health <= 0 || defender.current_health <= 0) {
-    return true
-  }
-  return false
 }
 
 // Battle logic and cron job setup
@@ -235,10 +220,14 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
     const { characterInstance, enemyInstance } = battle
 
+    // Store userId in the battle object
+    battle.userId = userId
+    battle.userName = userName
+    battle.battleEnded = false
+
     initializeCharacterFlagsAndCounters(characterInstance)
     initializeCharacterFlagsAndCounters(enemyInstance)
 
-    // Set up cron jobs for each character
     setupCharacterCron(characterInstance, 'frontlane', interaction, battleKey)
     setupCharacterCron(enemyInstance, 'enemy', interaction, battleKey)
   })
