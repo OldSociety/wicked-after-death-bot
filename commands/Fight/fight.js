@@ -16,7 +16,7 @@ const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
 // const { setupBattleLogic } = require('./helpers/battle/battleLogic.js')
-const { setupBattleLogic } = require('./helpers/battle/battleLogicTest.js')
+const { setupBattleLogic } = require('./helpers/battle/battleLogicAuto.js')
 
 module.exports = {
   cooldown: 5,
@@ -98,7 +98,9 @@ module.exports = {
 
       const filter = (i) => {
         i.deferUpdate()
-        return i.customId === 'characterSelect'
+        return (
+          i.customId === 'characterSelect'
+        )
       }
 
       // Collector for character selection
@@ -119,11 +121,13 @@ module.exports = {
         if (!character && i.customId === 'characterSelect') {
           characterId = i.values[0] // Capture the selected character ID
           character = userCharacters.find(
-            (char) => char.dataValues.character_id.toString() === characterId
+            (char) =>
+              char.dataValues.character_id.toString() === characterId
           )
 
+
           // Proceed with battle setup if both characters are selected
-          if (character) {
+            if (character) {
             userBattles[userId] = true
 
             if (!enemy) {
@@ -142,13 +146,10 @@ module.exports = {
             const battleKey = `${character.dataValues.character_id}-${enemy.id}`
 
             battleManager[battleKey] = battleResult
-
+  
             // Create and send an embed summarizing the battle initiation
             const embed = new EmbedBuilder()
-              .setTitle(
-                `⚡${userName}'s ${character.masterCharacter.character_name}`
-              )
-              .setColor('DarkRed')
+              .setTitle(`⚡${userName}'s ${character.masterCharacter.character_name}`).setColor('DarkRed')
               .setThumbnail(interaction.user.displayAvatarURL())
               .setTimestamp()
               .setDescription(
@@ -159,13 +160,11 @@ module.exports = {
                 {
                   name: '\u200B', // Zero-width space
                   value: '\u200B', // Zero-width space
-                  inline: true,
                 },
                 {
                   name:
                     `${enemy.character_name}`,
-                  value: `⚔️ ${enemy.effective_damage} 🧡 ${enemy.effective_health}`,
-                  inline: true,
+                  value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
                 }
               )
 
@@ -184,13 +183,10 @@ module.exports = {
                   '`' +
                   character.level.toString() +
                   '`',
-                value: `⚔️ ${effectiveDamage}, 🧡 ${effectiveHealth}`,
-                inline: true,
+                value: `⚔️ Damage: ${effectiveDamage}, 🧡 Health: ${effectiveHealth}`,
               }
             }
-            embed.setImage(
-              'https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&'
-            )
+            // embed.setImage('https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&')
 
             // Call setupBattleLogic after initiating the battle
             setupBattleLogic(userId, userName, interaction)

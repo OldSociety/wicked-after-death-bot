@@ -6,8 +6,6 @@ const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
     .setTitle(`${character.character_name}'s Action`)
     .setColor('DarkBlue')
     .setFooter({ text: 'Wicked After Death Battle' })
-    .setTimestamp();
-
 
   actions.forEach((action, index) => {
     let actionDesc = action.didMiss
@@ -42,9 +40,10 @@ const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
         name: healthFieldName,
         value: healthDesc,
       }
-    ).setThumbnail(
-      'https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&'
     )
+    // .setThumbnail(
+    //   'https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&'
+    // )
 
     if (action.bufferDamage > 0) {
       const initialBufferHealth =
