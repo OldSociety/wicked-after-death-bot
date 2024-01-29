@@ -1,20 +1,15 @@
 const { EmbedBuilder } = require('discord.js')
 
-const createRoundEmbed = (
-  actions,
-  userName,
-  character,
-  enemy,
-  turnNum
-) => {
+const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
   // console.log("Received actions:", actions); // Log the actions array
   const embed = new EmbedBuilder()
-    .setTitle(`Battle Status: Turn ${turnNum}`)
+    .setTitle(`${character.character_name}'s Action`)
     .setColor('DarkBlue')
-    .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+    .setFooter({ text: 'Wicked After Death Battle' })
+    .setTimestamp();
+
 
   actions.forEach((action, index) => {
-    console.log(2)
     let actionDesc = action.didMiss
       ? `${action.attacker.character_name} was partially blocked.`
       : `${action.attacker.character_name} ${
@@ -26,7 +21,7 @@ const createRoundEmbed = (
 
     if (action.defender.character_name === character.character_name) {
       {
-        // Regular health bar display for frontlane character
+        // Regular health bar display for character
         healthFieldName = `\n${action.defender.character_name}'s Health`
         healthDesc = createHealthBar(
           character.current_health,
@@ -34,7 +29,6 @@ const createRoundEmbed = (
         )
       }
     } else {
-      // Assuming the only other option is the enemy
       healthFieldName = `\n${action.defender.character_name}'s Health`
       healthDesc = createHealthBar(enemy.current_health, enemy.effective_health)
     }
@@ -48,6 +42,8 @@ const createRoundEmbed = (
         name: healthFieldName,
         value: healthDesc,
       }
+    ).setThumbnail(
+      'https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&'
     )
 
     if (action.bufferDamage > 0) {
@@ -62,13 +58,12 @@ const createRoundEmbed = (
     }
   })
 
-  // console.log("Embed fields:", embed.data.fields); //
   return embed
 }
 
 function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   const totalSegments = 20 // Number of segments in the health bar
-  
+
   // Calculate filled segments; ensure at least one if current health is greater than 0
   let filledSegments = Math.round((currentHealth / maxHealth) * totalSegments)
   if (currentHealth > 0 && filledSegments < 1) {
@@ -86,7 +81,6 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   const filledBar = '🟥'.repeat(filledSegments)
   const bufferBar = '🟦'.repeat(bufferSegments) // Represent buffer with a blue square
   const unfilledBar = '⬛'.repeat(unfilledSegments)
-  console.log(3)
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 

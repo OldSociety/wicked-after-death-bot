@@ -33,6 +33,8 @@ module.exports = {
         where: { user_id: interaction.user.id },
       })
 
+      console.log(interaction.user)
+
       if (!user) {
         await interaction.reply({
           content: "You don't have an account. Use `/account` to create one.",
@@ -96,9 +98,7 @@ module.exports = {
 
       const filter = (i) => {
         i.deferUpdate()
-        return (
-          i.customId === 'characterSelect'
-        )
+        return i.customId === 'characterSelect'
       }
 
       // Collector for character selection
@@ -119,13 +119,11 @@ module.exports = {
         if (!character && i.customId === 'characterSelect') {
           characterId = i.values[0] // Capture the selected character ID
           character = userCharacters.find(
-            (char) =>
-              char.dataValues.character_id.toString() === characterId
+            (char) => char.dataValues.character_id.toString() === characterId
           )
 
-
           // Proceed with battle setup if both characters are selected
-            if (character) {
+          if (character) {
             userBattles[userId] = true
 
             if (!enemy) {
@@ -147,28 +145,32 @@ module.exports = {
 
             // Create and send an embed summarizing the battle initiation
             const embed = new EmbedBuilder()
-              .setTitle('⚡Fight!').setColor('DarkRed')
+              .setTitle(
+                `⚡${userName}'s ${character.masterCharacter.character_name}`
+              )
+              .setColor('DarkRed')
+              .setThumbnail(interaction.user.displayAvatarURL())
+              .setTimestamp()
               .setDescription(
-                `**${userName}'s ${character.masterCharacter.character_name}** is looking for a fight and has found the **${enemy.character_name}**!`
+                `is looking for a fight and has found the **${enemy.character_name}**!`
               )
               .addFields(
                 createCharacterField(character),
                 {
                   name: '\u200B', // Zero-width space
                   value: '\u200B', // Zero-width space
+                  inline: true,
                 },
                 {
                   name:
-                    `${enemy.character_name} (Enemy) | Level ` +
-                    '`' +
-                    enemy.level.toString() +
-                    '`',
-                  value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
+                    `${enemy.character_name}`,
+                  value: `⚔️ ${enemy.effective_damage} 🧡 ${enemy.effective_health}`,
+                  inline: true,
                 }
               )
 
             // Function to create a field for a character
-            function createCharacterField(character, position) {
+            function createCharacterField(character) {
               const effectiveDamage =
                 character.effective_damage ||
                 character.masterCharacter.base_damage
@@ -178,13 +180,17 @@ module.exports = {
 
               return {
                 name:
-                  `${character.masterCharacter.character_name} (${position}) | Level ` +
+                  `${character.masterCharacter.character_name} | Level ` +
                   '`' +
                   character.level.toString() +
                   '`',
-                value: `⚔️ Damage: ${effectiveDamage}, 🧡 Health: ${effectiveHealth}`,
+                value: `⚔️ ${effectiveDamage}, 🧡 ${effectiveHealth}`,
+                inline: true,
               }
             }
+            embed.setImage(
+              'https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&'
+            )
 
             // Call setupBattleLogic after initiating the battle
             setupBattleLogic(userId, userName, interaction)
