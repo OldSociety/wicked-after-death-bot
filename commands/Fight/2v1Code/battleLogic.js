@@ -1,20 +1,20 @@
 const cron = require('node-cron')
 const { EmbedBuilder } = require('discord.js')
-const { battleManager, userBattles } = require('./battleManager')
-const { traits, applyCritDamage } = require('../characterFiles/traits')
-const LevelUpSystem = require('../characterFiles/levelUpSystem')
-const RewardsHandler = require('../characterFiles/RewardsHandler')
-const { createRoundEmbed } = require('./battleEmbeds')
-const { Character } = require('../../../../Models/model') // Adjust the path as needed
+const { battleManager, userBattles } = require('../helpers/battle/battleManager')
+const { traits, applyCritDamage } = require('../helpers/characterFiles/traits')
+const LevelUpSystem = require('../helpers/characterFiles/levelUpSystem')
+const RewardsHandler = require('../helpers/characterFiles/RewardsHandler')
+const { createRoundEmbed } = require('../helpers/battle/roundEmbed')
+const { Character } = require('../../../Models/model') // Adjust the path as needed
 const {
   calcDamage,
   calcActualDamage,
   updateBufferHealth,
   updateHealth,
   compileDamageResult,
-} = require('./applyDamageHelpers')
+} = require('../helpers/battle/applyDamageHelpers')
 
-const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
+const { checkSpecialTrigger, executeSpecial } = require('../helpers/battle/executeSpecial')
 
 let cronTask = null
 
@@ -61,14 +61,11 @@ async function applyDamage(attacker, defender, userId) {
   )
 }
 
+const applyRound = async (character, enemy, userName, interaction, turnNum) => {
+  console.log('Interaction:', interaction);
+console.log('Type of Interaction:', typeof interaction);
+console.log('Interaction methods:', Object.keys(interaction));
 
-const applyRound = async (
-  character,
-  enemy,
-  userName,
-  interaction,
-  turnNum
-) => {
   // // Step 1: Check specials
   // await checkSpecialTrigger(character, character.activeSpecials)
   // // await checkSpecialTrigger(enemy, specialsArray)
@@ -89,7 +86,7 @@ const applyRound = async (
     actions.push(action1)
   }
 
-  // Enemy attacks character 
+  // Enemy attacks character
   if (enemy.current_health > 0) {
     const actionEnemy = await applyDamage(enemy, character)
     actions.push(actionEnemy)
@@ -124,6 +121,8 @@ let initializedCharacters = {}
 
 const setupBattleLogic = async (userId, userName, interaction) => {
   // const user = await client.users.fetch(userId)
+  console.log('Type of Interaction:', typeof interaction);
+  console.log('Interaction methods:', Object.keys(interaction));
   const validBattleKeys = Object.keys(battleManager).filter(
     (key) => key !== 'battleManager' && key !== 'userBattles'
   )
@@ -142,10 +141,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
         if (!battle) continue
 
-        const {
-          characterInstance,
-          enemyInstance,
-        } = battle
+        const { characterInstance, enemyInstance } = battle
 
         if (!initializedCharacters[characterInstance.character_id]) {
           initializeCharacterFlagsAndCounters(characterInstance)
@@ -157,11 +153,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
           initializedCharacters[enemyInstance.character_id] = true
         }
 
-        if (
-          !characterInstance ||
-          !enemyInstance
-        )
-          continue
+        if (!characterInstance || !enemyInstance) continue
 
         // Apply damage and handle battles here
 

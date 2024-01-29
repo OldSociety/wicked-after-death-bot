@@ -4,7 +4,7 @@ const { battleManager, userBattles } = require('./battleManager')
 const { traits, applyCritDamage } = require('../characterFiles/traits')
 const LevelUpSystem = require('../characterFiles/levelUpSystem')
 const RewardsHandler = require('../characterFiles/RewardsHandler')
-const { createRoundEmbed } = require('./battleEmbeds')
+const { createRoundEmbed } = require('./roundEmbed')
 const { Character } = require('../../../../Models/model') // Adjust the path as needed
 const {
   calcDamage,
@@ -17,7 +17,9 @@ const {
 const { checkSpecialTrigger, executeSpecial } = require('./executeSpecial')
 
 let cronTask = null
+// let initializedCharacters = {}
 
+// Function to calculate damage
 async function applyDamage(attacker, defender, userId) {
   const randHit = Math.random() * 100
   let isCrit = false
@@ -44,10 +46,6 @@ async function applyDamage(attacker, defender, userId) {
 
   bufferDamage = Math.min(actualDamage, defender.buffer_health)
 
-  console.log(
-    `APPLY DAMAGE: ${attacker.character_name} dealt ${bufferDamage} damage to ${defender.character_name}. Was it a critical? ${isCrit}.`
-  )
-
   updateBufferHealth(defender, bufferDamage)
   updateHealth(defender, actualDamage - bufferDamage)
 
@@ -61,109 +59,64 @@ async function applyDamage(attacker, defender, userId) {
   )
 }
 
-const applyRound = async (
-  actingCharacter,
-  opposingCharacters,
-  userName,
-  interaction
-) => {
-  const actions = [];
-  let actionResult;
-
-  // Determine if the acting character is attacking the enemy character stepping forward
-  if (actingCharacter.role === 'enemy') {
-    // Enemy attacks
-    if (targetCharacter.current_health > 0) {
-      actionResult = await applyDamage(actingCharacter, targetCharacter);
-      actions.push(actionResult);
+// Function to apply a round of actions
+const applyRound = async (attacker, defender, userName, interaction) => {
+  const actions = []
+  if (attacker.current_health > 0 && defender.current_health > 0) {
+    const actionResult = await applyDamage(attacker, defender)
+    actions.push(actionResult)
+    // Create and send round summary embed
+    const roundEmbed = createRoundEmbed(actions, userName, attacker, defender)
+    try {
+      await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
+    } catch (error) {
+      console.error('Error in interaction follow-up:', error)
     }
   } else {
-    // Frontlane Character attacks Enemy
-    if (actingCharacter.current_health > 0) {
-      actionResult = await applyDamage(actingCharacter, opposingCharacters.enemy);
-      actions.push(actionResult);
-    }
+    console.log('GAME OVER')
   }
-
-  // Create and send round summary embed
-  const roundEmbed = createRoundEmbed(
-    actions,
-    userName,
-    opposingCharacters.character,
-    opposingCharacters.enemy
-  );
-
-  await interaction.followUp({ embeds: [roundEmbed], ephemeral: true });
-};
-
-// Helper function to generate the opposing characters object
-function getOpposingCharacters(battle, actingCharacterRole) {
-  const opposingCharacters = {
-    character: battle.characterInstance,
-    enemy: battle.enemyInstance
-  };
-
-  if (actingCharacterRole === 'frontlane') {
-    delete opposingCharacters[actingCharacterRole];
-  }
-
-  return opposingCharacters;
 }
 
-// Updated handleCharacterAction function
+// Function to handle character actions during a battle
 async function handleCharacterAction(character, role, interaction, battleKey) {
-  const battle = battleManager[battleKey];
-  console.log('BATTLEKEY: ALREADY TESTED AND WORKS')
-  if (!battle) return;
-console.log('BUT THIS DOESN"T PRINT!')
-  const opposingCharacters = getOpposingCharacters(battle, role);
-  console.log('Actions', opposingCharacters, character, role, interaction, battleKey)
-  await applyRound(
-    character,
-    opposingCharacters,
-    battle.userName,
-    interaction
-  );
+  const battle = battleManager[battleKey]
+  if (!battle) return
+
+  const defender =
+    role === 'enemy' ? battle.characterInstance : battle.enemyInstance
+  await applyRound(character, defender, battle.userName, interaction)
 
   // Check if the battle ends
-  if (await battleEnds(character, role, battleKey)) {
-    stopBattleCronJobs(battleKey);
+  if (await battleEnds(character, defender, battleKey)) {
+    stopBattleCronJobs(battleKey)
   }
 }
 
-// BATTLE LOGIC
-let initializedCharacters = {}
+// Function to calculate the attack speed of a character
+function calculateAttackSpeed(character) {
+  let baseSpeed = character.attackType === 'light' ? 6 : 8
 
-// Battle logic and cron job setup
-const setupBattleLogic = async (userId, userName, interaction) => {
-  const validBattleKeys = Object.keys(battleManager).filter(
-    (key) => key !== 'battleManager' && key !== 'userBattles'
-  )
+  // if (character.tags.includes('rogue')) {
+  //   if (character.attackType === 'light') {
+  //     baseSpeed -= 1 // Rogues attack faster
+  //   }
+  // }
 
-  if (validBattleKeys.length <= 0) return
+  return baseSpeed
+}
 
-  validBattleKeys.forEach((battleKey) => {
-    const battle = battleManager[battleKey]
-    if (!battle) return
-    // console.log('hi')
-
-    const {
-      characterInstance,
-      enemyInstance,
-    } = battle
-
-    initializeCharacterFlagsAndCounters(characterInstance)
-    initializeCharacterFlagsAndCounters(enemyInstance)
-
-    // Set up cron jobs for each character
-    setupCharacterCron(
-      characterInstance,
-      'frontlane',
-      interaction,
-      battleKey
-    )
-    setupCharacterCron(enemyInstance, 'enemy', interaction, battleKey)
+// Function to set up a cron job for a character
+const setupCharacterCron = (
+  characterInstance,
+  role,
+  interaction,
+  battleKey
+) => {
+  const attackSpeed = calculateAttackSpeed(characterInstance)
+  const cronTask = cron.schedule(`*/${attackSpeed} * * * * *`, async () => {
+    await handleCharacterAction(characterInstance, role, interaction, battleKey)
   })
+  characterInstance.cronTask = cronTask // Assign the cron task to the character instance
 }
 
 // Function to initialize character flags and counters
@@ -178,37 +131,12 @@ function initializeCharacterFlagsAndCounters(character) {
   character.activeSpecials = []
 }
 
-// Function to set up a cron job for a character
-
-const setupCharacterCron = (
-  characterInstance,
-  role,
-  battleKey,
-  interaction,
-  userId
-) => {
-  const attackSpeed = calculateAttackSpeed(characterInstance) // Implement this function based on character attributes
-
-  return cron.schedule(`*/${attackSpeed} * * * * *`, async () => {
-    await handleCharacterAction(characterInstance, interaction, interaction, battleKey)
-    // Check if the battle ends
-    if (battleEnds(battleKey)) {
-      // If the battle ends, execute end-of-battle logic
-      await handleBattleEnd(battleKey, interaction, userId)
-      // Stop the cron job
-      this.stop()
-    }
-  })
-}
-
+// Function to handle the end of a battle
 async function handleBattleEnd(battleKey, interaction, userId) {
   const battle = battleManager[battleKey]
   if (!battle) return
 
-  const {
-    characterInstance,
-    enemyInstance,
-  } = battle
+  const { characterInstance, enemyInstance } = battle
 
   // Logic for handling the end of the battle
   try {
@@ -216,7 +144,9 @@ async function handleBattleEnd(battleKey, interaction, userId) {
       characterInstance.current_health <= 0 ||
       enemyInstance.current_health <= 0
     ) {
+      console.log('BATTLE ENDS')
       if (characterInstance.current_health > 0) {
+        console.log('WIN')
         // Characters survived the battle
         await LevelUpSystem.levelUp(
           characterInstance.character_id,
@@ -231,6 +161,7 @@ async function handleBattleEnd(battleKey, interaction, userId) {
         )
         // You might want to send a message indicating the battle result
       } else {
+        console.log('LOSS')
         characterInstance.consecutive_kill = 0
         const lossEmbed = new EmbedBuilder()
           .setColor('DarkRed')
@@ -257,8 +188,6 @@ async function handleBattleEnd(battleKey, interaction, userId) {
           e
         )
       }
-
-     
     }
   } catch (error) {
     console.error('Error handling battle end:', error)
@@ -269,27 +198,11 @@ async function handleBattleEnd(battleKey, interaction, userId) {
   delete userBattles[userId]
 }
 
-// Function to calculate the attack speed of a character
-function calculateAttackSpeed(character) {
-  let baseSpeed = character.attackType === 'light' ? 6 : 8
-
-  // if (character.tags.includes('rogue')) {
-  //   if (character.attackType === 'light') {
-  //     baseSpeed -= 1 // Rogues attack faster
-  //   }
-  // }
-
-  return baseSpeed
-}
-
 // Function to stop all cron jobs associated with a battle
 function stopBattleCronJobs(battleKey) {
   const battle = battleManager[battleKey]
   if (battle) {
-    [
-      battle.characterInstance,
-      battle.enemyInstance,
-    ].forEach((character) => {
+    ;[battle.characterInstance, battle.enemyInstance].forEach((character) => {
       if (character && character.cronTask) {
         character.cronTask.stop()
       }
@@ -298,6 +211,37 @@ function stopBattleCronJobs(battleKey) {
 
   delete battleManager[battleKey]
   delete userBattles[battleKey]
+}
+
+// Function to check if the battle has ended
+async function battleEnds(attacker, defender, battleKey) {
+  if (attacker.current_health <= 0 || defender.current_health <= 0) {
+    return true
+  }
+  return false
+}
+
+// Battle logic and cron job setup
+const setupBattleLogic = async (userId, userName, interaction) => {
+  const validBattleKeys = Object.keys(battleManager).filter(
+    (key) => key !== 'battleManager' && key !== 'userBattles'
+  )
+
+  if (validBattleKeys.length <= 0) return
+
+  validBattleKeys.forEach((battleKey) => {
+    const battle = battleManager[battleKey]
+    if (!battle) return
+
+    const { characterInstance, enemyInstance } = battle
+
+    initializeCharacterFlagsAndCounters(characterInstance)
+    initializeCharacterFlagsAndCounters(enemyInstance)
+
+    // Set up cron jobs for each character
+    setupCharacterCron(characterInstance, 'frontlane', interaction, battleKey)
+    setupCharacterCron(enemyInstance, 'enemy', interaction, battleKey)
+  })
 }
 
 module.exports = { setupBattleLogic, applyDamage, applyCritDamage }

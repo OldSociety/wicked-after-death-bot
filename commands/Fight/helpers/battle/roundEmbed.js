@@ -14,6 +14,7 @@ const createRoundEmbed = (
     .setThumbnail('https://i.imgur.com/AfFp7pu.png')
 
   actions.forEach((action, index) => {
+    console.log(2)
     let actionDesc = action.didMiss
       ? `${action.attacker.character_name} was partially blocked.`
       : `${action.attacker.character_name} ${
@@ -85,7 +86,7 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   const filledBar = '🟥'.repeat(filledSegments)
   const bufferBar = '🟦'.repeat(bufferSegments) // Represent buffer with a blue square
   const unfilledBar = '⬛'.repeat(unfilledSegments)
-
+  console.log(3)
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 
