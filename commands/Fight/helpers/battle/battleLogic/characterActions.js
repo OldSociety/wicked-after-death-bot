@@ -75,14 +75,7 @@ const applyRound = async (attacker, defender, userName, interaction) => {
 
 async function handleCharacterAction(character, role, interaction, battleKey) {
   const battle = battleManager[battleKey]
-  if (!battle) {
-    console.error('Battle not found for key:', battleKey)
-    // Additional debug info
-    console.log('Current battles in manager:', Object.keys(battleManager))
-    return // Battle not found
-  }
-
-  if (!battle || battle.battleEnded) return // Check if battle has ended
+  if (!battle || battle.battleEnded) return 
 
   const defender =
     role === 'enemy' ? battle.characterInstance : battle.enemyInstance
@@ -104,7 +97,6 @@ async function handleCharacterAction(character, role, interaction, battleKey) {
     }
 
     stopBattleCronJobs(battleKey)
-    console.log('stop', battleKey)
   }
 }
 

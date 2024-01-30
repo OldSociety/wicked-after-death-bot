@@ -4,7 +4,7 @@ const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
   // console.log("Received actions:", actions); // Log the actions array
   const embed = new EmbedBuilder()
     .setTitle(`${character.character_name}'s Action`)
-    .setColor('DarkBlue')
+    .setColor('DarkRed')
     .setFooter({ text: 'Wicked After Death Battle' })
 
   actions.forEach((action, index) => {
@@ -83,8 +83,63 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 
-// Example usage
-// const healthBar = createHealthBar(50, 100, 10); // Current health 50, Max health 100, Buffer health 10
-// console.log(healthBar);
+const createCharacterEmbed = (actions, userName, character, enemy, turnNum) => {
+  const characterEmbed = new EmbedBuilder()
+    .setTitle(
+        `${selectedCharacter.masterCharacter.character_name}`
+    )
+    .setDescription(`${selectedCharacter.masterCharacter.description}`)
+    .setColor('DarkBlue')
+    .addFields(
+      {
+        name: 'Level',
+        value: '`' + selectedCharacter.level.toString() + '`',
+        inline: true,
+      },
+      {
+        name: 'Experience',
+        value:
+          '`' +
+          selectedCharacter.experience.toString() +
+          ' / ' +
+          selectedCharacter.xp_needed.toString() +
+          '`',
+        inline: true,
+      },
+      {
+        name: 'Damage',
+        value:
+          '`⚔️' +
+          selectedCharacter.masterCharacter.base_damage.toString() +
+          '`',
+        inline: true,
+      },
+      {
+        name: 'Health',
+        value:
+          '`🧡' +
+          selectedCharacter.masterCharacter.base_health.toString() +
+          '`',
+        inline: true,
+      },
+      {
+        name: 'Crit Chance',
+        value:
+          '`🎯' +
+          selectedCharacter.masterCharacter.crit_chance.toString() +
+          '`',
+        inline: true,
+      },
+      {
+        name: 'Crit Damage',
+        value:
+          '`💥' +
+          selectedCharacter.masterCharacter.crit_damage.toString() +
+          '`',
+        inline: true,
+      }
+    )
+    return characterEmbed
+}
 
-module.exports = { createRoundEmbed }
+module.exports = { createRoundEmbed, createCharacterEmbed }

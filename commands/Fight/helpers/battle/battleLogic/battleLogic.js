@@ -28,7 +28,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
     
 
-    setupCharacterCron(characterInstance, 'frontlane', interaction, battleKey)
+    setupCharacterCron(characterInstance, 'character', interaction, battleKey)
     setupCharacterCron(enemyInstance, 'enemy', interaction, battleKey)
   })
 }
