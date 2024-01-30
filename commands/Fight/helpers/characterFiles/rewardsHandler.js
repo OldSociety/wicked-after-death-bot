@@ -79,4 +79,4 @@ class RewardsHandler {
   }
 }
 
-module.exports = RewardsHandler
+module.exports = { test: 'Test Export', RewardsHandler }

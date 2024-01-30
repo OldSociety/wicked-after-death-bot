@@ -73,6 +73,7 @@ class LevelUpSystem {
       ],
     })
 
+    console.log(1)
 
     const enemy = await Enemy.findByPk(enemyId)
 
@@ -165,4 +166,4 @@ class LevelUpSystem {
   }
 }
 
-module.exports = LevelUpSystem
+module.exports = { test: 'Test Export', LevelUpSystem }

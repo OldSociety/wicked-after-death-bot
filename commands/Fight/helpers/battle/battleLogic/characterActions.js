@@ -98,12 +98,13 @@ async function handleCharacterAction(character, role, interaction, battleKey) {
     battle.battleEnded = true // Prevents double execution
 
     try {
-      await handleBattleEnd(battleKey, interaction, battle.characterInstance, battle.enemyInstance)
+      await handleBattleEnd(battleKey, interaction)
     } catch (error) {
       console.log('handlebattleEnd error: ', error)
     }
 
     stopBattleCronJobs(battleKey)
+    console.log('stop', battleKey)
   }
 }
 
