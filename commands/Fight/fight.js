@@ -16,7 +16,9 @@ const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
 // const { setupBattleLogic } = require('./helpers/battle/battleLogic.js')
-const { setupBattleLogic } = require('./helpers/battle/battleLogicAuto.js')
+const {
+  setupBattleLogic,
+} = require('./helpers/battle/battleLogic/battleLogic.js')
 
 module.exports = {
   cooldown: 5,
@@ -98,9 +100,7 @@ module.exports = {
 
       const filter = (i) => {
         i.deferUpdate()
-        return (
-          i.customId === 'characterSelect'
-        )
+        return i.customId === 'characterSelect'
       }
 
       // Collector for character selection
@@ -121,13 +121,11 @@ module.exports = {
         if (!character && i.customId === 'characterSelect') {
           characterId = i.values[0] // Capture the selected character ID
           character = userCharacters.find(
-            (char) =>
-              char.dataValues.character_id.toString() === characterId
+            (char) => char.dataValues.character_id.toString() === characterId
           )
 
-
           // Proceed with battle setup if both characters are selected
-            if (character) {
+          if (character) {
             userBattles[userId] = true
 
             if (!enemy) {
@@ -143,13 +141,16 @@ module.exports = {
               userId
             )
 
-            const battleKey = `${character.dataValues.character_id}-${enemy.id}`
+            const battleKey = `${character.dataValues.character_id}-${enemy.enemy_id}`
 
             battleManager[battleKey] = battleResult
-  
+
             // Create and send an embed summarizing the battle initiation
             const embed = new EmbedBuilder()
-              .setTitle(`⚡${userName}'s ${character.masterCharacter.character_name}`).setColor('DarkRed')
+              .setTitle(
+                `⚡${userName}'s ${character.masterCharacter.character_name}`
+              )
+              .setColor('DarkRed')
               .setThumbnail(interaction.user.displayAvatarURL())
               .setTimestamp()
               .setDescription(
@@ -162,8 +163,7 @@ module.exports = {
                   value: '\u200B', // Zero-width space
                 },
                 {
-                  name:
-                    `${enemy.character_name}`,
+                  name: `${enemy.character_name}`,
                   value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
                 }
               )

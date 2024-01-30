@@ -6,18 +6,18 @@ const {
 
 // calcDamage function
 function calcDamage(attacker, randHit) {
-    let isCrit = false;
-  
-    // First, check if the character has an auto-crit flag set.
-    if (autoCritCharacters.has(attacker.character_id)) {
-      isCrit = isNextAttackAutoCrit(attacker.character_id); // Check and reset the flag
-    } else if (randHit < attacker.crit_chance * 100) { // Then proceed to random crit chance
-      isCrit = true;
-    }
-  
+  let isCrit = false
+
+  // First, check if the character has an auto-crit flag set.
+  if (autoCritCharacters.has(attacker.character_id)) {
+    isCrit = isNextAttackAutoCrit(attacker.character_id) // Check and reset the flag
+  } else if (randHit < attacker.crit_chance * 100) {
+    // Then proceed to random crit chance
+    isCrit = true
+  }
+
   let minDamage = Math.round(attacker.effective_damage * 0.08)
   let maxDamage = Math.round(attacker.effective_damage * 0.12)
-
 
   // Modify damage based on critical hit
   if (isCrit) {
@@ -28,7 +28,6 @@ function calcDamage(attacker, randHit) {
   if (autoCritCharacters.has(attacker.character_id)) {
     isCrit = isNextAttackAutoCrit(attacker.character_id) // Check and reset the flag
   }
-
 
   return [minDamage, maxDamage, isCrit]
 }

@@ -73,6 +73,7 @@ class LevelUpSystem {
       ],
     })
 
+
     const enemy = await Enemy.findByPk(enemyId)
 
     if (!character || !enemy) {
