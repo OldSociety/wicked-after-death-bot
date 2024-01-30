@@ -1,4 +1,4 @@
-const { createRoundEmbed } = require('../roundEmbed')
+const { createRoundEmbed, createPlayerActionEmbed } = require('../roundEmbed')
 const { traits, applyCritDamage } = require('../../characterFiles/traits')
 const { battleManager } = require('../battleManager')
 const {
@@ -74,30 +74,37 @@ const applyRound = async (attacker, defender, userName, interaction) => {
 }
 
 async function handleCharacterAction(character, role, interaction, battleKey) {
-  const battle = battleManager[battleKey]
-  if (!battle || battle.battleEnded) return 
+  const battle = battleManager[battleKey];
+  if (!battle || battle.battleEnded) return;
 
-  const defender =
-    role === 'enemy' ? battle.characterInstance : battle.enemyInstance
-  const battleEnded = await applyRound(
-    character,
-    defender,
-    battle.userName,
-    interaction
-  )
+  if (role === 'player') {
+    const message = await interaction.followUp(createPlayerActionEmbed(character));
+    await message.react('⚔️');
 
-  // Check if the battle ends and ensure it's only processed once
-  if (battleEnded && !battle.battleEnded) {
-    battle.battleEnded = true // Prevents double execution
+    const filter = (reaction, user) => {
+      return ['⚔️'].includes(reaction.emoji.name) && user.id === interaction.user.id;
+    };
 
-    try {
-      await handleBattleEnd(battleKey, interaction)
-    } catch (error) {
-      console.log('handlebattleEnd error: ', error)
-    }
+    const collector = message.createReactionCollector({ filter, max: 1, time: 30000 });
 
-    stopBattleCronJobs(battleKey)
+    collector.on('collect', async (reaction) => {
+      if (reaction.emoji.name === '⚔️') {
+        const defender = battle.enemyInstance;
+        await applyRound(character, defender, battle.userName, interaction);
+      }
+    });
+
+    collector.on('end', collected => {
+      if (collected.size === 0) {
+        interaction.followUp('No action selected, skipping turn.');
+      }
+    });
+  } else {
+    // Enemy logic
+    const defender = battle.characterInstance;
+    await applyRound(character, defender, battle.userName, interaction);
   }
 }
+
 
 module.exports = { applyDamage, applyRound, handleCharacterAction }

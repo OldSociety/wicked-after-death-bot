@@ -1,11 +1,16 @@
-const { EmbedBuilder } = require('discord.js')
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require('discord.js')
 
 const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
   // console.log("Received actions:", actions); // Log the actions array
   const embed = new EmbedBuilder()
     .setTitle(`${character.character_name}'s Action`)
     .setColor('DarkRed')
-    .setFooter({ text: 'Wicked After Death Battle' })
+    .setFooter({ text: `In combat with  ${enemy.character_name}, ${turnNum}` })
 
   actions.forEach((action, index) => {
     let actionDesc = action.didMiss
@@ -83,63 +88,25 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 
-const createCharacterEmbed = (actions, userName, character, enemy, turnNum) => {
-  const characterEmbed = new EmbedBuilder()
-    .setTitle(
-        `${selectedCharacter.masterCharacter.character_name}`
-    )
-    .setDescription(`${selectedCharacter.masterCharacter.description}`)
-    .setColor('DarkBlue')
-    .addFields(
-      {
-        name: 'Level',
-        value: '`' + selectedCharacter.level.toString() + '`',
-        inline: true,
-      },
-      {
-        name: 'Experience',
-        value:
-          '`' +
-          selectedCharacter.experience.toString() +
-          ' / ' +
-          selectedCharacter.xp_needed.toString() +
-          '`',
-        inline: true,
-      },
-      {
-        name: 'Damage',
-        value:
-          '`⚔️' +
-          selectedCharacter.masterCharacter.base_damage.toString() +
-          '`',
-        inline: true,
-      },
-      {
-        name: 'Health',
-        value:
-          '`🧡' +
-          selectedCharacter.masterCharacter.base_health.toString() +
-          '`',
-        inline: true,
-      },
-      {
-        name: 'Crit Chance',
-        value:
-          '`🎯' +
-          selectedCharacter.masterCharacter.crit_chance.toString() +
-          '`',
-        inline: true,
-      },
-      {
-        name: 'Crit Damage',
-        value:
-          '`💥' +
-          selectedCharacter.masterCharacter.crit_damage.toString() +
-          '`',
-        inline: true,
-      }
-    )
-    return characterEmbed
+const createPlayerActionEmbed = (character) => {
+  const playerActionEmbed = new EmbedBuilder()
+    .setTitle(`${character.character_name}'s Turn`)
+    .setDescription('Select your action:')
+    .setColor('DarkGreen')
+    .addFields({
+      name: 'Light Attack',
+      value: 'React with ⚔️ to perform a Light Attack.',
+      inline: true,
+    })
+
+  const actionRow = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('light_attack')
+      .setLabel('⚔️')
+      .setStyle(ButtonStyle.Primary)
+  )
+
+  return { embeds: [playerActionEmbed], components: [actionRow] }
 }
 
-module.exports = { createRoundEmbed, createCharacterEmbed }
+module.exports = { createRoundEmbed, createPlayerActionEmbed }
