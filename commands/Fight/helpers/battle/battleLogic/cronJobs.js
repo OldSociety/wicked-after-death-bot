@@ -1,6 +1,7 @@
 const cron = require('node-cron')
 const { calculateAttackSpeed } = require('./battleUtils')
 const { handleCharacterAction } = require('./characterActions')
+const { applyRound } = require('./characterActions')
 
 // Function to set up a cron job for a character
 const setupCharacterCron = (
@@ -17,8 +18,26 @@ const setupCharacterCron = (
   if (role === 'enemy') {
     // Enemy acts automatically, start cron job immediately
     characterInstance.cronTask = cron.schedule(`*/10 * * * * *`, async () => {
-      console.log('FIGHT: ', enemyInstance.character_name, characterInstance.character_name, 'role: ', role, 'username: ', userName)
-      await applyRound(enemyInstance, characterInstance, role, userName, channel)
+      // console.log(
+      //   'FIGHT: ',
+      //   enemyInstance.character_name,
+      //   characterInstance.character_name,
+      //   'role: ',
+      //   role,
+      //   'username: ',
+      //   userName
+      // )
+      try {
+        await applyRound(
+          enemyInstance,
+          characterInstance,
+          role,
+          userName,
+          channel
+        )
+      } catch (error) {
+        console.log('error', error)
+      }
     })
   } else if (role === 'character') {
     // Player acts manually, set up cron job but do not start immediately

@@ -58,19 +58,15 @@ const applyRound = async (
   userName,
   channel,
   interaction = null
-) => {
-  console.log(attacker)
+) => { 
+  // console.log(role, userName, channel)
   if (attacker.current_health > 0 && defender.current_health > 0) {
     const actionResult = await applyDamage(attacker, defender)
-    console.log('actions result: ', actionResult)
     const actions = [actionResult]
-    console.log('actions: ', actions)
     const roundEmbed = createRoundEmbed(actions, userName, attacker, defender)
-    console.log('role: ', role)
 
     // If the attacker is the enemy, send the embed to the channel
     if (role === 'enemy') {
-      console.log(role)
       try {
         await channel.send({ embeds: [roundEmbed] })
       } catch (error) {
@@ -79,6 +75,7 @@ const applyRound = async (
     }
     // If the attacker is the player, reply to the interaction
     else if (interaction) {
+      console.log('interaction: ', interaction)
       try {
         await interaction.reply({ embeds: [roundEmbed], ephemeral: true })
       } catch (error) {
