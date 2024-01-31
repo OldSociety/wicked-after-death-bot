@@ -15,7 +15,6 @@ async function applyDamage(attacker, defender, userId) {
   let isCrit = false
   let actualDamage
   let bufferDamage = 0 // Initialize bufferDamage to 0
-  console.log(3)
 
   // Calculate damage range
   const [minDamage, maxDamage, isCriticalHit] = calcDamage(attacker, randHit)
@@ -33,6 +32,7 @@ async function applyDamage(attacker, defender, userId) {
     // Attack misses - apply 3/4 damage
     actualDamage = Math.round(calcActualDamage(minDamage, maxDamage) * 0.75)
     isCrit = false // Ensure critical hit is not considered on a miss
+    console.log('miss', actualDamage)
   }
 
   bufferDamage = Math.min(actualDamage, defender.buffer_health)
@@ -51,18 +51,36 @@ async function applyDamage(attacker, defender, userId) {
 }
 
 // Function to apply a round of actions
-const applyRound = async (attacker, defender, userName, interaction) => {
+const applyRound = async (
+  attacker,
+  defender,
+  userName,
+  channel,
+  interaction = null
+) => {
   if (attacker.current_health > 0 && defender.current_health > 0) {
     const actionResult = await applyDamage(attacker, defender)
     const actions = [actionResult]
     const roundEmbed = createRoundEmbed(actions, userName, attacker, defender)
 
-    try {
-      await interaction.followUp({ embeds: [roundEmbed], ephemeral: true })
-    } catch (error) {
-      console.error('Error in interaction follow-up:', error)
+    // If the attacker is the enemy, send the embed to the channel
+    if (attacker.role === 'enemy') {
+      try {
+        await channel.send({ embeds: [roundEmbed] })
+      } catch (error) {
+        console.error('Error sending round embed to channel:', error)
+      }
     }
-    // Check if the battle should end (either attacker or defender has zero health)
+    // If the attacker is the player, reply to the interaction
+    else if (interaction) {
+      try {
+        await interaction.reply({ embeds: [roundEmbed], ephemeral: true })
+      } catch (error) {
+        console.error('Error in interaction reply:', error)
+      }
+    }
+
+    // Check if the battle should end
     if (attacker.current_health <= 0 || defender.current_health <= 0) {
       return true // Indicates the battle has ended
     }
@@ -79,12 +97,30 @@ async function handleCharacterAction(character, role, interaction, battleKey) {
 
   if (role === 'character') {
     // Player's turn
-    const playerActionEmbed = createPlayerActionEmbed(character, battleKey)
-    await interaction.followUp(playerActionEmbed)
+    const message = await interaction.followUp(
+      createPlayerActionEmbed(character)
+    )
+    // ... existing code for setting up collector ...
+
+    client.on('interactionCreate', async (interaction) => {
+      if (!interaction.isButton()) return
+
+      if (interaction.customId === 'light_attack') {
+        // Acknowledge the interaction before processing
+        await interaction.deferReply() // or interaction.reply({ content: "Processing...", ephemeral: true });
+
+        // The light attack button was pressed
+        await applyDamage(character, battle.enemyInstance)
+
+        // Respond to the interaction
+        await interaction.followUp(
+          `${character.character_name} attacks with a light strike!`
+        )
+      }
+    })
   } else {
     // Enemy logic
-    const defender = battle.characterInstance
-    await applyRound(character, defender, battle.userName, interaction)
+    // ... existing enemy logic ...
   }
 }
 

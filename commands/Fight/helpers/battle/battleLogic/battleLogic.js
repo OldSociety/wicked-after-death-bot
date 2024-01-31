@@ -31,7 +31,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
 
     // Delay the initial player action embed display
     setTimeout(async () => {
-      const playerActionEmbed = createPlayerActionEmbed(characterInstance)
+      const playerActionEmbed = createPlayerActionEmbed(characterInstance, battleKey)
       await interaction.followUp(playerActionEmbed)
     }, 1000) // Delay of (1 second)
   }

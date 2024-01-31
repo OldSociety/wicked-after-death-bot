@@ -127,7 +127,7 @@ module.exports = {
             `Are you sure you want to delete the account for ${targetUser.tag}?`
           )
           .setColor(0x0099ff)
-        await interaction.reply({ embeds: [embed], components: [row] })
+        await interaction.reply({ embeds: [embed], components: [row], ephemeral: true })
 
         if (!interaction.isButton()) return
 

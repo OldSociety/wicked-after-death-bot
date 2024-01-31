@@ -7,6 +7,7 @@ const {
 
 const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
   // console.log("Received actions:", actions); // Log the actions array
+  console.log('character',character.character_name)
   const embed = new EmbedBuilder()
     .setTitle(`${character.character_name}'s Action`)
     .setColor('DarkRed')
@@ -22,17 +23,19 @@ const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
     let healthDesc
     let healthFieldName
 
-    if (action.defender.character_name === character.character_name) {
+    if (action.attacker.character_name === character.character_name) {
+      console.log('here')
       {
         // Regular health bar display for character
-        healthFieldName = `\n${action.defender.character_name}'s Health`
+        healthFieldName = `\n${action.attacker.character_name}'s Health`
         healthDesc = createHealthBar(
           character.current_health,
           character.effective_health
         )
       }
     } else {
-      healthFieldName = `\n${action.defender.character_name}'s Health`
+      console.log('there')
+      healthFieldName = `\n${action.attacker.character_name}'s Health`
       healthDesc = createHealthBar(enemy.current_health, enemy.effective_health)
     }
 
@@ -101,7 +104,7 @@ const createPlayerActionEmbed = (character, battleKey) => {
 
   const actionRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId(`battle_light_attack_${battleKey}`)
+      .setCustomId(`battle_light_${battleKey}`)
       .setLabel('⚔️')
       .setStyle(ButtonStyle.Primary)
   )
