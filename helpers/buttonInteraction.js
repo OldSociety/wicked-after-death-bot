@@ -70,6 +70,8 @@ module.exports = {
   async execute(interaction) {
     if (!interaction.isButton()) return
 
+    const userName = interaction.user.username
+    const role = 'character'
     const customId = interaction.customId
     const userId = customId.split('_').pop()
     const parts = customId.split('_')
@@ -99,7 +101,9 @@ module.exports = {
           await applyRound(
             battle.characterInstance,
             battle.enemyInstance,
-            userId,
+            role,
+            userName,
+            interaction.channel,
             interaction
           )
 

@@ -27,7 +27,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
     initializeCharacterFlagsAndCounters(enemyInstance)
 
     // Setup cron jobs
-    setupCharacterCron(enemyInstance, 'enemy', interaction, battleKey) // Only for enemy
+    setupCharacterCron(enemyInstance, characterInstance, 'enemy', interaction, battleKey) // Only for enemy
 
     // Delay the initial player action embed display
     setTimeout(async () => {
