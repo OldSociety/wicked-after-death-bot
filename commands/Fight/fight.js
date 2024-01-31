@@ -1,5 +1,7 @@
 const {
   SlashCommandBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   EmbedBuilder,
   ActionRowBuilder,
   StringSelectMenuBuilder,
@@ -15,7 +17,7 @@ const { selectRaid } = require('./helpers/levelSelection/raidSelection')
 const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
-// const { setupBattleLogic } = require('./helpers/battle/battleLogic.js')
+// const { setupBattleLogic } = require('./helpers/battle/battleTest.js')
 const {
   setupBattleLogic,
 } = require('./helpers/battle/battleLogic/battleLogic.js')
@@ -168,6 +170,57 @@ module.exports = {
                 }
               )
 
+            // Create Confirm and Back buttons
+            const confirmButton = new ButtonBuilder()
+              .setCustomId('confirm_fight')
+              .setLabel('Confirm')
+              .setStyle(ButtonStyle.Success)
+
+            const backButton = new ButtonBuilder()
+              .setCustomId('back_fight')
+              .setLabel('Back')
+              .setStyle(ButtonStyle.Danger)
+
+            // Add buttons to the action row
+            const actionRow = new ActionRowBuilder().addComponents(
+              confirmButton,
+              backButton
+            )
+
+            await interaction.followUp({
+              embeds: [embed],
+              components: [actionRow],
+            })
+
+            // Collector for button interaction
+            const buttonFilter = (i) => i.user.id === userId
+            const buttonCollector =
+              interaction.channel.createMessageComponentCollector({
+                filter: buttonFilter,
+                time: 30000,
+              })
+
+            buttonCollector.on('collect', async (i) => {
+              if (i.customId === 'confirm_fight') {
+                // Initiate the battle
+
+                setupBattleLogic(userId, userName, interaction)
+              } else if (i.customId === 'back_fight') {
+                // Abort the battle
+                await interaction.followUp({
+                  content: 'Battle aborted.',
+                  ephemeral: true,
+                })
+              }
+              i.deferUpdate()
+            })
+
+            buttonCollector.on('end', (collected) => {
+              if (collected.size === 0) {
+                interaction.followUp('No response, battle aborted.')
+              }
+            })
+
             // Function to create a field for a character
             function createCharacterField(character) {
               const effectiveDamage =
@@ -188,10 +241,6 @@ module.exports = {
             }
             // embed.setImage('https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&')
 
-            // Call setupBattleLogic after initiating the battle
-            setupBattleLogic(userId, userName, interaction)
-
-            await interaction.followUp({ embeds: [embed] })
             // Stop the collector as we have both selections
             collector.stop()
           }

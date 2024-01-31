@@ -8,7 +8,6 @@ const {
   updateHealth,
   compileDamageResult,
 } = require('../applyDamageHelpers')
-const { handleBattleEnd, stopBattleCronJobs } = require('./battleEndHandlers')
 
 // Function to calculate damage
 async function applyDamage(attacker, defender, userId) {
@@ -16,6 +15,7 @@ async function applyDamage(attacker, defender, userId) {
   let isCrit = false
   let actualDamage
   let bufferDamage = 0 // Initialize bufferDamage to 0
+  console.log(3)
 
   // Calculate damage range
   const [minDamage, maxDamage, isCriticalHit] = calcDamage(attacker, randHit)
@@ -74,37 +74,18 @@ const applyRound = async (attacker, defender, userName, interaction) => {
 }
 
 async function handleCharacterAction(character, role, interaction, battleKey) {
-  const battle = battleManager[battleKey];
-  if (!battle || battle.battleEnded) return;
+  const battle = battleManager[battleKey]
+  if (!battle || battle.battleEnded) return
 
-  if (role === 'player') {
-    const message = await interaction.followUp(createPlayerActionEmbed(character));
-    await message.react('⚔️');
-
-    const filter = (reaction, user) => {
-      return ['⚔️'].includes(reaction.emoji.name) && user.id === interaction.user.id;
-    };
-
-    const collector = message.createReactionCollector({ filter, max: 1, time: 30000 });
-
-    collector.on('collect', async (reaction) => {
-      if (reaction.emoji.name === '⚔️') {
-        const defender = battle.enemyInstance;
-        await applyRound(character, defender, battle.userName, interaction);
-      }
-    });
-
-    collector.on('end', collected => {
-      if (collected.size === 0) {
-        interaction.followUp('No action selected, skipping turn.');
-      }
-    });
+  if (role === 'character') {
+    // Player's turn
+    const playerActionEmbed = createPlayerActionEmbed(character, battleKey)
+    await interaction.followUp(playerActionEmbed)
   } else {
     // Enemy logic
-    const defender = battle.characterInstance;
-    await applyRound(character, defender, battle.userName, interaction);
+    const defender = battle.characterInstance
+    await applyRound(character, defender, battle.userName, interaction)
   }
 }
-
 
 module.exports = { applyDamage, applyRound, handleCharacterAction }

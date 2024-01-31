@@ -88,7 +88,7 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 
-const createPlayerActionEmbed = (character) => {
+const createPlayerActionEmbed = (character, battleKey) => {
   const playerActionEmbed = new EmbedBuilder()
     .setTitle(`${character.character_name}'s Turn`)
     .setDescription('Select your action:')
@@ -101,7 +101,7 @@ const createPlayerActionEmbed = (character) => {
 
   const actionRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId('light_attack')
+      .setCustomId(`battle_light_attack_${battleKey}`)
       .setLabel('⚔️')
       .setStyle(ButtonStyle.Primary)
   )
