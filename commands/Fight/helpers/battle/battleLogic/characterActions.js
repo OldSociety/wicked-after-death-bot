@@ -75,9 +75,9 @@ const applyRound = async (
     }
     // If the attacker is the player, reply to the interaction
     else if (interaction) {
-      console.log('interaction: ', interaction)
       try {
         await interaction.reply({ embeds: [roundEmbed], ephemeral: true })
+        console.log('this seems to be where the bug lies.')
       } catch (error) {
         console.error('Error in interaction reply:', error)
       }
