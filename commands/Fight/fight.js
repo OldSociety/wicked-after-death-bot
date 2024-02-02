@@ -17,7 +17,6 @@ const { selectRaid } = require('./helpers/levelSelection/raidSelection')
 const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
-// const { setupBattleLogic } = require('./helpers/battle/battleTest.js')
 const {
   setupBattleLogic,
 } = require('./helpers/battle/battleLogic/battleLogic.js')
@@ -36,8 +35,6 @@ module.exports = {
       const user = await User.findOne({
         where: { user_id: interaction.user.id },
       })
-
-      console.log(interaction.user)
 
       if (!user) {
         await interaction.reply({
@@ -203,8 +200,8 @@ module.exports = {
             buttonCollector.on('collect', async (i) => {
               if (i.customId === 'confirm_fight') {
                 // Initiate the battle
-
                 setupBattleLogic(userId, userName, interaction)
+
               } else if (i.customId === 'back_fight') {
                 // Abort the battle
                 await interaction.followUp({

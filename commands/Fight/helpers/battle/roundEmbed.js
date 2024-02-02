@@ -5,9 +5,7 @@ const {
   ButtonStyle,
 } = require('discord.js')
 
-const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
-  // console.log("Received actions:", actions); // Log the actions array
-  console.log('character',character.character_name)
+const createRoundEmbed = (actions, character, enemy, turnNum) => {
   const embed = new EmbedBuilder()
     .setTitle(`${character.character_name}'s Action`)
     .setColor('DarkRed')
@@ -24,7 +22,6 @@ const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
     let healthFieldName
 
     if (action.attacker.character_name === character.character_name) {
-      console.log('here')
       {
         // Regular health bar display for character
         healthFieldName = `\n${action.attacker.character_name}'s Health`
@@ -34,7 +31,6 @@ const createRoundEmbed = (actions, userName, character, enemy, turnNum) => {
         )
       }
     } else {
-      console.log('there')
       healthFieldName = `\n${action.attacker.character_name}'s Health`
       healthDesc = createHealthBar(enemy.current_health, enemy.effective_health)
     }
@@ -109,7 +105,7 @@ const createPlayerActionEmbed = (character, battleKey) => {
       .setStyle(ButtonStyle.Primary)
   )
 
-  return { embeds: [playerActionEmbed], components: [actionRow] }
+  return { embeds: [playerActionEmbed], components: [actionRow], ephemeral: true }
 }
 
 module.exports = { createRoundEmbed, createPlayerActionEmbed }

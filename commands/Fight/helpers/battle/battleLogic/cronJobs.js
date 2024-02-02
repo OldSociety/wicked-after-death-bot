@@ -8,31 +8,20 @@ const setupCharacterCron = (
   enemyInstance,
   characterInstance,
   role,
-  interaction,
+  channel,
+  interaction = null,
   battleKey
 ) => {
   const attackSpeed = calculateAttackSpeed(characterInstance)
-  const userName = interaction.user.username
-  const channel = interaction.channel
 
   if (role === 'enemy') {
     // Enemy acts automatically, start cron job immediately
     characterInstance.cronTask = cron.schedule(`*/10 * * * * *`, async () => {
-      // console.log(
-      //   'FIGHT: ',
-      //   enemyInstance.character_name,
-      //   characterInstance.character_name,
-      //   'role: ',
-      //   role,
-      //   'username: ',
-      //   userName
-      // )
       try {
         await applyRound(
           enemyInstance,
           characterInstance,
           role,
-          userName,
           channel
         )
       } catch (error) {

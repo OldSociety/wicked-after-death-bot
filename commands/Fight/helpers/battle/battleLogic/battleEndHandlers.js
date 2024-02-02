@@ -17,8 +17,8 @@ async function handleBattleEnd(battleKey, interaction) {
       enemyInstance.current_health <= 0
     ) {
       if (characterInstance.current_health > 0) {
-        console.log(characterInstance.current_health)
-        console.log(LevelUpSystem);
+        // console.log(characterInstance.current_health)
+        // console.log(LevelUpSystem);
        // Player won the battle
        await LevelUpSystem.levelUp(
         characterInstance.character_id,

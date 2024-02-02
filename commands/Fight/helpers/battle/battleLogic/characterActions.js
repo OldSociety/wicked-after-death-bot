@@ -32,7 +32,6 @@ async function applyDamage(attacker, defender, userId) {
     // Attack misses - apply 3/4 damage
     actualDamage = Math.round(calcActualDamage(minDamage, maxDamage) * 0.75)
     isCrit = false // Ensure critical hit is not considered on a miss
-    console.log('miss', actualDamage)
   }
 
   bufferDamage = Math.min(actualDamage, defender.buffer_health)
@@ -55,20 +54,18 @@ const applyRound = async (
   attacker,
   defender,
   role,
-  userName,
   channel,
   interaction = null
 ) => { 
-  // console.log(role, userName, channel)
   if (attacker.current_health > 0 && defender.current_health > 0) {
     const actionResult = await applyDamage(attacker, defender)
     const actions = [actionResult]
-    const roundEmbed = createRoundEmbed(actions, userName, attacker, defender)
+    const roundEmbed = createRoundEmbed(actions, attacker, defender)
 
     // If the attacker is the enemy, send the embed to the channel
     if (role === 'enemy') {
       try {
-        await channel.send({ embeds: [roundEmbed] })
+        await channel.send({ embeds: [roundEmbed], ephemeral: true })
       } catch (error) {
         console.error('Error sending round embed to channel:', error)
       }
@@ -76,10 +73,10 @@ const applyRound = async (
     // If the attacker is the player, reply to the interaction
     else if (interaction) {
       try {
-        await interaction.reply({ embeds: [roundEmbed], ephemeral: true })
-        console.log('this seems to be where the bug lies.')
+        console.log(interaction.id)
+        await channel.send({ embeds: [roundEmbed], ephemeral: true })
       } catch (error) {
-        console.error('Error in interaction reply:', error)
+        console.error('Error in interaction reply 2:', error)
       }
     }
 

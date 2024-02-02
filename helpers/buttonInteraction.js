@@ -69,8 +69,7 @@ module.exports = {
   name: 'interactionCreate',
   async execute(interaction) {
     if (!interaction.isButton()) return
-
-    const userName = interaction.user.username
+console.log("InteractionID: ", interaction.id)
     const role = 'character'
     const customId = interaction.customId
     const userId = customId.split('_').pop()
@@ -102,7 +101,6 @@ module.exports = {
             battle.characterInstance,
             battle.enemyInstance,
             role,
-            userName,
             interaction.channel,
             interaction
           )

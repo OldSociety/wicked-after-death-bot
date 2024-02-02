@@ -5,6 +5,8 @@ const { createPlayerActionEmbed } = require('../roundEmbed')
 const { SetupPlayerReactions } = require('./reactionListener')
 
 const setupBattleLogic = async (userId, userName, interaction) => {
+  const channel = interaction.channel 
+
   const validBattleKeys = Object.keys(battleManager).filter(
     (key) => key !== 'battleManager' && key !== 'userBattles'
   )
@@ -27,7 +29,7 @@ const setupBattleLogic = async (userId, userName, interaction) => {
     initializeCharacterFlagsAndCounters(enemyInstance)
 
     // Setup cron jobs
-    setupCharacterCron(enemyInstance, characterInstance, 'enemy', interaction, battleKey) // Only for enemy
+    setupCharacterCron(enemyInstance, characterInstance, 'enemy', channel, battleKey) // Only for enemy
 
     // Delay the initial player action embed display
     setTimeout(async () => {
