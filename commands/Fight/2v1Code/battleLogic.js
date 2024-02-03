@@ -3,7 +3,7 @@ const { EmbedBuilder } = require('discord.js')
 const { battleManager, userBattles } = require('../helpers/battle/battleManager')
 const { traits, applyCritDamage } = require('../helpers/characterFiles/traits')
 const LevelUpSystem = require('../helpers/characterFiles/levelUpSystem')
-const RewardsHandler = require('../helpers/characterFiles/RewardsHandler')
+const RewardsHandler = require('../helpers/characterFiles/rewardsHandler')
 const { createRoundEmbed } = require('../helpers/battle/roundEmbed')
 const { Character } = require('../../../Models/model') // Adjust the path as needed
 const {

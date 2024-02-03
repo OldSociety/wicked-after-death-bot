@@ -87,22 +87,31 @@ function createHealthBar(currentHealth, maxHealth, bufferHealth = 0) {
   return '`' + '『' + `${filledBar}${bufferBar}${unfilledBar}` + '』' + '`'
 }
 
-const createPlayerActionEmbed = (character, battleKey) => {
+const createPlayerActionEmbed = (character, enemy, channel, battleKey) => {
   const playerActionEmbed = new EmbedBuilder()
-    .setTitle(`${character.character_name}'s Turn`)
-    .setDescription('Select your action:')
+    .setDescription(`Combat: ${character.character_name} vs. ${enemy.character_name}`)
     .setColor('DarkGreen')
     .addFields({
-      name: 'Light Attack',
+      name: '\u200B',
       value: 'React with ⚔️ to perform a Light Attack.',
       inline: true,
-    })
+    },
+    { name: '\u200B', value: '```\u200B\n\n\n\u200B```', inline: false }, // Invisible character to create space
+)
 
   const actionRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`battle_light_${battleKey}`)
+      .setLabel('🗡️')
+      .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+      .setCustomId(`battle_heavy_${battleKey}`)
       .setLabel('⚔️')
-      .setStyle(ButtonStyle.Primary)
+      .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+      .setCustomId(`battle_block_${battleKey}`)
+      .setLabel('🛡️')
+      .setStyle(ButtonStyle.Secondary)
   )
 
   return { embeds: [playerActionEmbed], components: [actionRow], ephemeral: true }

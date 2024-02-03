@@ -61,24 +61,31 @@ const applyRound = async (
     const actionResult = await applyDamage(attacker, defender)
     const actions = [actionResult]
     const roundEmbed = createRoundEmbed(actions, attacker, defender)
+    let firstAttack = false
 
-    // If the attacker is the enemy, send the embed to the channel
-    if (role === 'enemy') {
+    // // If the attacker is the enemy, send the embed to the channel
+    // if (role === 'enemy') {
+    //   try {
+    //     await channel.send({ embeds: [roundEmbed], ephemeral: true })
+    //   } catch (error) {
+    //     console.error('Error sending round embed to channel:', error)
+    //   }
+    // }
+    // // If the attacker is the player, reply to the interaction
+    // else if (interaction) {
       try {
-        await channel.send({ embeds: [roundEmbed], ephemeral: true })
-      } catch (error) {
-        console.error('Error sending round embed to channel:', error)
-      }
-    }
-    // If the attacker is the player, reply to the interaction
-    else if (interaction) {
-      try {
+        if (!firstAttack) {
         console.log(interaction.id)
-        await channel.send({ embeds: [roundEmbed], ephemeral: true })
-      } catch (error) {
+        await interaction.reply({ embeds: [roundEmbed], ephemeral: true })
+        firstAttack = true
+      } else {
+        console.log('this works')
+        await interaction.editReply({ embeds: [roundEmbed], ephemeral: true })
+      }
+     } catch (error) {
         console.error('Error in interaction reply 2:', error)
       }
-    }
+    // }
 
     // Check if the battle should end
     if (attacker.current_health <= 0 || defender.current_health <= 0) {

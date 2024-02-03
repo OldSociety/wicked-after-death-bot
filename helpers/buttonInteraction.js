@@ -69,7 +69,7 @@ module.exports = {
   name: 'interactionCreate',
   async execute(interaction) {
     if (!interaction.isButton()) return
-console.log("InteractionID: ", interaction.id)
+    console.log('InteractionID: ', interaction.id)
     const role = 'character'
     const customId = interaction.customId
     const userId = customId.split('_').pop()
@@ -104,14 +104,32 @@ console.log("InteractionID: ", interaction.id)
             interaction.channel,
             interaction
           )
-
-          // Check if enemy is defeated and handle battle end if necessary
-          if (battle.enemyInstance.current_health <= 0) {
-            handleBattleEnd(battleKey, interaction)
-          }
+        } else if (battleAction === 'heavy') {
+          console.log('Heavy attack initiated')
+          await applyRound(
+            battle.characterInstance,
+            battle.enemyInstance,
+            role,
+            interaction.channel,
+            interaction
+          )
+        } else if (battleAction === 'block') {
+          console.log('Block initiated')
+          await applyRound(
+            battle.characterInstance,
+            battle.enemyInstance,
+            role,
+            interaction.channel,
+            interaction
+          )
         }
-        // Add logic for other battle actions if needed
+
+        // Check if enemy is defeated and handle battle end if necessary
+        if (battle.enemyInstance.current_health <= 0) {
+          handleBattleEnd(battleKey, interaction)
+        }
       }
+      // Add logic for other battle actions if needed
 
       // Add logic for other battle actions if needed
     } else if (customId.startsWith('delete_account_yes')) {
