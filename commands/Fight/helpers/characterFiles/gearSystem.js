@@ -1,19 +1,16 @@
-
-const { Character } = require('../../../Models/models');
+const { Character } = require('../../../Models/models')
 
 class GearSystem {
   static async levelUp(characterId) {
-    const character = await Character.findByPk(characterId);
+    const character = await Character.findByPk(characterId)
     if (!character) {
-      throw new Error('Character not found');
+      throw new Error('Character not found')
     }
 
-    character.dataValues.level += 1;
+    character.dataValues.level += 1
 
-    // More complex logic here...
-
-    await character.save();
+    await character.save()
   }
 }
 
-module.exports = GearSystem;
+module.exports = GearSystem

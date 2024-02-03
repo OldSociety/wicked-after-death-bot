@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js')
-const { LevelUpSystem } = require('../../characterFiles/levelUpSystem');
+const { LevelUpSystem } = require('../../characterFiles/levelUpSystem')
 const { RewardsHandler } = require('../../characterFiles/rewardsHandler')
 const { battleManager, userBattles } = require('../battleManager')
 
@@ -17,15 +17,13 @@ async function handleBattleEnd(battleKey, interaction) {
       enemyInstance.current_health <= 0
     ) {
       if (characterInstance.current_health > 0) {
-        // console.log(characterInstance.current_health)
-        // console.log(LevelUpSystem);
-       // Player won the battle
-       await LevelUpSystem.levelUp(
-        characterInstance.character_id,
-        enemyInstance.enemy_id,
-        interaction
-      );
-      
+        // Player won the battle
+        await LevelUpSystem.levelUp(
+          characterInstance.character_id,
+          enemyInstance.enemy_id,
+          interaction
+        )
+
         await RewardsHandler.handleRewards(
           userId,
           characterInstance.character_id,
@@ -52,7 +50,7 @@ async function handleBattleEnd(battleKey, interaction) {
 function stopBattleCronJobs(battleKey) {
   const battle = battleManager[battleKey]
   if (battle) {
-    [battle.characterInstance, battle.enemyInstance].forEach((character) => {
+    ;[battle.characterInstance, battle.enemyInstance].forEach((character) => {
       if (character && character.cronTask) {
         character.cronTask.stop()
       }
@@ -64,5 +62,3 @@ function stopBattleCronJobs(battleKey) {
 }
 
 module.exports = { handleBattleEnd, stopBattleCronJobs }
-
-

@@ -34,7 +34,6 @@ const createRoundEmbed = (actions, character, enemy, battleKey) => {
       })
     })
   } else {
-    //   // For the first time, set a default message
     embed.addFields({
       name: 'Prepare for Battle',
       value: 'Choose your action and fight!',

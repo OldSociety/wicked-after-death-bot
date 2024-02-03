@@ -37,8 +37,6 @@ module.exports = {
         where: { user_id: interaction.user.id },
       })
 
-      console.log(interaction.user)
-
       if (!user) {
         await interaction.reply({
           content: "You don't have an account. Use `/account` to create one.",
@@ -203,14 +201,14 @@ module.exports = {
             buttonCollector.on('collect', async (i) => {
               if (i.customId === 'confirm_fight') {
                 // Initiate the battle
-                await i.deferReply({ ephemeral: true });
+                await i.deferReply({ ephemeral: true })
                 setupBattleLogic(userId, userName, i)
               } else if (i.customId === 'back_fight') {
                 // Abort the battle and immediately respond
                 await i.reply({
                   content: 'Battle aborted.',
                   ephemeral: true,
-                });
+                })
               }
             })
 

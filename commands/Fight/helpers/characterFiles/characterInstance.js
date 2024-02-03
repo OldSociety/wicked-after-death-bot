@@ -4,11 +4,11 @@ class CharacterInstance {
   static async initCharacter(masterCharacterId, userId, characterId) {
     try {
       // console.log("Initializing character with ID:", characterId);
-      const character = await Character.findByPk(characterId);
+      const character = await Character.findByPk(characterId)
 
       if (!character) {
-        console.error("Character with ID not found in DB:", characterId);
-        throw new Error('Character not found');
+        console.error('Character with ID not found in DB:', characterId)
+        throw new Error('Character not found')
       }
 
       if (!character.initialized) {
@@ -82,9 +82,9 @@ class CharacterInstance {
           crit_damage: character.crit_damage,
         }
       }
-   } catch (error) {
-      console.error("Error in initCharacter:", error);
-      throw new Error('Character initialization failed');
+    } catch (error) {
+      console.error('Error in initCharacter:', error)
+      throw new Error('Character initialization failed')
     }
   }
 }

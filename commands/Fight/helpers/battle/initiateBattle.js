@@ -18,16 +18,13 @@ async function initiateBattle(
       userId,
       characterId
     )
-    const characterData = await Character.findByPk(
-      characterId
-    )
+    const characterData = await Character.findByPk(characterId)
     const frontlaneMasterCharacterData = await MasterCharacter.findByPk(
       frontlaneMasterCharacterId
     )
 
     // Fetch the enemy from the database
     const enemyData = await Enemy.findByPk(enemyId)
-
 
     // Create combined stats for the in-memory copy of the characters
     const characterInstance = {

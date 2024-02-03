@@ -49,17 +49,9 @@ const e = 2.71828
 const alpha = 0.1
 
 class LevelUpSystem {
-  static async levelUp(
-    characterId,
-    enemyId,
-    interaction
-  ) {
+  static async levelUp(characterId, enemyId, interaction) {
     // Process level up for character
-    await this.processCharacterLevelUp(
-      characterId,
-      enemyId,
-      interaction
-    )
+    await this.processCharacterLevelUp(characterId, enemyId, interaction)
   }
 
   static async processCharacterLevelUp(characterId, enemyId, interaction) {
@@ -116,48 +108,51 @@ class LevelUpSystem {
         character.xp_needed = newLevelData.xpToNextLevel
       }
       const levelUpEmbed = new EmbedBuilder()
-      .setTitle(
-        `${character.masterCharacter.character_name} reaches level ${character.level}!`
-      ).setColor('DarkGold')
-      .addFields(
-        {
-          name: 'Level',
-          value: '`' + character.level.toString() + '`',
-          inline: true,
-        },
-        {
-          name: 'Experience',
-          value:
-            '`' +
-            character.experience.toString() +
-            ' / ' +
-            character.xp_needed.toString() +
-            '`',
-          inline: true,
-        },
-        {
-          name: 'Damage',
-          value: '`⚔️' + character.effective_damage.toString() + '`',
-          inline: true,
-        },
-        {
-          name: 'Health',
-          value: '`🧡' + character.effective_health.toString() + '`',
-          inline: true,
-        },
-        {
-          name: 'Crit Chance',
-          value: '`🎯' + character.masterCharacter.crit_chance.toString() + '`',
-          inline: true,
-        },
-        {
-          name: 'Crit Damage',
-          value: '`💥' + character.masterCharacter.crit_damage.toString() + '`',
-          inline: true,
-        }
-      )
+        .setTitle(
+          `${character.masterCharacter.character_name} reaches level ${character.level}!`
+        )
+        .setColor('DarkGold')
+        .addFields(
+          {
+            name: 'Level',
+            value: '`' + character.level.toString() + '`',
+            inline: true,
+          },
+          {
+            name: 'Experience',
+            value:
+              '`' +
+              character.experience.toString() +
+              ' / ' +
+              character.xp_needed.toString() +
+              '`',
+            inline: true,
+          },
+          {
+            name: 'Damage',
+            value: '`⚔️' + character.effective_damage.toString() + '`',
+            inline: true,
+          },
+          {
+            name: 'Health',
+            value: '`🧡' + character.effective_health.toString() + '`',
+            inline: true,
+          },
+          {
+            name: 'Crit Chance',
+            value:
+              '`🎯' + character.masterCharacter.crit_chance.toString() + '`',
+            inline: true,
+          },
+          {
+            name: 'Crit Damage',
+            value:
+              '`💥' + character.masterCharacter.crit_damage.toString() + '`',
+            inline: true,
+          }
+        )
 
-    await interaction.followUp({ embeds: [levelUpEmbed], ephemeral: false })
+      await interaction.followUp({ embeds: [levelUpEmbed], ephemeral: false })
     }
     await character.save()
   }

@@ -18,12 +18,7 @@ const setupCharacterCron = (
     // Enemy acts automatically, start cron job immediately
     characterInstance.cronTask = cron.schedule(`*/10 * * * * *`, async () => {
       try {
-        await applyRound(
-          enemyInstance,
-          characterInstance,
-          role,
-          channel
-        )
+        await applyRound(enemyInstance, characterInstance, role, channel)
       } catch (error) {
         console.log('error', error)
       }

@@ -1,5 +1,5 @@
 const StringSelectMenuBuilder = require('discord.js/src/structures/StringSelectMenuBuilder')
-const ActionRowBuilder  = require('discord.js').ActionRowBuilder // Adjust import as needed
+const ActionRowBuilder = require('discord.js').ActionRowBuilder // Adjust import as needed
 
 const createCharacterSelectMenu = (userCharacters) => {
   const selectOptions = userCharacters.map((character) => {

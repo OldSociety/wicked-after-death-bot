@@ -7,12 +7,7 @@ const {
 } = require('../../../../Models/model')
 
 class RewardsHandler {
-  static async handleRewards(
-    userId,
-    characterId,
-    enemyId,
-    interaction
-  ) {
+  static async handleRewards(userId, characterId, enemyId, interaction) {
     try {
       console.log(userId)
       const user = await User.findByPk(userId)
@@ -21,17 +16,14 @@ class RewardsHandler {
       const e = 2.71828
       const alpha = 0.1
 
-      const character = await Character.findByPk(
-        characterId,
-        {
-          include: [
-            {
-              model: MasterCharacter,
-              as: 'masterCharacter',
-            },
-          ],
-        }
-      )
+      const character = await Character.findByPk(characterId, {
+        include: [
+          {
+            model: MasterCharacter,
+            as: 'masterCharacter',
+          },
+        ],
+      })
 
       const enemy = await Enemy.findByPk(enemyId)
 
@@ -65,10 +57,27 @@ class RewardsHandler {
         .addFields(
           {
             name: `${character.masterCharacter.character_name} `,
-            value: '`' + `⏫${XP} XP` + '`' + ` >> ` + '`' + `⏫${character.experience} / ${character.xp_needed} XP`+ '`' , 
+            value:
+              '`' +
+              `⏫${XP} XP` +
+              '`' +
+              ` >> ` +
+              '`' +
+              `⏫${character.experience} / ${character.xp_needed} XP` +
+              '`',
             // inline: true,
           },
-          { name: 'Reward ', value: '`' + `🪙${earnedGold}` + '`' + ` >> ` + '`' + `🪙${user.balance}` + '`',}
+          {
+            name: 'Reward ',
+            value:
+              '`' +
+              `🪙${earnedGold}` +
+              '`' +
+              ` >> ` +
+              '`' +
+              `🪙${user.balance}` +
+              '`',
+          }
         )
 
       await interaction.followUp({ embeds: [rewardEmbed], ephemeral: false })

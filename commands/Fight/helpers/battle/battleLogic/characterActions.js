@@ -9,7 +9,6 @@ const {
   compileDamageResult,
 } = require('../applyDamageHelpers')
 
-
 // Function to calculate damage
 async function applyDamage(attacker, defender, userId) {
   const randHit = Math.random() * 100
