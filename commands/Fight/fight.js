@@ -238,7 +238,6 @@ module.exports = {
             }
             // embed.setImage('https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&')
 
-            // Stop the collector as we have both selections
             collector.stop()
           }
         }
