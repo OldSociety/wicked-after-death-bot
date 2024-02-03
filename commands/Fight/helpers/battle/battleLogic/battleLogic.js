@@ -1,11 +1,10 @@
 const { battleManager, userBattles } = require('../battleManager')
 const { setupCharacterCron } = require('./cronJobs')
 const { initializeCharacterFlagsAndCounters } = require('./battleUtils')
-const { createPlayerActionEmbed } = require('../roundEmbed')
+const { createRoundEmbed } = require('../roundEmbed')
 const { SetupPlayerReactions } = require('./reactionListener')
 
 const setupBattleLogic = async (userId, userName, i) => {
-  const channel = i.channel
 
   const validBattleKeys = Object.keys(battleManager).filter(
     (key) => key !== 'battleManager' && key !== 'userBattles'
@@ -28,14 +27,16 @@ const setupBattleLogic = async (userId, userName, i) => {
     initializeCharacterFlagsAndCounters(characterInstance)
     initializeCharacterFlagsAndCounters(enemyInstance)
 
+    let actions = null
+
     // Player Embed
-    const playerActionEmbed = createPlayerActionEmbed(
+    const roundEmbed = createRoundEmbed(
+      actions,
       characterInstance,
       enemyInstance,
-      channel,
       battleKey
     )
-    await i.editReply(playerActionEmbed)
+    await i.editReply(roundEmbed)
   }
 }
 

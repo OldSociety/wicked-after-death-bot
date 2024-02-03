@@ -1,11 +1,9 @@
-const { Op } = require('sequelize')
 const { User, Character, UserGear, UserGearParts } = require('../Models/model')
 const {
   battleManager,
 } = require('../commands/Fight/helpers/battle/battleManager')
 const {
   applyRound,
-  applyDamage,
 } = require('../commands/Fight/helpers/battle/battleLogic/characterActions')
 const {
   handleBattleEnd,
@@ -69,8 +67,6 @@ module.exports = {
   name: 'interactionCreate',
   async execute(interaction) {
     if (!interaction.isButton()) return
-    console.log('InteractionID: ', interaction.id)
-    const role = 'character'
     const customId = interaction.customId
     const userId = customId.split('_').pop()
     const parts = customId.split('_')
@@ -100,27 +96,24 @@ module.exports = {
           await applyRound(
             battle.characterInstance,
             battle.enemyInstance,
-            role,
-            interaction.channel,
-            interaction
+            interaction,
+            battleKey
           )
         } else if (battleAction === 'heavy') {
           console.log('Heavy attack initiated')
           await applyRound(
             battle.characterInstance,
             battle.enemyInstance,
-            role,
-            interaction.channel,
-            interaction
+            interaction,
+            battleKey
           )
         } else if (battleAction === 'block') {
           console.log('Block initiated')
           await applyRound(
             battle.characterInstance,
             battle.enemyInstance,
-            role,
-            interaction.channel,
-            interaction
+            interaction,
+            battleKey
           )
         }
 
@@ -129,7 +122,6 @@ module.exports = {
           handleBattleEnd(battleKey, interaction)
         }
       }
-      // Add logic for other battle actions if needed
 
       // Add logic for other battle actions if needed
     } else if (customId.startsWith('delete_account_yes')) {

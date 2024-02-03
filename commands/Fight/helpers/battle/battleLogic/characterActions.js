@@ -1,4 +1,4 @@
-const { createRoundEmbed, createPlayerActionEmbed } = require('../roundEmbed')
+const { createRoundEmbed } = require('../roundEmbed')
 const { traits, applyCritDamage } = require('../../characterFiles/traits')
 const { battleManager } = require('../battleManager')
 const {
@@ -8,6 +8,7 @@ const {
   updateHealth,
   compileDamageResult,
 } = require('../applyDamageHelpers')
+
 
 // Function to calculate damage
 async function applyDamage(attacker, defender, userId) {
@@ -50,50 +51,32 @@ async function applyDamage(attacker, defender, userId) {
 }
 
 // Function to apply a round of actions
-const applyRound = async (
-  attacker,
-  defender,
-  role,
-  channel,
-  interaction = null
-) => { 
+const applyRound = async (attacker, defender, interaction, battleKey) => {
   if (attacker.current_health > 0 && defender.current_health > 0) {
     const actionResult = await applyDamage(attacker, defender)
     const actions = [actionResult]
-    const roundEmbed = createRoundEmbed(actions, attacker, defender)
-    let firstAttack = false
+    const roundEmbedObject = createRoundEmbed(
+      actions,
+      attacker,
+      defender,
+      battleKey
+    )
 
-    // // If the attacker is the enemy, send the embed to the channel
-    // if (role === 'enemy') {
-    //   try {
-    //     await channel.send({ embeds: [roundEmbed], ephemeral: true })
-    //   } catch (error) {
-    //     console.error('Error sending round embed to channel:', error)
-    //   }
-    // }
-    // // If the attacker is the player, reply to the interaction
-    // else if (interaction) {
-      try {
-        if (!firstAttack) {
-        console.log(interaction.id)
-        await interaction.reply({ embeds: [roundEmbed], ephemeral: true })
-        firstAttack = true
-      } else {
-        console.log('this works')
-        await interaction.editReply({ embeds: [roundEmbed], ephemeral: true })
-      }
-     } catch (error) {
-        console.error('Error in interaction reply 2:', error)
-      }
-    // }
+    try {
+      await interaction.reply({ ...roundEmbedObject })
+    } catch (error) {
+      console.error('Error in initial interaction reply:', error)
+    }
 
     // Check if the battle should end
     if (attacker.current_health <= 0 || defender.current_health <= 0) {
-      return true // Indicates the battle has ended
+      // End the battle
+      return true
     }
-    return false // Indicates the battle continues
+    // Continue the battle
+    return false
   } else {
-    // One of the characters has zero health, so the battle ends
+    // End the battle because one of the characters has zero health
     return true
   }
 }
