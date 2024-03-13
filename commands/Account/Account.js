@@ -168,7 +168,7 @@ module.exports = {
             const levelField = `⏫${character.level}`
             const xpField = `${character.experience} / ${character.xp_needed}`
 
-            // Adjust these numbers based on your own tests
+            // Formatting
             const nameSpaces = 20 - nameField.length
             const levelSpaces = 5
 

@@ -2,7 +2,7 @@ const { battleManager, userBattles } = require('../battleManager')
 const { setupCharacterCron } = require('./cronJobs')
 const { initializeCharacterFlagsAndCounters } = require('./battleUtils')
 const { createRoundEmbed } = require('../roundEmbed')
-const { SetupPlayerReactions } = require('./reactionListener')
+// const { SetupPlayerReactions } = require('./reactionListener')
 
 const setupBattleLogic = async (userId, userName, i) => {
 
@@ -22,6 +22,8 @@ const setupBattleLogic = async (userId, userName, i) => {
     battle.userId = userId
     battle.userName = userName
     battle.battleEnded = false
+
+    console.log(`Battle initiated for user ${userId} with battle key ${battleKey}.`);
 
     // Initialize character flags and counters
     initializeCharacterFlagsAndCounters(characterInstance)

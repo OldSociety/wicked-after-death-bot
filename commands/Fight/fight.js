@@ -114,9 +114,11 @@ module.exports = {
 
       collector.on('collect', async (i) => {
         if (userBattles[userId]) {
-          await interaction.followUp('You are already in an ongoing battle.')
-          return
-        }
+          console.log(`User ${userId} attempted to start a new battle but is already marked as in a battle.`);
+          await interaction.followUp('You are already in an ongoing battle.');
+          console.log("Attempted start with userBattles:", userBattles);
+          return;
+      }
 
         if (!character && i.customId === 'characterSelect') {
           characterId = i.values[0] // Capture the selected character ID

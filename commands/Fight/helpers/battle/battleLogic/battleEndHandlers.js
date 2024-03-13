@@ -43,22 +43,27 @@ async function handleBattleEnd(battleKey, interaction) {
     console.error('Error in handleBattleEnd:', error)
   }
 
-  stopBattleCronJobs(battleKey)
+ await stopBattleCronJobs(battleKey, userId)
 }
 
 // Function to stop all cron jobs associated with a battle
-function stopBattleCronJobs(battleKey) {
-  const battle = battleManager[battleKey]
+async function stopBattleCronJobs(battleKey, userId) {
+  const battle = battleManager[battleKey];
   if (battle) {
-    ;[battle.characterInstance, battle.enemyInstance].forEach((character) => {
+    await Promise.all([battle.characterInstance, battle.enemyInstance].map(character => {
       if (character && character.cronTask) {
-        character.cronTask.stop()
+        // Assuming `character.cronTask.stop()` returns a Promise
+        return character.cronTask.stop();
+      } else {
+        return Promise.resolve(); // No operation needed, immediately resolve
       }
-    })
+    }));
   }
-
-  delete battleManager[battleKey]
-  delete userBattles[battleKey]
+  // console.log(`Clearing battle for user ${JSON.stringify(userBattles)}. Battle key: ${battleKey}`);
+  delete battleManager[battleKey];
+  delete userBattles[userId];
+  // console.log("battleManager after delete:", JSON.stringify(battleManager)); // Should be empty
+  // console.log("userBattles after delete:", JSON.stringify(userBattles)); // Should also be empty
 }
 
 module.exports = { handleBattleEnd, stopBattleCronJobs }
