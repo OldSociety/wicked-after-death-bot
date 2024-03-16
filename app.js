@@ -10,7 +10,7 @@ const buttonInteractionHandler = require('./helpers/buttonInteraction')
 const { MasterCharacter } = require('./Models/model')
 // const { scavengeHelper } = require('./helpers/scavengeHelper')
 
-const channelId = process.env.WADCHANNELID
+const channelId = process.env.FUCKERYCHANNELID
 
 // Create a new client instance
 const client = new Client({
@@ -69,8 +69,7 @@ client.on('interactionCreate', async (interaction) => {
 // Counter for tracking the number of messages
 let messageCounter = 0
 // The number of messages to wait before sending a random message
-let messageThreshold = 3
-// let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
+let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
 // Listen for new messages
 client.on('messageCreate', async (message) => {
@@ -81,8 +80,7 @@ client.on('messageCreate', async (message) => {
   if (messageCounter >= messageThreshold) {
     // Reset the message counter
     messageCounter = 0
-    messageThreshold = 3
-    // messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
+    messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
     try {
       // Fetch a random character from the database
@@ -98,7 +96,8 @@ client.on('messageCreate', async (message) => {
         const channel = await client.channels.fetch(channelId)
         if (channel) {
           // Send the character's name in the channel
-          channel.send(`A wild ${randomCharacter.character_name} appears! Use the /fight command to add the character to your roster.`)
+          // channel.send(`A wild ${randomCharacter.character_name} appears! Use the /fight command to add the character to your roster.`)
+          channel.send(`Thank you for being active in chat. You guys are on fire!`)
         }
       }
     } catch (error) {

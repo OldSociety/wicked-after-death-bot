@@ -24,7 +24,9 @@ async function initiateBattle(
     )
 
     // Fetch the enemy from the database
+    console.log('initiateBattle enemy id: ', enemyId)
     const enemyData = await Character.findByPk(enemyId)
+    console.log('initiateBattle enemy data: ', enemyData)
 
     // Create combined stats for the in-memory copy of the characters
     const characterInstance = {
