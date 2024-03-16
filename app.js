@@ -1,31 +1,16 @@
 require('dotenv').config()
 const fs = require('node:fs')
 const path = require('node:path')
-const { Sequelize } = require('sequelize')
+// const { Sequelize } = require('sequelize')
 const sequelize = require('./config/sequelize')
 
 const { Client, Collection, GatewayIntentBits } = require('discord.js')
-const { userInfo } = require('node:os')
+// const { userInfo } = require('node:os')
 const buttonInteractionHandler = require('./helpers/buttonInteraction')
-const { scavengeHelper } = require('./helpers/scavengeHelper')
+const { MasterCharacter } = require('./Models/model')
+// const { scavengeHelper } = require('./helpers/scavengeHelper')
 
-// // Import Redis
-// const Redis = require('ioredis');
-// const redisClient = new Redis(); // You can pass options like port and host here.
-
-// redisClient.on('error', (error) => {
-//   console.error(`Redis error: ${error}`);
-// });
-
-// // Sample Redis operations
-// redisClient.set('foo', 'bar');
-// redisClient.get('foo', (err, result) => {
-//   if (err) {
-//     console.error(`Error getting value: ${err}`);
-//   } else {
-//     console.log(`Result: ${result}`); // Should print "bar"
-//   }
-// });
+const channelId = process.env.WADCHANNELID
 
 // Create a new client instance
 const client = new Client({
@@ -84,17 +69,11 @@ client.on('interactionCreate', async (interaction) => {
 // Counter for tracking the number of messages
 let messageCounter = 0
 // The number of messages to wait before sending a random message
-const messageThreshold = 10
-const randomMessages = [
-  'This is quite the active conversation!',
-  'Love the energy in this server right now!',
-  'So many voices, so much to learn!',
-  'You all are on fire today!',
-  'The diversity of thoughts here is amazing!',
-]
+let messageThreshold = 3
+// let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
 // Listen for new messages
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async (message) => {
   // Increment the message counter
   messageCounter++
 
@@ -102,10 +81,29 @@ client.on('messageCreate', (message) => {
   if (messageCounter >= messageThreshold) {
     // Reset the message counter
     messageCounter = 0
-    // Send a random message from the array
-    Math.floor(Math.random() * (25 - 15 + 1)) + 15
+    messageThreshold = 3
+    // messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
-    message.channel.send(randomMessages[randomIndex])
+    try {
+      // Fetch a random character from the database
+      const characterCount = await MasterCharacter.count()
+      const randomRow = Math.floor(Math.random() * characterCount)
+      const randomCharacter = await MasterCharacter.findOne({
+        offset: randomRow,
+      })
+
+      if (randomCharacter) {
+        global.appearingCharacterName = randomCharacter.character_name;
+        // Assuming channelId is fetched from .env and is the ID of the channel where you want to post
+        const channel = await client.channels.fetch(channelId)
+        if (channel) {
+          // Send the character's name in the channel
+          channel.send(`A wild ${randomCharacter.character_name} appears! Use the /fight command to add the character to your roster.`)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching character:', error)
+    }
   }
 })
 

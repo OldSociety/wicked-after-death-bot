@@ -8,13 +8,10 @@ const {
   StringSelectMenuOptionBuilder,
 } = require('discord.js')
 
-const { User } = require('../../Models/model.js')
+const { User, MasterCharacter } = require('../../Models/model.js')
 
 // HELPERS
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
-const { selectLevel } = require('./helpers/levelSelection/levelSelection')
-const { selectRaid } = require('./helpers/levelSelection/raidSelection')
-const { selectFight } = require('./helpers/levelSelection/fightSelection')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
 // const { setupBattleLogic } = require('./helpers/battle/battleTest.js')
@@ -33,6 +30,7 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
+      // Verify user account
       const user = await User.findOne({
         where: { user_id: interaction.user.id },
       })
@@ -45,24 +43,41 @@ module.exports = {
         return
       }
 
-      await interaction.deferReply({ ephemeral: true })
+      // await interaction.deferReply({ ephemeral: true })
 
-      const selectedLevelId = await selectLevel(interaction)
-      if (!selectedLevelId) {
-        return interaction.editReply('No level selected.')
+      // const selectedLevelId = await selectLevel(interaction)
+      // if (!selectedLevelId) {
+      //   return interaction.editReply('No level selected.')
+      // }
+
+      // const selectedRaidId = await selectRaid(interaction, selectedLevelId)
+      // if (!selectedRaidId) {
+      //   return interaction.editReply('No raid selected.')
+      // }
+
+      // const selectedFight = await selectFight(interaction, selectedRaidId)
+      // if (!selectedFight || !selectedFight.enemy) {
+      //   return interaction.editReply('No fight selected.')
+      // }
+
+      const enemyName = global.appearingCharacterName
+      // console.log(enemyName)
+      if (!enemyName) {
+        await interaction.reply('No character has appeared to fight with.')
+        return
       }
 
-      const selectedRaidId = await selectRaid(interaction, selectedLevelId)
-      if (!selectedRaidId) {
-        return interaction.editReply('No raid selected.')
-      }
+      const enemy = await MasterCharacter.findOne({
+        where: { character_name: enemyName },
+      })
 
-      const selectedFight = await selectFight(interaction, selectedRaidId)
-      if (!selectedFight || !selectedFight.enemy) {
-        return interaction.editReply('No fight selected.')
+      // console.log(enemy)
+      if (!enemy) {
+        await interaction.reply(
+          "The character you're trying to fight with doesn't exist."
+        )
+        return
       }
-
-      const enemy = selectedFight.enemy.dataValues
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
@@ -92,7 +107,7 @@ module.exports = {
         .setColor('#0099ff')
         .setTitle('Character Selection')
 
-      await interaction.editReply({
+      await interaction.reply({
         embeds: [characterEmbed],
         components: [actionRow],
         ephemeral: true,
@@ -114,11 +129,13 @@ module.exports = {
 
       collector.on('collect', async (i) => {
         if (userBattles[userId]) {
-          console.log(`User ${userId} attempted to start a new battle but is already marked as in a battle.`);
-          await interaction.followUp('You are already in an ongoing battle.');
-          console.log("Attempted start with userBattles:", userBattles);
-          return;
-      }
+          console.log(
+            `User ${userId} attempted to start a new battle but is already marked as in a battle.`
+          )
+          await interaction.followUp('You are already in an ongoing battle.')
+          console.log('Attempted start with userBattles:', userBattles)
+          return
+        }
 
         if (!character && i.customId === 'characterSelect') {
           characterId = i.values[0] // Capture the selected character ID
@@ -134,12 +151,12 @@ module.exports = {
               await interaction.followUp('Enemy not found.')
               return
             }
-
+            console.log('enemy id', enemy.master_character_id)
             // Initiate battle with selected characters and enemy
             const battleResult = await initiateBattle(
               character.dataValues.character_id,
               character.masterCharacter.master_character_id,
-              enemy.enemy_id,
+              enemy.master_character_id,
               userId
             )
 
@@ -250,6 +267,7 @@ module.exports = {
           interaction.followUp('Time has run out, no character selected.')
         }
       })
+      global.appearingCharacterName = null
     } catch (error) {
       console.error('Error in execute:', error)
       if (!interaction.replied && !interaction.deferred) {
