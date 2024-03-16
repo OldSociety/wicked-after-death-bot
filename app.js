@@ -7,7 +7,7 @@ const sequelize = require('./config/sequelize')
 const { Client, Collection, GatewayIntentBits } = require('discord.js')
 const { userInfo } = require('node:os')
 const buttonInteractionHandler = require('./helpers/buttonInteraction')
-// const { scavengeHelper } = require('./helpers/scavengeHelper')
+const { scavengeHelper } = require('./helpers/scavengeHelper')
 
 // // Import Redis
 // const Redis = require('ioredis');
@@ -81,11 +81,33 @@ client.on('interactionCreate', async (interaction) => {
   await buttonInteractionHandler.execute(interaction)
 })
 
-// // Track messages
-// client.on('messageCreate', async function (message) {
-//   scavengeHelper(message)
+// Counter for tracking the number of messages
+let messageCounter = 0
+// The number of messages to wait before sending a random message
+const messageThreshold = 10
+const randomMessages = [
+  'This is quite the active conversation!',
+  'Love the energy in this server right now!',
+  'So many voices, so much to learn!',
+  'You all are on fire today!',
+  'The diversity of thoughts here is amazing!',
+]
 
-// })
+// Listen for new messages
+client.on('messageCreate', (message) => {
+  // Increment the message counter
+  messageCounter++
+
+  // Check if the message counter reaches the threshold
+  if (messageCounter >= messageThreshold) {
+    // Reset the message counter
+    messageCounter = 0
+    // Send a random message from the array
+    Math.floor(Math.random() * (25 - 15 + 1)) + 15
+
+    message.channel.send(randomMessages[randomIndex])
+  }
+})
 
 // Log in to Discord with your client's token
 client.login(process.env.TOKEN)

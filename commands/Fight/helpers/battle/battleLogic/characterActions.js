@@ -89,14 +89,13 @@ async function handleCharacterAction(character, role, interaction, battleKey) {
     const message = await interaction.followUp(
       createPlayerActionEmbed(character)
     )
-    // ... existing code for setting up collector ...
 
     client.on('interactionCreate', async (interaction) => {
       if (!interaction.isButton()) return
 
       if (interaction.customId === 'light_attack') {
         // Acknowledge the interaction before processing
-        await interaction.deferReply() // or interaction.reply({ content: "Processing...", ephemeral: true });
+        await interaction.deferReply()
 
         // The light attack button was pressed
         await applyDamage(character, battle.enemyInstance)
