@@ -35,3 +35,4 @@ module.exports = {
     await queryInterface.dropTable('StandardFights')
   },
 }
+migrations/20240119041916-standard-fight.js

@@ -50,26 +50,17 @@ module.exports = {
     await queryInterface.bulkDelete('GearSets', null, {})
     await queryInterface.bulkDelete('GearParts', null, {})
     await queryInterface.bulkDelete('Enemies', null, {})
-    await queryInterface.bulkDelete('Store', null, {})
+    await queryInterface.bulkDelete('Stores', null, {})
     console.log('Data seeding reverted.')
   },
 }
 
 async function seedMasterCharacters(data) {
   for (const item of data) {
-    const [character, created] = await MasterCharacter.findOrCreate({
+    await MasterCharacter.findOrCreate({
       where: { master_character_id: item.master_character_id },
       defaults: item,
     })
-
-    // if (created && item.tags) {
-    //   console.log(CharacterTag)
-    //   const tagRecords = await CharacterTag.findAll({
-    //     where: { name: item.tags },
-    //   })
-
-    //   await character.addTags(tagRecords) // Assumes addTags method is available through Sequelize associations
-    // }
   }
 }
 

@@ -127,21 +127,18 @@ module.exports = {
             .addFields(
               {
                 name: 'Level',
-                value:
-                  '`' +
-                  selectedCharacter.level.toString() +
-                  '`',
-                  inline: true
+                value: '`' + selectedCharacter.level.toString() + '`',
+                inline: true,
               },
               {
                 name: 'Experience',
                 value:
-                '`' +
-                selectedCharacter.experience.toString() +
-                ' / ' +
-                selectedCharacter.xp_needed.toString() +
-                '`',
-                  inline: true
+                  '`' +
+                  selectedCharacter.experience.toString() +
+                  ' / ' +
+                  selectedCharacter.xp_needed.toString() +
+                  '`',
+                inline: true,
               },
               {
                 name: 'Damage',
@@ -174,8 +171,8 @@ module.exports = {
                   selectedCharacter.masterCharacter.crit_damage.toString() +
                   '`',
                 inline: true,
-              },
-              
+              }
+
               // {
               //   name: 'Damage' + '\u00A0'.repeat(10) + 'Health',
               //   value:
@@ -188,13 +185,14 @@ module.exports = {
               //     '`',
               // }
             )
+            .setImage(selectedCharacter.masterCharacter.image)
 
-            await interaction.followUp({ embeds: [detailEmbed], ephemeral: true });
-            collector.stop(); // Stop the collector after sending the character details
-          } else {
-            await interaction.followUp('Character not found.');
-            collector.stop(); // Optionally, also stop the collector in case of not found
-          }
+          await interaction.followUp({ embeds: [detailEmbed], ephemeral: true })
+          collector.stop() // Stop the collector after sending the character details
+        } else {
+          await interaction.followUp('Character not found.')
+          collector.stop() // Optionally, also stop the collector in case of not found
+        }
       })
     } catch (error) {
       console.error(error)
