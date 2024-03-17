@@ -77,6 +77,11 @@ module.exports = {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
         },
+        in_deck: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+          allowNull: false
+        }
       },
       {
         timestamps: false,

@@ -13,6 +13,10 @@ module.exports = {
           type: Sequelize.STRING,
           allowNull: false,
         },
+        image: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
         cost: {
           type: Sequelize.INTEGER,
           allowNull: false,
