@@ -37,8 +37,29 @@ module.exports = {
       const characters = user.characters || []
 
       if (characters.length === 0) {
-        return interaction.reply('Your roster is empty.')
+        return interaction.reply('Your deck is empty.')
       }
+      // Generate the list of characters for the embed
+      const characterList = user.characters
+        .map(
+          (character, index) =>
+            `${index + 1} **${character.masterCharacter.character_name}**　•　Lvl. ${
+              character.level
+            }　•　🧡${character.effective_health}　•　⚔️${
+                character.effective_damage
+            }`
+        )
+        .join('\n')
+
+      const deckEmbed = new EmbedBuilder()
+        .setColor('#0099ff')
+        .setTitle(`Your Deck`)
+        .setDescription(characterList)
+
+      await interaction.reply({
+        embeds: [deckEmbed],
+        ephemeral: true,
+      })
     } catch (error) {
       console.error(error)
       return interaction.reply(
