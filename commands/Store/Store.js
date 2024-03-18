@@ -98,7 +98,7 @@ async function handleCharacterPackPurchase(user, packName) {
   let rarity
   switch (packName) {
     case 'Bronze Box':
-      rarity = 'Commoner'
+      rarity = '⚪ Common'
       break
     // ... handle other cases
   }

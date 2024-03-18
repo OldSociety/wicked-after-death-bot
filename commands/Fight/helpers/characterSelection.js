@@ -8,15 +8,17 @@ const createCharacterSelectMenu = (userCharacters) => {
 
     // Decide the font color based on the rarity
     switch (masterInfo.rarity) {
-      case 'folk hero':
+      case 'rare':
         rarityColor = '🟢' // Bronze
         break
-      case 'legend':
+      case 'epic':
         rarityColor = '🔵' // Purple
         break
-      case 'unique':
+      case 'legendary':
         rarityColor = '🟣' // Yellow
         break
+      case 'minion':
+        rarityColor = '⚫' // Black
       default:
         rarityColor = '⚪' // White
     }

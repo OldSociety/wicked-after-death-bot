@@ -15,7 +15,7 @@ const {
   // UserGearParts,
 } = require('../../Models/model.js')
 
-const startingCharacterIds = [0, 1, 2]
+const startingCharacterIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 // const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 function formatTimestampAndCalculateDays(timestamp) {
@@ -77,31 +77,32 @@ module.exports = {
           })
         )
 
-          // const gearPartsDetails = await GearParts.findAll({
-          //   where: { parts_id: startingGearParts },
-          // })
+        // const gearPartsDetails = await GearParts.findAll({
+        //   where: { parts_id: startingGearParts },
+        // })
 
-          // if (!gearPartsDetails || gearPartsDetails.length === 0) {
-          //   throw new Error('Failed to fetch gear parts details')
-          // }
+        // if (!gearPartsDetails || gearPartsDetails.length === 0) {
+        //   throw new Error('Failed to fetch gear parts details')
+        // }
 
-          // // Create initial UserGear record
-          // await Promise.all(
-          //   gearPartsDetails.map((part) => {
-          //     return UserGearParts.create(
-          //       {
-          //         user_id: userId,
-          //         parts_id: part.parts_id,
-          //         rarity: part.rarity,
-          //       },
-          //       { transaction: t }
-          //     )
-          //   })
-          // )
+        // // Create initial UserGear record
+        // await Promise.all(
+        //   gearPartsDetails.map((part) => {
+        //     return UserGearParts.create(
+        //       {
+        //         user_id: userId,
+        //         parts_id: part.parts_id,
+        //         rarity: part.rarity,
+        //       },
+        //       { transaction: t }
+        //     )
+        //   })
+        // )
         await t.commit()
 
         const embed = new EmbedBuilder()
-          .setTitle('Account Created').setColor('DarkGold')
+          .setTitle('Account Created')
+          .setColor('DarkGold')
           .setDescription('Your Hellbound: Wicked after Death is now active!')
           .addFields(
             {
@@ -152,15 +153,19 @@ module.exports = {
 
             // Decide the font color based on the rarity
             switch (masterInfo.rarity) {
-              case 'folk hero':
+              case 'rare':
                 rarityColor = '🟩'
                 break
-              case 'legend':
+              case 'epic':
                 rarityColor = '🟦'
                 break
-              case 'unique':
+              case 'legendary':
                 rarityColor = '🟪'
                 break
+              case 'minion':
+                rarityColor = '⬛'
+                break
+
               default:
                 rarityColor = '⬜'
             }
@@ -176,10 +181,11 @@ module.exports = {
               nameSpaces
             )}\`  \`${levelField}${' '.repeat(levelSpaces)}\`  \`${xpField}\``
           })
-          .join('\n') 
+          .join('\n')
 
         const embed = new EmbedBuilder()
-          .setTitle(`${userName}`).setColor('DarkGold')
+          .setTitle(`${userName}`)
+          .setColor('DarkGold')
           .setDescription(`**Created on:** ${result}`)
           .addFields(
             {

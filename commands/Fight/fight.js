@@ -87,9 +87,9 @@ module.exports = {
       const options = userCharacters.map((char) => {
         const rarityColor =
           {
-            'folk hero': '🟩',
-            legend: '🟦',
-            unique: '🟪',
+            'rare': '🟩',
+            'epic': '🟦',
+            'legendary': '🟪',
           }[char.rarity] || '⬜'
 
         return new StringSelectMenuOptionBuilder()
@@ -160,14 +160,14 @@ module.exports = {
               userId
             )
 
-            const battleKey = `${character.dataValues.character_id}-${enemy.enemy_id}`
+            const battleKey = `${character.dataValues.character_id}-${enemy.master_character_id}`
 
             battleManager[battleKey] = battleResult
 
             // Create and send an embed summarizing the battle initiation
             const embed = new EmbedBuilder()
               .setTitle(
-                `⚡${userName}'s ${character.masterCharacter.character_name}`
+                `⚡${userName}`
               )
               .setColor('DarkRed')
               .setThumbnail(interaction.user.displayAvatarURL())

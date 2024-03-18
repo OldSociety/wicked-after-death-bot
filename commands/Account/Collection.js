@@ -48,15 +48,19 @@ module.exports = {
 
         // Decide the font color based on the rarity
         switch (character.masterCharacter.rarity) {
-          case 'folk hero':
+          case 'rare':
             rarityColor = '🟩'
             break
-          case 'legend':
+          case 'epic':
             rarityColor = '🟦'
             break
-          case 'unique':
+          case 'legendary':
             rarityColor = '🟪'
             break
+          case 'minion':
+            rarityColor = '⬛'
+            break
+
           default:
             rarityColor = '⬜'
         }
@@ -104,13 +108,13 @@ module.exports = {
 
         if (selectedCharacter) {
           switch (selectedCharacter.masterCharacter.rarity) {
-            case 'folk hero':
+            case 'rare':
               rarityColor = '🟩'
               break
-            case 'legend':
+            case 'epic':
               rarityColor = '🟦'
               break
-            case 'unique':
+            case 'legendary':
               rarityColor = '🟪'
               break
             default:
