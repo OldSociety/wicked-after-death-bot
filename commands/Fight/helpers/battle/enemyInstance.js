@@ -1,9 +1,9 @@
-const { Enemy } = require('../../../../Models/model') // Adjust the path as needed
+const { MasterCharacter } = require('../../../../Models/model') // Adjust the path as needed
 
 class EnemyInstance {
   static async initEnemy(enemyId) {
     // Initialize enemy based on the Enemy model
-    const enemy = await Enemy.findByPk(enemyId)
+    const enemy = await MasterCharacter.findByPk(enemyId)
 
     // Check if the enemy exists
     if (!enemy) {

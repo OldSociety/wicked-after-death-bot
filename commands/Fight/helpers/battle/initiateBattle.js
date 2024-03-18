@@ -1,7 +1,6 @@
 const {
   Character,
   MasterCharacter,
-  Enemy,
 } = require('../../../../Models/model')
 const { CharacterInstance } = require('../characterFiles/characterInstance')
 
@@ -24,9 +23,7 @@ async function initiateBattle(
     )
 
     // Fetch the enemy from the database
-    console.log('initiateBattle enemy id: ', enemyId)
-    const enemyData = await Character.findByPk(enemyId)
-    console.log('initiateBattle enemy data: ', enemyData)
+    const enemyData = await MasterCharacter.findByPk(enemyId)
 
     // Create combined stats for the in-memory copy of the characters
     const characterInstance = {

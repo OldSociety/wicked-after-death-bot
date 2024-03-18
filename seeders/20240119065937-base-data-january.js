@@ -2,7 +2,6 @@ const {
   User,
   MasterCharacter,
   CharacterTag,
-  Enemy,
   GearSets,
   GearParts,
   UserGearParts,
@@ -14,7 +13,6 @@ const {
 
 const storeData = require('../db/dbStore')
 const characterData = require('../db/dbMasterCharacters')
-const enemyData = require('../db/dbEnemies')
 const gearPartsData = require('../db/dbGearParts')
 const gearSetsData = require('../db/dbGearSets')
 const levelData = require('../db/dbBattles/dbLevels')
@@ -29,7 +27,6 @@ module.exports = {
 
       await queryInterface.bulkInsert('Stores', storeData)
       await seedMasterCharacters(characterData)
-      await queryInterface.bulkInsert('Enemies', enemyData)
       await queryInterface.bulkInsert('GearParts', gearPartsData)
       await queryInterface.bulkInsert('GearSets', gearSetsData)
 
@@ -49,7 +46,6 @@ module.exports = {
     await queryInterface.bulkDelete('StandardLevels', null, {})
     await queryInterface.bulkDelete('GearSets', null, {})
     await queryInterface.bulkDelete('GearParts', null, {})
-    await queryInterface.bulkDelete('Enemies', null, {})
     await queryInterface.bulkDelete('Stores', null, {})
     console.log('Data seeding reverted.')
   },

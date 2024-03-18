@@ -96,8 +96,7 @@ client.on('messageCreate', async (message) => {
         const channel = await client.channels.fetch(channelId)
         if (channel) {
           // Send the character's name in the channel
-          // channel.send(`A wild ${randomCharacter.character_name} appears! Use the /fight command to add the character to your roster.`)
-          channel.send(`Thank you for being active in chat. You guys are on fire!`)
+          channel.send(`A wild ${randomCharacter.character_name} appears!`)
         }
       }
     } catch (error) {

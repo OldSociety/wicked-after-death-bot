@@ -21,9 +21,9 @@ module.exports = {
           allowNull: false,
         },
         enemy_id: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-          }
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
       },
       {
         timestamps: false,
@@ -35,4 +35,3 @@ module.exports = {
     await queryInterface.dropTable('StandardFights')
   },
 }
-migrations/20240119041916-standard-fight.js
