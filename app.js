@@ -10,7 +10,7 @@ const buttonInteractionHandler = require('./helpers/buttonInteraction')
 const { MasterCharacter } = require('./Models/model')
 // const { scavengeHelper } = require('./helpers/scavengeHelper')
 
-const channelId = process.env.FUCKERYCHANNELID
+const channelId = process.env.WADCHANNELID
 
 // Create a new client instance
 const client = new Client({
@@ -69,7 +69,9 @@ client.on('interactionCreate', async (interaction) => {
 // Counter for tracking the number of messages
 let messageCounter = 0
 // The number of messages to wait before sending a random message
-let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
+// let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
+
+let messageThreshold = 3
 
 // Listen for new messages
 client.on('messageCreate', async (message) => {
