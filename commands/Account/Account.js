@@ -15,7 +15,7 @@ const {
   // UserGearParts,
 } = require('../../Models/model.js')
 
-const startingCharacterIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+const startingCharacterIds = [0, 1, 2]
 // const startingGearParts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 function formatTimestampAndCalculateDays(timestamp) {
@@ -64,6 +64,7 @@ module.exports = {
       // const findPercentage = (chanceToFind * 100).toFixed(0)
       const userCreatedAt = user.createdAt
       const result = formatTimestampAndCalculateDays(userCreatedAt)
+      
       if (created) {
         await Promise.all(
           startingCharacterIds.map((id) => {
