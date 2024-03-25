@@ -27,7 +27,7 @@ async function setupQuestionReactionCollector(
 
     // Remove all reactions to mimic privacy
     try {
-      await reaction.message.reactions.removeAll()
+      await reaction.users.remove(user.id)
     } catch (error) {
       console.error('Failed to manage reactions:', error)
     }

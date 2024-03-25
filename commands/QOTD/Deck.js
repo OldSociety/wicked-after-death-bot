@@ -49,7 +49,7 @@ module.exports = {
       if (interaction.options.getSubcommand() === 'add') {
         const deckName = interaction.options.getString('name')
         const [deck, created] = await Deck.findOrCreate({
-          where: { name: deckName },
+          where: { deck_name: deckName },
         })
 
         if (created) {
