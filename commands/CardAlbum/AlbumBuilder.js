@@ -7,8 +7,8 @@ const { User, Character, MasterCharacter } = require('../../Models/model.js')
 module.exports = {
   cooldown: 5,
   data: new SlashCommandBuilder()
-    .setName('deck_builder')
-    .setDescription('Build your character deck'),
+    .setName('album_builder')
+    .setDescription('Build your character album'),
   async execute(interaction) {
     const userId = interaction.user.id
 
@@ -37,7 +37,7 @@ module.exports = {
       const characters = user.characters || []
 
       if (characters.length === 0) {
-        return interaction.reply('Your deck is empty.')
+        return interaction.reply('Your album is empty.')
       }
       // Generate the list of characters for the embed
       const characterList = user.characters
@@ -51,13 +51,13 @@ module.exports = {
         )
         .join('\n')
 
-      const deckEmbed = new EmbedBuilder()
+      const albumEmbed = new EmbedBuilder()
         .setColor('#0099ff')
-        .setTitle(`Your Deck`)
+        .setTitle(`Your album`)
         .setDescription(characterList)
 
       await interaction.reply({
-        embeds: [deckEmbed],
+        embeds: [albumEmbed],
         ephemeral: true,
       })
     } catch (error) {
