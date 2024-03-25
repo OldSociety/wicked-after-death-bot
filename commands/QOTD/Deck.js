@@ -1,5 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-// Other imports as necessary, e.g., fs, models
+const { DataTypes, Sequelize } = require('sequelize')
+const sequelize = require('../../config/sequelize.js')
+
+const { Deck, Question } = require('../../Models/model.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
