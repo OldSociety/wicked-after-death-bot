@@ -4,9 +4,14 @@ const path = require('node:path')
 // const { Sequelize } = require('sequelize')
 const sequelize = require('./config/sequelize')
 
-const { Client, Collection, GatewayIntentBits } = require('discord.js')
+const {
+  Client,
+  Collection,
+  GatewayIntentBits,
+  EmbedBuilder,
+} = require('discord.js')
 // const { userInfo } = require('node:os')
-const buttonInteractionHandler = require('./helpers/buttonInteraction')
+const { postRandomQuestion } = require('./helpers/handleQuestion')
 const { MasterCharacter } = require('./Models/model')
 // const { scavengeHelper } = require('./helpers/scavengeHelper')
 
@@ -17,6 +22,7 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildVoiceStates,
   ],
 })
@@ -84,25 +90,31 @@ client.on('messageCreate', async (message) => {
     messageCounter = 0
     messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
-    try {
-      // Fetch a random character from the database
-      const characterCount = await MasterCharacter.count()
-      const randomRow = Math.floor(Math.random() * characterCount)
-      const randomCharacter = await MasterCharacter.findOne({
-        offset: randomRow,
-      })
+    // try {
+    //   // Fetch a random character from the database
+    //   const characterCount = await MasterCharacter.count()
+    //   const randomRow = Math.floor(Math.random() * characterCount)
+    //   const randomCharacter = await MasterCharacter.findOne({
+    //     offset: randomRow,
+    //   })
 
-      if (randomCharacter) {
-        global.appearingCharacterName = randomCharacter.character_name;
-        // Assuming channelId is fetched from .env and is the ID of the channel where you want to post
-        const channel = await client.channels.fetch(channelId)
-        if (channel) {
-          // Send the character's name in the channel
-          channel.send(`A wild ${randomCharacter.character_name} appears!`)
-        }
-      }
+    //   if (randomCharacter) {
+    //     global.appearingCharacterName = randomCharacter.character_name;
+    //     // Assuming channelId is fetched from .env and is the ID of the channel where you want to post
+    //     const channel = await client.channels.fetch(channelId)
+    //     if (channel) {
+    //       // Send the character's name in the channel
+    //       channel.send(`A wild ${randomCharacter.character_name} appears!`)
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error('Error fetching character:', error)
+    // }
+
+    try {
+      await postRandomQuestion(message.channel)
     } catch (error) {
-      console.error('Error fetching character:', error)
+      console.error('Error fetching question:', error)
     }
   }
 })
