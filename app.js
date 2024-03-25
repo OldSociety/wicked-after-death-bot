@@ -73,48 +73,53 @@ client.on('interactionCreate', async (interaction) => {
 })
 
 // Counter for tracking the number of messages
-let messageCounter = 0
+global.messageCounter = 0
 // The number of messages to wait before sending a random message
 // let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
 let messageThreshold = 3
+global.isQuestionActive = false
 
 // Listen for new messages
 client.on('messageCreate', async (message) => {
-  // Increment the message counter
-  messageCounter++
+  if (message.author.id === process.env.BOTADMINID || message.author.bot) {
+    return
+  }
+  if (!global.isQuestionActive) {
+    messageCounter++
+    console.log(messageCounter)
 
-  // Check if the message counter reaches the threshold
-  if (messageCounter >= messageThreshold) {
-    // Reset the message counter
-    messageCounter = 0
-    messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
+    if (messageCounter >= messageThreshold) {
+      global.messageCounter = 0 // Reset the message counter
+      messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
-    // try {
-    //   // Fetch a random character from the database
-    //   const characterCount = await MasterCharacter.count()
-    //   const randomRow = Math.floor(Math.random() * characterCount)
-    //   const randomCharacter = await MasterCharacter.findOne({
-    //     offset: randomRow,
-    //   })
+      // try {
+      //   // Fetch a random character from the database
+      //   const characterCount = await MasterCharacter.count()
+      //   const randomRow = Math.floor(Math.random() * characterCount)
+      //   const randomCharacter = await MasterCharacter.findOne({
+      //     offset: randomRow,
+      //   })
 
-    //   if (randomCharacter) {
-    //     global.appearingCharacterName = randomCharacter.character_name;
-    //     // Assuming channelId is fetched from .env and is the ID of the channel where you want to post
-    //     const channel = await client.channels.fetch(channelId)
-    //     if (channel) {
-    //       // Send the character's name in the channel
-    //       channel.send(`A wild ${randomCharacter.character_name} appears!`)
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching character:', error)
-    // }
+      //   if (randomCharacter) {
+      //     global.appearingCharacterName = randomCharacter.character_name;
+      //     // Assuming channelId is fetched from .env and is the ID of the channel where you want to post
+      //     const channel = await client.channels.fetch(channelId)
+      //     if (channel) {
+      //       // Send the character's name in the channel
+      //       channel.send(`A wild ${randomCharacter.character_name} appears!`)
+      //     }
+      //   }
+      // } catch (error) {
+      //   console.error('Error fetching character:', error)
+      // }
 
-    try {
-      await postRandomQuestion(message.channel)
-    } catch (error) {
-      console.error('Error fetching question:', error)
+      try {
+        global.isQuestionActive = true // Indicate a question is now active
+        await postRandomQuestion(message.channel)
+      } catch (error) {
+        console.error('Error fetching question:', error)
+      }
     }
   }
 })

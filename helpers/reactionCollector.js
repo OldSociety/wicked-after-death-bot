@@ -12,7 +12,7 @@ async function setupQuestionReactionCollector(
 
   const collector = questionMessage.createReactionCollector({
     filter,
-    time: 300000, // 5 minutes for answering
+    time: 60000, // 5 minutes for answering
   })
 
   collector.on('collect', async (reaction, user) => {
@@ -35,6 +35,9 @@ async function setupQuestionReactionCollector(
 
   collector.on('end', async () => {
     console.log('Question period has ended.')
+    global.isQuestionActive = false // Reset the flag when the question period ends
+    global.messageCounter = 0;
+    console.log(global.isQuestionActive, global.messageCounter)
 
     // Send a closing embed message to indicate the question period has ended
     const closingEmbed = new EmbedBuilder()
