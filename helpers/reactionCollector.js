@@ -21,6 +21,16 @@ async function setupQuestionReactionCollector(
     // Direct message the user with feedback
     if (reaction.emoji.name === correctAnswerEmoji) {
       user.send('You answered correctly!').catch(console.error) // Handle the case where the user cannot receive DMs
+    
+    // Award points
+    const userData = await User.findOne({ where: { id: user.id } });
+    if (userData) {
+      userData.points += 1; // Define this constant as you see fit
+      await userData.save();
+      
+      // Optionally, send a message about the awarded points
+      user.send(`You've been awarded 1 fate point! (THIS IS JUST A TEST)`).catch(console.error);
+    }
     } else {
       user.send("Oops, that's not the right answer.").catch(console.error)
     }
