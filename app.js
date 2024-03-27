@@ -12,7 +12,7 @@ const {
 } = require('discord.js')
 // const { userInfo } = require('node:os')
 
-const buttonInteractionHandler = require('./helpers/buttonInteraction');
+const buttonInteractionHandler = require('./helpers/buttonInteraction')
 const { postRandomQuestion } = require('./helpers/handleQuestion')
 const { MasterCharacter } = require('./Models/model')
 // const { scavengeHelper } = require('./helpers/scavengeHelper')
