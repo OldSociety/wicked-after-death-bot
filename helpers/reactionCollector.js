@@ -24,6 +24,15 @@ async function setupQuestionReactionCollector(
 
       // Award points
       const userData = await User.findOne({ where: { id: user.id } })
+
+      if (!user) {
+        await interaction.reply({
+          content: "You don't have an account. Use `/account` in WickedAsDeath channel to create one.",
+          ephemeral: true,
+        })
+        return
+      }
+
       if (userData) {
         userData.points += 1 // Define this constant as you see fit
         await userData.save()
