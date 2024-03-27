@@ -29,6 +29,7 @@ async function postRandomQuestion(channel) {
       .setDescription(randomQuestion.question_text)
       .addFields({
         name: 'Options',
+        description: 'PLEASE KEEPING VOTING TO HELP IN TESTING.',
         value: answers
           .map((answer, index) => `${options[index]} ${answer}`)
           .join('\n'),
