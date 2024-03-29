@@ -6,7 +6,6 @@ async function setupQuestionReactionCollector(
   correctAnswerEmoji
 ) {
   const usersWhoAnswered = new Set() // Keep track of users who have answered
-  const userId = User.user_id
   const filter = (reaction, user) => {
     return !user.bot && !usersWhoAnswered.has(user.user_id) // Ensure the user hasn't already answered
   }
@@ -17,39 +16,63 @@ async function setupQuestionReactionCollector(
   })
 
   collector.on('collect', async (reaction, user) => {
-    usersWhoAnswered.add(user.id) // Track that the user has answered
-
-    if (reaction.emoji.name === correctAnswerEmoji) {
-      // Direct message the user with feedback
-      user.send('You answered correctly!').catch(console.error) // Handle the case where the user cannot receive DMs
-
-      // Look up the user in the database using `user_id` which matches the Discord user's ID
-      const userData = await User.findOne({ where: { user_id: user.id } })
-
-      if (userData) {
-        // User found, award points
-        userData.fate_points += 1 // Adjust the points accordingly
-        await userData.save()
-
-        // Optionally, notify the user of their new points total
-        user
-          .send(
-            `You've been awarded 1 fate point! You now have ${userData.fate_points} fate points.`
-          )
-          .catch(console.error)
-      } else {
-        // Handle the case where there is no user data found, potentially prompting the user to register
-        console.log(`No user data found for ID: ${user.id}`)
-      }
-    } else {
-      user.send("Oops, that's not the right answer.").catch(console.error)
+    // Attempt to remove just the reacting user's reaction to maintain privacy
+    try {
+      await reaction.users.remove(user.id) // Use user.id here
+    } catch (error) {
+      console.error('Failed to remove reaction:', error)
+      return // Stop further processing if there's an error removing the reaction
     }
 
-    // Attempt to remove the user's reaction to maintain privacy
+    // Proceed only if the user hasn't answered yet
+    if (usersWhoAnswered.has(user.id)) {
+      return // Exit if the user has already answered
+    }
+
+    usersWhoAnswered.add(user.id) // Mark the user as having answered
+
+    let feedbackEmbed
+
+    // Check if the answer is correct and construct feedback embed accordingly
+    if (reaction.emoji.name === correctAnswerEmoji) {
+      // Correct answer logic
+      const userData = await User.findOne({ where: { user_id: user.id } })
+      if (userData) {
+        userData.fate_points += 1 // Increment fate points
+        await userData.save() // Save the updated user data
+        feedbackEmbed = new EmbedBuilder()
+          .setColor('#00FF00')
+          .setTitle('Correct Answer!')
+          .setDescription('You answered correctly!')
+          .setFooter({
+            text: `You have been awarded 1 fate point. You now have ${userData.fate_points} fate points.`,
+          })
+      } else {
+        console.log(`No user data found for ID: ${user.id}`)
+        feedbackEmbed = new EmbedBuilder()
+          .setColor('#00FF00')
+          .setTitle('Correct Answer!')
+          .setDescription('You answered correctly!')
+          .setFooter({
+            text: `You don't have an account. Use '/account' in the #wicked-after-death channel to create one.`,
+          })
+
+        return // Exit if no user data is found
+      }
+    } else {
+      // Incorrect answer logic
+      feedbackEmbed = new EmbedBuilder()
+        .setColor('#FF0000')
+        .setTitle('Incorrect Answer!')
+        .setDescription("Oops, that's not the right answer.")
+        .setFooter({ text: 'Better luck next time!' })
+    }
+
+    // Send the feedback embed as a DM
     try {
-      await reaction.users.remove(user.user_id)
+      await user.send({ embeds: [feedbackEmbed] })
     } catch (error) {
-      console.error('Failed to manage reactions:', error)
+      console.error('Failed to send DM:', error)
     }
   })
 
