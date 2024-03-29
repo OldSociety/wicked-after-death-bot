@@ -6,7 +6,7 @@ async function setupQuestionReactionCollector(
   correctAnswerEmoji
 ) {
   const usersWhoAnswered = new Set() // Keep track of users who have answered
-
+  const userId = User.user_id
   const filter = (reaction, user) => {
     return !user.bot && !usersWhoAnswered.has(user.user_id) // Ensure the user hasn't already answered
   }
@@ -17,37 +17,35 @@ async function setupQuestionReactionCollector(
   })
 
   collector.on('collect', async (reaction, user) => {
-    usersWhoAnswered.add(user.user_id) // Add the user to the set of users who have answered
+    usersWhoAnswered.add(user.id) // Track that the user has answered
 
-    // Direct message the user with feedback
     if (reaction.emoji.name === correctAnswerEmoji) {
+      // Direct message the user with feedback
       user.send('You answered correctly!').catch(console.error) // Handle the case where the user cannot receive DMs
 
-      // Award points
-      const userData = await User.findOne({ where: { id: user.user_id } })
-
-      if (!user) {
-        await interaction.reply({
-          content: "You don't have an account. Use `/account` in WickedAsDeath channel to create one.",
-          ephemeral: true,
-        })
-        return
-      }
+      // Look up the user in the database using `user_id` which matches the Discord user's ID
+      const userData = await User.findOne({ where: { user_id: user.id } })
 
       if (userData) {
-        userData.points += 1 // Define this constant as you see fit
+        // User found, award points
+        userData.fate_points += 1 // Adjust the points accordingly
         await userData.save()
 
-        // Optionally, send a message about the awarded points
+        // Optionally, notify the user of their new points total
         user
-          .send(`You've been awarded 1 fate point! (THIS IS JUST A TEST)`)
+          .send(
+            `You've been awarded 1 fate point! You now have ${userData.fate_points} fate points.`
+          )
           .catch(console.error)
+      } else {
+        // Handle the case where there is no user data found, potentially prompting the user to register
+        console.log(`No user data found for ID: ${user.id}`)
       }
     } else {
       user.send("Oops, that's not the right answer.").catch(console.error)
     }
 
-    // Remove all reactions to mimic privacy
+    // Attempt to remove the user's reaction to maintain privacy
     try {
       await reaction.users.remove(user.user_id)
     } catch (error) {

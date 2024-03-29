@@ -79,12 +79,13 @@ global.messageCounter = 0
 // The number of messages to wait before sending a random message
 // let messageThreshold = Math.floor(Math.random() * (25 - 15 + 1)) + 15
 
-let messageThreshold = 3
+let messageThreshold = 30
 global.isQuestionActive = false
 
 // Listen for new messages
 client.on('messageCreate', async (message) => {
-  if (message.author.id === process.env.BOTADMINID || message.author.bot) {
+  // if (message.author.id === process.env.BOTADMINID || message.author.bot) {
+    if (message.author.bot) {
     return
   }
   if (!global.isQuestionActive) {
