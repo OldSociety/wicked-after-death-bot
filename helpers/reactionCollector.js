@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js')
+const { User } = require('../Models/model.js')
 
 async function setupQuestionReactionCollector(
   questionMessage,
@@ -7,7 +8,7 @@ async function setupQuestionReactionCollector(
   const usersWhoAnswered = new Set() // Keep track of users who have answered
 
   const filter = (reaction, user) => {
-    return !user.bot && !usersWhoAnswered.has(user.id) // Ensure the user hasn't already answered
+    return !user.bot && !usersWhoAnswered.has(user.user_id) // Ensure the user hasn't already answered
   }
 
   const collector = questionMessage.createReactionCollector({
@@ -16,14 +17,14 @@ async function setupQuestionReactionCollector(
   })
 
   collector.on('collect', async (reaction, user) => {
-    usersWhoAnswered.add(user.id) // Add the user to the set of users who have answered
+    usersWhoAnswered.add(user.user_id) // Add the user to the set of users who have answered
 
     // Direct message the user with feedback
     if (reaction.emoji.name === correctAnswerEmoji) {
       user.send('You answered correctly!').catch(console.error) // Handle the case where the user cannot receive DMs
 
       // Award points
-      const userData = await User.findOne({ where: { id: user.id } })
+      const userData = await User.findOne({ where: { id: user.user_id } })
 
       if (!user) {
         await interaction.reply({
@@ -48,7 +49,7 @@ async function setupQuestionReactionCollector(
 
     // Remove all reactions to mimic privacy
     try {
-      await reaction.users.remove(user.id)
+      await reaction.users.remove(user.user_id)
     } catch (error) {
       console.error('Failed to manage reactions:', error)
     }
