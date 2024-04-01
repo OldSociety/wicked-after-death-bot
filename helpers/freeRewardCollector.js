@@ -5,8 +5,8 @@ const { User, WickedCards } = require('../Models/model.js')
 // Utility function to transform rarity identifiers
 function transformRarityIdentifier(rarity) {
   // Check if rarity is defined and is a string
-  if (typeof rarity === 'string' && rarity.startsWith('Ex')) {
-    return 'Exclusive ' + rarity.substring(2)
+  if (typeof rarity === 'string' && rarity.startsWith('ex')) {
+    return 'exclusive ' + rarity.substring(2)
   }
   // Return the original rarity if it's defined, otherwise return a default string indicating an unknown rarity
   return rarity || 'Unknown Rarity'
@@ -16,15 +16,15 @@ function transformRarityIdentifier(rarity) {
 async function fetchExEpicRewardWithAdjustedChances() {
   // Define rarities and their corresponding chances
   const raritiesWithChances = [
-    { rarity: 'ExRare', chance: 82.63 },
-    { rarity: 'ExEpic', chance: 12.44 },
-    { rarity: 'ExLegend', chance: 4.89 },
-    { rarity: 'Mythic', chance: 0.06 },
+    { rarity: 'exRare', chance: 82.63 },
+    { rarity: 'exEpic', chance: 12.44 },
+    { rarity: 'exLegend', chance: 4.89 },
+    { rarity: 'mythic', chance: 0.06 },
   ]
 
   // Calculate a random percentage for rarity selection
   let randomPercent = Math.random() * 100
-  let selectedRarity = 'ExRare' // Default selection
+  let selectedRarity = 'exRare' // Default selection
 
   for (const rarityWithChance of raritiesWithChances) {
     if (randomPercent <= rarityWithChance.chance) {
