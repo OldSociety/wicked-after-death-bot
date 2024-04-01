@@ -1,5 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders')
-const { User } = require('../../Models/model.js') // Adjust the import path as per your structure
+const { User } = require('../../Models/model.js')
+const {
+  setupFreeRewardCollector,
+} = require('../../helpers/freeRewardCollector') // Adjust the path as necessary
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -32,25 +35,13 @@ module.exports = {
       console.log(`Hours since last claim: ${hoursSinceLastClaim}`)
 
       if (hoursSinceLastClaim >= 8) {
-        // Update user balance and last claim time
-        const rewardPoints = 100 // Set your reward points
-        user.balance += rewardPoints // Update the user's balance
-        user.last_daily_claim = currentTime // Set the current time as the last claim time
-
-        // Save changes to the database
-        await user.save()
-
-        // Confirm to the user
-        const embed = new EmbedBuilder()
-          .setTitle('Free Reward')
-          .setColor(0x0099ff)
-          .setDescription(`You've claimed your free ${rewardPoints} points!`)
-          .addFields({
-            name: 'New Balance',
-            value: `🪙 ${user.balance} points`,
-          })
-
-        await interaction.reply({ embeds: [embed] })
+        const rewardMessage = await interaction.reply({ 
+            content: 'Your reward is hidden behind one of these doors. Choose wisely:', 
+            fetchReply: true // Make sure to fetch the reply if you're using discord.js v13+
+          });
+        
+          // Now call the setupFreeRewardCollector with the rewardMessage
+          setupFreeRewardCollector(rewardMessage);
       } else {
         // Calculate the remaining time until the next claim is available
         const timeRemaining = 8 - hoursSinceLastClaim
