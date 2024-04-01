@@ -11,7 +11,7 @@ async function postRandomQuestion(channel) {
       attributes: ['id'],
       where: {
         rarity: {
-          [Op.in]: ['Common', 'Rare', 'Epic', 'Legend'], // Filter by included rarities
+          [Op.in]: ['common', 'rare', 'epic', 'legendary'], // Filter by included rarities
         },
       },
     });
