@@ -75,11 +75,11 @@ async function setupFreeRewardCollector(rewardMessage) {
       8000, // Gold value
       10000, // Gold value
       20000, // Gold value
-      await fetchCardByRarity(['Legendary']), // Guaranteed Legendary
+      await fetchCardByRarity(['legendary']), // Guaranteed Legendary
       await fetchExEpicRewardWithAdjustedChances(), // ExRare or higher
       Math.random() < 0.8
-        ? await fetchCardByRarity(['Epic'])
-        : await fetchCardByRarity(['Legendary']), // Primarily Epic, chance of Legendary
+        ? await fetchCardByRarity(['epic'])
+        : await fetchCardByRarity(['legendary']), // Primarily Epic, chance of Legendary
     ]
  
 
@@ -88,11 +88,11 @@ async function setupFreeRewardCollector(rewardMessage) {
   while (rewards.length < 8) {
     rewards.push(
       await fetchCardByRarity([
-        'Common',
-        'Uncommon',
-        'Rare',
-        'Epic',
-        'Legendary',
+        'common',
+        'uncommon',
+        'rare',
+        'epic',
+        'legendary',
       ])
     ) // Random card from all rarities
   }

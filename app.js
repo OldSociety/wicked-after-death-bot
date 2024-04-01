@@ -119,7 +119,7 @@ client.on('messageCreate', async (message) => {
 
       try {
         global.isQuestionActive = true // Indicate a question is now active
-        await postRandomQuestion(message.channel)
+        await postRandomQuestion(client)
       } catch (error) {
         console.error('Error fetching question:', error)
       }
