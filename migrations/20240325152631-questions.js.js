@@ -10,6 +10,14 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
+      card_id: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      card_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       img_url: {
         type: Sequelize.STRING,
         allowNull: true, 
@@ -51,6 +59,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Questions')
+    await queryInterface.dropTable('WickedCards')
   },
 }
