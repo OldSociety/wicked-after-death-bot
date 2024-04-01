@@ -4,10 +4,51 @@ const { User, WickedCards } = require('../Models/model.js')
 
 // Utility function to transform rarity identifiers
 function transformRarityIdentifier(rarity) {
-  if (rarity.startsWith('Ex')) {
+  // Check if rarity is defined and is a string
+  if (typeof rarity === 'string' && rarity.startsWith('Ex')) {
     return 'Exclusive ' + rarity.substring(2)
   }
-  return rarity
+  // Return the original rarity if it's defined, otherwise return a default string indicating an unknown rarity
+  return rarity || 'Unknown Rarity'
+}
+
+// This function now specifically adjusts the selection based on the provided chances
+async function fetchExEpicRewardWithAdjustedChances() {
+  // Define rarities and their corresponding chances
+  const raritiesWithChances = [
+    { rarity: 'ExRare', chance: 82.63 },
+    { rarity: 'ExEpic', chance: 12.44 },
+    { rarity: 'ExLegend', chance: 4.89 },
+    { rarity: 'Mythic', chance: 0.06 },
+  ]
+
+  // Calculate a random percentage for rarity selection
+  let randomPercent = Math.random() * 100
+  let selectedRarity = 'ExRare' // Default selection
+
+  for (const rarityWithChance of raritiesWithChances) {
+    if (randomPercent <= rarityWithChance.chance) {
+      selectedRarity = rarityWithChance.rarity
+      break // Found the selected rarity
+    }
+    randomPercent -= rarityWithChance.chance // Adjust random percent after bypassing this rarity
+  }
+
+  // Fetch a card of the selected rarity
+  const card = await WickedCards.findOne({
+    where: { rarity: selectedRarity },
+    order: [sequelize.fn('RANDOM')],
+  })
+
+  if (!card) {
+    throw new Error(`No cards available for rarity: ${selectedRarity}`)
+  }
+
+  // Ensure you return an object with both name and rarity
+  return {
+    name: card.card_name,
+    rarity: card.rarity,
+  }
 }
 
 // Assuming you have a method in WickedCards to fetch cards by rarity
@@ -30,16 +71,17 @@ async function fetchCardByRarity(rarities) {
 }
 
 async function setupFreeRewardCollector(rewardMessage) {
-  const rewards = [
-    8000, // Gold value
-    10000, // Gold value
-    20000, // Gold value
-    await fetchCardByRarity(['Legendary']), // Guaranteed Legendary
-    await fetchCardByRarity(['ExRare', 'ExEpic', 'ExLegend', 'Mythic']), // ExRare or higher
-    Math.random() < 0.8
-      ? await fetchCardByRarity(['Epic'])
-      : await fetchCardByRarity(['Legendary']), // Primarily Epic, chance of Legendary
-  ]
+    const rewards = [
+      8000, // Gold value
+      10000, // Gold value
+      20000, // Gold value
+      await fetchCardByRarity(['Legendary']), // Guaranteed Legendary
+      await fetchExEpicRewardWithAdjustedChances(), // ExRare or higher
+      Math.random() < 0.8
+        ? await fetchCardByRarity(['Epic'])
+        : await fetchCardByRarity(['Legendary']), // Primarily Epic, chance of Legendary
+    ]
+ 
 
   // Fill the rest of the rewards with random cards, assuming a simple random selection here
   // Adjust your selection mechanism as needed based on your game's design
@@ -105,19 +147,22 @@ async function setupFreeRewardCollector(rewardMessage) {
       }
     }
 
-    // Construct feedback embed
+    console.log(`Selected Reward:`, selectedReward) // Debug to see what's actually in `selectedReward`
+
     const feedbackEmbed = new EmbedBuilder()
       .setColor('#00FF00')
       .setTitle('Congratulations!')
       .setDescription(
         `${user.username}, you've selected ${reaction.emoji.name} and won ${
           typeof selectedReward === 'number'
-            ? '🪙' + selectedReward + ' gold'
-            : `the ${transformRarityIdentifier(selectedReward.rarity)} card: **${
-                selectedReward.name
-              }**`
+            ? `🪙 ${selectedReward} gold`
+            : `the ${transformRarityIdentifier(
+                selectedReward.rarity
+              )} card: **${selectedReward.name}**`
         }!`
       )
+
+    // Proceed with sending the embed...
 
     // Update the original rewardMessage with the feedbackEmbed
     await rewardMessage.edit({ content: ' ', embeds: [feedbackEmbed] })

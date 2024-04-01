@@ -44,7 +44,7 @@ async function setupQuestionReactionCollector(
         feedbackEmbed = new EmbedBuilder()
           .setColor('#00FF00')
           .setTitle('Correct Answer!')
-          .setDescription(`You now have ${userData.fate_points} fate points and ${wickedCard.card_name} was added to your collection.`)
+          .setDescription(`You now have ${userData.fate_points} fate points and the ${wickedCard.rarity} card **${wickedCard.card_name}** was added to your collection.`)
           .setFooter({
             text: `You have been awarded 1 fate point.`,
           })

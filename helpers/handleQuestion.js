@@ -1,16 +1,30 @@
-const { EmbedBuilder } = require('discord.js')
-const { WickedCards } = require('../Models/model')
-const { setupQuestionReactionCollector } = require('./reactionCollector')
+const { EmbedBuilder } = require('discord.js');
+const { Op } = require('sequelize'); // Make sure to import Op
+const sequelize = require('../config/sequelize');
+const { WickedCards } = require('../Models/model');
+const { setupQuestionReactionCollector } = require('./reactionCollector');
 
 async function postRandomQuestion(channel) {
   try {
-    const questionCount = await WickedCards.count()
-    if (questionCount === 0) throw new Error('No questions available.')
+    // Get IDs of all questions with included rarities
+    const questions = await WickedCards.findAll({
+      attributes: ['id'],
+      where: {
+        rarity: {
+          [Op.in]: ['Common', 'Rare', 'Epic', 'Legend'], // Filter by included rarities
+        },
+      },
+    });
 
-    const randomRow = Math.floor(Math.random() * questionCount)
-    const randomQuestion = await WickedCards.findOne({ offset: randomRow })
+    if (questions.length === 0) throw new Error('No questions available.');
 
-    if (!randomQuestion) throw new Error('Question not found.')
+    // Select a random question ID from the list
+    const randomIndex = Math.floor(Math.random() * questions.length);
+    const randomQuestionId = questions[randomIndex].id;
+
+    // Fetch the randomly selected question by ID
+    const randomQuestion = await WickedCards.findByPk(randomQuestionId);
+    if (!randomQuestion) throw new Error('Question not found.');
 
     const options = ['🇦', '🇧', '🇨', '🇩']
     const answers = [
