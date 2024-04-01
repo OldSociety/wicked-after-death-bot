@@ -3,7 +3,8 @@ const { User } = require('../Models/model.js')
 
 async function setupQuestionReactionCollector(
   questionMessage,
-  correctAnswerEmoji
+  correctAnswerEmoji,
+  wickedCard
 ) {
   const usersWhoAnswered = new Set() // Keep track of users who have answered
   const filter = (reaction, user) => {
@@ -43,10 +44,11 @@ async function setupQuestionReactionCollector(
         feedbackEmbed = new EmbedBuilder()
           .setColor('#00FF00')
           .setTitle('Correct Answer!')
-          .setDescription('You answered correctly!')
+          .setDescription(`You now have ${userData.fate_points} fate points and ${wickedCard.card_name} was added to your collection.`)
           .setFooter({
-            text: `You have been awarded 1 fate point. You now have ${userData.fate_points} fate points.`,
+            text: `You have been awarded 1 fate point.`,
           })
+          .setImage(wickedCard.img_url)
       } else {
         console.log(`No user data found for ID: ${user.id}`)
         feedbackEmbed = new EmbedBuilder()
