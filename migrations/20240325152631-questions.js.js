@@ -3,16 +3,37 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Questions', {
+    await queryInterface.createTable('WickedCards', {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
       },
-      deck_name: {
+      img_url: {
+        type: Sequelize.STRING,
+        allowNull: true, 
+        validate: {
+          isUrl: true, // Ensure it's a valid URL
+        },
+      },
+      album_category: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      collection_category: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      cost: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0, 
+      },
+      damage_value: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0, 
       },
       question_text: {
         type: Sequelize.TEXT,
@@ -22,7 +43,10 @@ module.exports = {
       answer_2: Sequelize.STRING,
       answer_3: Sequelize.STRING,
       answer_4: Sequelize.STRING,
-      correct_answer: Sequelize.STRING, // e.g., "A", "B", "C", or "D"
+      correct_answer: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
     })
   },
 

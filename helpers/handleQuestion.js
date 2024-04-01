@@ -1,14 +1,14 @@
 const { EmbedBuilder } = require('discord.js')
-const { Question } = require('../Models/model')
+const { WickedCards } = require('../Models/model')
 const { setupQuestionReactionCollector } = require('./reactionCollector')
 
 async function postRandomQuestion(channel) {
   try {
-    const questionCount = await Question.count()
+    const questionCount = await WickedCards.count()
     if (questionCount === 0) throw new Error('No questions available.')
 
     const randomRow = Math.floor(Math.random() * questionCount)
-    const randomQuestion = await Question.findOne({ offset: randomRow })
+    const randomQuestion = await WickedCards.findOne({ offset: randomRow })
 
     if (!randomQuestion) throw new Error('Question not found.')
 
