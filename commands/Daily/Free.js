@@ -37,11 +37,15 @@ module.exports = {
       if (hoursSinceLastClaim >= 8) {
         const rewardMessage = await interaction.reply({ 
             content: 'Your reward is hidden behind one of these doors. Choose wisely:', 
-            fetchReply: true // Make sure to fetch the reply if you're using discord.js v13+
-          });
-        
-          // Now call the setupFreeRewardCollector with the rewardMessage
-          setupFreeRewardCollector(rewardMessage);
+            fetchReply: true
+        });
+      
+        // Call the setupFreeRewardCollector with the rewardMessage
+        setupFreeRewardCollector(rewardMessage);
+      
+        // Update the last_daily_claim field to the current time
+        user.last_daily_claim = currentTime;
+        await user.save();
       } else {
         // Calculate the remaining time until the next claim is available
         const timeRemaining = 8 - hoursSinceLastClaim

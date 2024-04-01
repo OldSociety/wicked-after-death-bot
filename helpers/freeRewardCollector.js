@@ -1,9 +1,62 @@
 const { EmbedBuilder } = require('discord.js')
-const { User } = require('../Models/model.js')
+const sequelize = require('../config/sequelize')
+const { User, WickedCards } = require('../Models/model.js')
+
+// Utility function to transform rarity identifiers
+function transformRarityIdentifier(rarity) {
+  if (rarity.startsWith('Ex')) {
+    return 'Exclusive ' + rarity.substring(2)
+  }
+  return rarity
+}
+
+// Assuming you have a method in WickedCards to fetch cards by rarity
+async function fetchCardByRarity(rarities) {
+  const card = await WickedCards.findOne({
+    where: { rarity: rarities },
+    order: sequelize.random(),
+  })
+
+  if (!card)
+    throw new Error(
+      `No cards of specified rarities available: ${rarities.join(', ')}.`
+    )
+
+  // Return an object with both the card name and its rarity
+  return {
+    name: card.card_name,
+    rarity: card.rarity,
+  }
+}
 
 async function setupFreeRewardCollector(rewardMessage) {
-  const rewards = [100, 200, 300, 400, 500, 600, 700, 800]
+  const rewards = [
+    8000, // Gold value
+    10000, // Gold value
+    20000, // Gold value
+    await fetchCardByRarity(['Legendary']), // Guaranteed Legendary
+    await fetchCardByRarity(['ExRare', 'ExEpic', 'ExLegend', 'Mythic']), // ExRare or higher
+    Math.random() < 0.8
+      ? await fetchCardByRarity(['Epic'])
+      : await fetchCardByRarity(['Legendary']), // Primarily Epic, chance of Legendary
+  ]
+
+  // Fill the rest of the rewards with random cards, assuming a simple random selection here
+  // Adjust your selection mechanism as needed based on your game's design
+  while (rewards.length < 8) {
+    rewards.push(
+      await fetchCardByRarity([
+        'Common',
+        'Uncommon',
+        'Rare',
+        'Epic',
+        'Legendary',
+      ])
+    ) // Random card from all rarities
+  }
+
   const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣']
+
   // Shuffle rewards function
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -11,6 +64,7 @@ async function setupFreeRewardCollector(rewardMessage) {
       ;[array[i], array[j]] = [array[j], array[i]]
     }
   }
+
   // Shuffle rewards before mapping to emojis
   shuffleArray(rewards)
 
@@ -30,32 +84,54 @@ async function setupFreeRewardCollector(rewardMessage) {
   })
 
   collector.on('collect', async (reaction, user) => {
-    usersWhoClaimed.add(user.id); // Mark user as having claimed
-  
+    usersWhoClaimed.add(user.id) // Mark user as having claimed
+
     // Determine selected reward
-    const selectedEmojiIndex = emojis.indexOf(reaction.emoji.name);
-    const selectedReward = rewards[selectedEmojiIndex];
-  
+    const selectedEmojiIndex = emojis.indexOf(reaction.emoji.name)
+    const selectedReward = rewards[selectedEmojiIndex]
+
+    // Fetch user data
+    const userData = await User.findOne({ where: { user_id: user.id } })
+
+    if (!userData) {
+      console.error(`User with ID ${user.id} not found.`)
+      // Handle error, for example by sending a message to the user
+    } else {
+      // Check if the selected reward is gold (i.e., a number)
+      if (typeof selectedReward === 'number') {
+        // Add the gold amount to the user's balance
+        userData.balance += selectedReward
+        await userData.save() // Save the updated user data to the database
+      }
+    }
+
     // Construct feedback embed
     const feedbackEmbed = new EmbedBuilder()
       .setColor('#00FF00')
       .setTitle('Congratulations!')
-      .setDescription(`${user.username}, you've selected ${reaction.emoji.name} and won ${selectedReward} coins!`);
-  
+      .setDescription(
+        `${user.username}, you've selected ${reaction.emoji.name} and won ${
+          typeof selectedReward === 'number'
+            ? '🪙' + selectedReward + ' gold'
+            : `the ${transformRarityIdentifier(selectedReward.rarity)} card: **${
+                selectedReward.name
+              }**`
+        }!`
+      )
+
     // Update the original rewardMessage with the feedbackEmbed
-    await rewardMessage.edit({ content: ' ', embeds: [feedbackEmbed] });
-  
+    await rewardMessage.edit({ content: ' ', embeds: [feedbackEmbed] })
+
     // Optionally, handle updating user's reward in your database here
-    console.log(`User ${user.tag} won ${selectedReward} coins.`);
-  
+    console.log(`User ${user.tag} won ${selectedReward}`)
+
     // Disable further reactions by removing all reactions from the message
     try {
-      await rewardMessage.reactions.removeAll();
+      await rewardMessage.reactions.removeAll()
     } catch (error) {
-      console.error('Failed to remove reactions:', error);
+      console.error('Failed to remove reactions:', error)
     }
-  });
-  
+  })
 
   collector.on('end', (collected) => {
     if (collected.size === 0) {

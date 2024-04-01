@@ -18,6 +18,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      rarity: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       img_url: {
         type: Sequelize.STRING,
         allowNull: true, 
