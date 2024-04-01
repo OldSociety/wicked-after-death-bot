@@ -12,7 +12,7 @@ async function setupQuestionReactionCollector(
 
   const collector = questionMessage.createReactionCollector({
     filter,
-    time: 600000, // 5 minutes for answering
+    time: 600000, // 10 minutes for answering
   })
 
   collector.on('collect', async (reaction, user) => {
@@ -50,14 +50,12 @@ async function setupQuestionReactionCollector(
       } else {
         console.log(`No user data found for ID: ${user.id}`)
         feedbackEmbed = new EmbedBuilder()
-          .setColor('#00FF00')
-          .setTitle('Correct Answer!')
-          .setDescription('You answered correctly!')
+          .setColor('#FF0000')
+          .setTitle('Missing Account')
+          .setDescription(`You don't have an account.`)
           .setFooter({
-            text: `You don't have an account. Use '/account' in the #wicked-after-death channel to create one.`,
+            text: `Use '/account' in the #wicked-after-death channel to create one.`,
           })
-
-        return // Exit if no user data is found
       }
     } else {
       // Incorrect answer logic
