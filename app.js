@@ -85,7 +85,7 @@ global.isQuestionActive = false
 // Listen for new messages
 client.on('messageCreate', async (message) => {
   // if (message.author.id === process.env.BOTADMINID || message.author.bot) {
-    if (message.author.bot) {
+    if (message.author.bot) { //includes admin for testing
     return
   }
   if (!global.isQuestionActive) {

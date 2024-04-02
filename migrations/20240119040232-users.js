@@ -13,6 +13,18 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      chat_level: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      chat_exp: {
+        type: Sequelize.REAL,
+        allowNull: false,
+      },
+      last_chat_message: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
       balance: {
         type: Sequelize.INTEGER,
         allowNull: false,
