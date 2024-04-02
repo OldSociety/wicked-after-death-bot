@@ -16,10 +16,12 @@ module.exports = {
       chat_level: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 1,
       },
       chat_exp: {
         type: Sequelize.REAL,
         allowNull: false,
+        defaultValue: 0,
       },
       last_chat_message: {
         type: Sequelize.DATE,
@@ -32,6 +34,7 @@ module.exports = {
       qubit_balance: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 0,
       },
       createdAt: {
         type: Sequelize.DATE,

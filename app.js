@@ -14,7 +14,7 @@ const {
 
 const buttonInteractionHandler = require('./helpers/buttonInteraction')
 const { postRandomQuestion } = require('./helpers/handleQuestion')
-const { MasterCharacter } = require('./Models/model')
+const { MasterCharacter, User } = require('./Models/model')
 // const { scavengeHelper } = require('./helpers/scavengeHelper')
 
 const channelId = process.env.WADCHANNELID
@@ -85,7 +85,8 @@ global.isQuestionActive = false
 // Listen for new messages
 client.on('messageCreate', async (message) => {
   // if (message.author.id === process.env.BOTADMINID || message.author.bot) {
-    if (message.author.bot) { //includes admin for testing
+  if (message.author.bot) {
+    //includes admin for testing
     return
   }
   if (!global.isQuestionActive) {
@@ -124,6 +125,72 @@ client.on('messageCreate', async (message) => {
         console.error('Error fetching question:', error)
       }
     }
+  }
+  // Check and update user XP and level
+  const now = new Date()
+  const userID = message.author.id
+
+  try {
+    let user = await User.findOne({ where: { user_id: userID } })
+
+    if (!user) {
+      await interaction.reply({
+        content: "You don't have an account. Use `/account` to create one.",
+        ephemeral: true,
+      })
+      return
+    }
+
+    const lastMessageTime = new Date(user.last_chat_message)
+    const minutesSinceLastMessage = (now - lastMessageTime) / (1000 * 60)
+
+    if (minutesSinceLastMessage >= 1) {
+      const xpToAdd = Math.floor(Math.random() * (15 - 12 + 1)) + 12
+      let newXP = user.chat_exp + xpToAdd
+      let newLevel = user.chat_level
+      const xpForNextLevel = 5 * newLevel ** 2 + 50 * newLevel + 100
+
+      if (newXP >= xpForNextLevel) {
+        newLevel += 1
+        newXP -= xpForNextLevel // Adjust XP for the next level
+
+        // Level-up logic
+        const additionalFatePoints = 5
+        await User.update(
+          {
+            chat_level: newLevel,
+            chat_exp: newXP,
+            fate_points: user.fate_points + additionalFatePoints, // Add fate points upon leveling up
+            last_chat_message: now,
+          },
+          { where: { user_id: userID } }
+        )
+
+        // Send level-up notification
+        const levelUpEmbed = new EmbedBuilder()
+          .setColor(0x00ff00)
+          .setTitle('Level Up!')
+          .setDescription(
+            `Congratulations, ${message.author.username}! You've reached **level ${newLevel}** and gained **${additionalFatePoints} fate points**!`
+          )
+          .setTimestamp()
+
+        // Send the embed to the user or a specific channel
+        await message.channel.send({ embeds: [levelUpEmbed] })
+      } else {
+        // Just update the XP and last message time if no level up
+        await User.update(
+          {
+            chat_exp: newXP,
+            last_chat_message: now,
+          },
+          { where: { user_id: userID } }
+        )
+      }
+    }
+  } catch (error) {
+    console.error('Error updating user XP, level, and fate points:', error)
+    // Consider notifying the channel or logging the error in a specific way here
   }
 })
 
