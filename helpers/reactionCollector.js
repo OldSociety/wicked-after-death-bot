@@ -13,7 +13,7 @@ async function setupQuestionReactionCollector(
 
   const collector = questionMessage.createReactionCollector({
     filter,
-    time: 600000, // 10 minutes for answering
+    time: 3600000, // 1 hour for answering
   })
 
   collector.on('collect', async (reaction, user) => {
