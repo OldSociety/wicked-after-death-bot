@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
-      card_id: {
+      card_index: {
         type: Sequelize.STRING,
         allowNull: false,
       },

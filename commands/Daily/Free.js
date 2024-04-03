@@ -34,7 +34,7 @@ module.exports = {
       // Debugging: Log the calculated hours since last claim
       console.log(`Hours since last claim: ${hoursSinceLastClaim}`)
 
-      if (hoursSinceLastClaim >= 8) {
+      if (hoursSinceLastClaim >= 0) {
         const rewardMessage = await interaction.reply({ 
             content: 'Your reward is hidden behind one of these doors. Choose wisely:', 
             fetchReply: true

@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js')
 const sequelize = require('../config/sequelize')
-const { User, WickedCards } = require('../Models/model.js')
+const { User, WickedCards, UserCardCollection } = require('../Models/model.js')
 
 // Utility function to transform rarity identifiers
 function transformRarityIdentifier(rarity) {
@@ -65,36 +65,27 @@ async function fetchCardByRarity(rarities) {
 
   // Return an object with both the card name and its rarity
   return {
+    id: card.id,
     name: card.card_name,
     rarity: card.rarity,
   }
 }
 
 async function setupFreeRewardCollector(rewardMessage) {
-    const rewards = [
-      8000, // Gold value
-      10000, // Gold value
-      20000, // Gold value
-      await fetchCardByRarity(['legendary']), // Guaranteed Legendary
-      await fetchExEpicRewardWithAdjustedChances(), // ExRare or higher
-      Math.random() < 0.8
-        ? await fetchCardByRarity(['epic'])
-        : await fetchCardByRarity(['legendary']), // Primarily Epic, chance of Legendary
-    ]
- 
 
-  // Fill the rest of the rewards with random cards, assuming a simple random selection here
-  // Adjust your selection mechanism as needed based on your game's design
+  const rewards = [
+    8000, // Gold value
+    10000,
+    20000,
+    await fetchCardByRarity(['legendary']), // Guaranteed Legendary
+    await fetchExEpicRewardWithAdjustedChances(), // ExRare or higher
+    Math.random() < 0.8
+      ? await fetchCardByRarity(['epic'])
+      : await fetchCardByRarity(['legendary']), // Primarily Epic, chance of Legendary
+  ]
+
   while (rewards.length < 8) {
-    rewards.push(
-      await fetchCardByRarity([
-        'common',
-        'uncommon',
-        'rare',
-        'epic',
-        'legendary',
-      ])
-    ) // Random card from all rarities
+    rewards.push(await fetchCardByRarity(['rare', 'epic', 'legendary'])) // Random card from all rarities
   }
 
   const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣']
@@ -144,10 +135,28 @@ async function setupFreeRewardCollector(rewardMessage) {
         // Add the gold amount to the user's balance
         userData.balance += selectedReward
         await userData.save() // Save the updated user data to the database
+      } else {
+       
+// Correct way to access the model based on your console.log output
+const UserCardCollection = sequelize.models.UserCardCollections;
+
+        // Handle card reward
+        const [userCard, created] =
+          await UserCardCollection.findOrCreate({
+            where: { user_id: user.id, card_id: selectedReward.id },
+            defaults: { quantity: 1 }, // Starting quantity if creating
+          })
+
+        if (!created) {
+          // If the record already existed, increment quantity
+          userCard.quantity += 1
+          await userCard.save()
+        }
       }
     }
 
-    console.log(`Selected Reward:`, selectedReward) // Debug to see what's actually in `selectedReward`
+    console.log(`Selected Reward:`, selectedReward)
+
 
     const feedbackEmbed = new EmbedBuilder()
       .setColor('#00FF00')
@@ -162,12 +171,9 @@ async function setupFreeRewardCollector(rewardMessage) {
         }!`
       )
 
-    // Proceed with sending the embed...
-
     // Update the original rewardMessage with the feedbackEmbed
     await rewardMessage.edit({ content: ' ', embeds: [feedbackEmbed] })
 
-    // Optionally, handle updating user's reward in your database here
     console.log(`User ${user.tag} won ${selectedReward}`)
 
     // Disable further reactions by removing all reactions from the message
@@ -182,7 +188,6 @@ async function setupFreeRewardCollector(rewardMessage) {
     if (collected.size === 0) {
       console.log('No selections were made.')
     }
-    // Optionally, clean up the message or provide further instructions
   })
 
   // React with options for users to choose their reward

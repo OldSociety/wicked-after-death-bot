@@ -11,18 +11,10 @@ module.exports = {
         },
         allowNull: false,
       },
-      deck_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Decks',
-          key: 'id',
-        },
-        allowNull: false,
-      },
       card_id: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Cards',
+          model: 'WickedCards',
           key: 'id',
         },
         allowNull: false,
