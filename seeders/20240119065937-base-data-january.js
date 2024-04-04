@@ -9,6 +9,7 @@ const {
   StandardFight,
   StandardLevel,
   StandardRaid,
+  WickedCards
 } = require('../Models/model')
 
 const storeData = require('../db/dbStore')
@@ -19,6 +20,7 @@ const levelData = require('../db/dbBattles/dbLevels')
 const raidData = require('../db/dbBattles/dbRaids')
 const fightData = require('../db/dbBattles/dbFights')
 const tagData = require('../db/dbCharacterTags')
+const WickedCardsData = require('../db/dbWickedCards')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -29,6 +31,7 @@ module.exports = {
       await seedMasterCharacters(characterData)
       await queryInterface.bulkInsert('GearParts', gearPartsData)
       await queryInterface.bulkInsert('GearSets', gearSetsData)
+      await queryInterface.bulkInsert('WickedCards', WickedCardsData)
 
       await seedStandardLevels(levelData)
       await seedStandardRaids(raidData)
@@ -47,6 +50,7 @@ module.exports = {
     await queryInterface.bulkDelete('GearSets', null, {})
     await queryInterface.bulkDelete('GearParts', null, {})
     await queryInterface.bulkDelete('Stores', null, {})
+    await queryInterface.bulkDelete('WickedCards', null, {})
     console.log('Data seeding reverted.')
   },
 }
