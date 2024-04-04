@@ -24,14 +24,12 @@ function calculateTimeUntilNextReset() {
 }
 
 function resetDailyClaims() {
-  // This function resets the daily claims at the next 6 AM Pacific Time
   setTimeout(() => {
     usersClaimedToday.clear()
     resetDailyClaims() // Schedule the next reset
   }, calculateTimeUntilNextReset().hours * 3600000 + calculateTimeUntilNextReset().minutes * 60000)
 }
 
-// Initialize the first reset
 resetDailyClaims()
 
 module.exports = {
@@ -53,17 +51,16 @@ module.exports = {
     } else {
       usersClaimedToday.add(userId)
 
-      const dailyRewards = [100, 200, 300, 400, 500, 600, 700]; // Define your daily rewards
-        const rewardIndex = (user.daily_streak - 1) % dailyRewards.length;
-        const dailyReward = dailyRewards[rewardIndex];
+      const dailyRewards = [100, 200, 300, 400, 500, 600, 700]
+      const rewardIndex = (user.daily_streak - 1) % dailyRewards.length
+      const dailyReward = dailyRewards[rewardIndex]
 
-        // Increment the daily_streak and update in database
-        let newStreak = user.daily_streak + 1;
-        if (newStreak > 7 || newStreak < 1) newStreak = 1; // Reset streak after day 7
+      // Increment the daily_streak and update in database
+      let newStreak = user.daily_streak + 1
+      if (newStreak > 7 || newStreak < 1) newStreak = 1 // Reset streak after day 7
 
-        // await updateUserData(userId, { daily_streak: newStreak }); // Adjust this to your actual data updating logic
-        user.daily_streak = newStreak
-        await user.save()
+      user.daily_streak = newStreak
+      await user.save()
 
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)

@@ -34,19 +34,33 @@ module.exports = {
       // Debugging: Log the calculated hours since last claim
       console.log(`Hours since last claim: ${hoursSinceLastClaim}`)
 
-      if (hoursSinceLastClaim >= 8) {
-        const rewardMessage = await interaction.reply({
-          content:
-            'Your reward is hidden behind one of these doors. Choose wisely:',
-          fetchReply: true,
-        })
+      if (hoursSinceLastClaim >= 0) {
+        try {
+          const rewardMessage = await interaction.reply({
+            content:
+              'Your reward is hidden behind one of these doors. Choose wisely:',
+            fetchReply: true,
+          })
 
-        // Call the setupFreeRewardCollector with the rewardMessage
-        setupFreeRewardCollector(rewardMessage)
+          // Start the reward collector and introduce a timeout
+          const collector = setupFreeRewardCollector(rewardMessage)
 
-        // Update the last_free_claim field to the current time
-        user.last_free_claim = currentTime
-        await user.save()
+          collector.on('end', (collected, reason) => {
+            if (reason === 'time') {
+              // Timeout occurred
+              console.log('No selection made')
+
+              return
+            }
+          })
+        } catch (error) {
+          console.error('Error in the /free command:', error)
+          await interaction.reply({
+            content:
+              'An error occurred while trying to claim your free reward. Please try again later.',
+            ephemeral: true,
+          })
+        }
       } else {
         // Calculate the remaining time until the next claim is available
         const timeRemaining = 8 - hoursSinceLastClaim
