@@ -1,15 +1,10 @@
+'use strict'
+
 const {
-  User,
   MasterCharacter,
-  CharacterTag,
-  GearSets,
-  GearParts,
-  UserGearParts,
-  Store,
   StandardFight,
   StandardLevel,
   StandardRaid,
-  WickedCards
 } = require('../Models/model')
 
 const storeData = require('../db/dbStore')
@@ -20,18 +15,18 @@ const levelData = require('../db/dbBattles/dbLevels')
 const raidData = require('../db/dbBattles/dbRaids')
 const fightData = require('../db/dbBattles/dbFights')
 const tagData = require('../db/dbCharacterTags')
-const WickedCardsData = require('../db/dbWickedCards')
+const WickedCardData = require('../db/dbWickedCards')
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     try {
       console.log('Seeding data...')
 
-      await queryInterface.bulkInsert('Stores', storeData)
+      // await queryInterface.bulkInsert('Stores', storeData)
       await seedMasterCharacters(characterData)
       await queryInterface.bulkInsert('GearParts', gearPartsData)
       await queryInterface.bulkInsert('GearSets', gearSetsData)
-      await queryInterface.bulkInsert('WickedCards', WickedCardsData)
+      await queryInterface.bulkInsert('WickedCards', WickedCardData)
 
       await seedStandardLevels(levelData)
       await seedStandardRaids(raidData)
