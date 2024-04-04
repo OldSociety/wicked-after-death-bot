@@ -1,36 +1,6 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders')
-const moment = require('moment-timezone')
-const { User } = require('../../Models/model.js')
-
-const usersClaimedToday = new Set()
-
-function calculateTimeUntilNextReset() {
-  const now = moment().tz('America/Los_Angeles')
-  let nextReset
-
-  if (now.hour() < 6) {
-    // If before 6 AM today, next reset is today at 6 AM
-    nextReset = now.clone().startOf('day').add(6, 'hours')
-  } else {
-    // If after 6 AM today, next reset is tomorrow at 6 AM
-    nextReset = now.clone().add(1, 'day').startOf('day').add(6, 'hours')
-  }
-
-  const duration = moment.duration(nextReset.diff(now))
-  return {
-    hours: duration.hours(),
-    minutes: duration.minutes(),
-  }
-}
-
-function resetDailyClaims() {
-  setTimeout(() => {
-    usersClaimedToday.clear()
-    resetDailyClaims() // Schedule the next reset
-  }, calculateTimeUntilNextReset().hours * 3600000 + calculateTimeUntilNextReset().minutes * 60000)
-}
-
-resetDailyClaims()
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const { grantDailyReward } = require('./helpers/dailyRewardsHandler')
+const { User } = require('../../Models/model')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -38,38 +8,61 @@ module.exports = {
     .setDescription('Claim your daily reward!'),
   async execute(interaction) {
     const userId = interaction.user.id
+    const user = await User.findByPk(userId)
 
-    const user = await User.findOne({ where: { user_id: userId } })
-
-    if (usersClaimedToday.has(userId)) {
-      const { hours, minutes } = calculateTimeUntilNextReset()
-
+    if (!user) {
       await interaction.reply({
-        content: `You've already claimed your daily reward today. Please come back in ${hours} hours and ${minutes} minutes!`,
+        content:
+          "You don't have an account with us. Please register to claim daily rewards.",
         ephemeral: true,
       })
-    } else {
-      usersClaimedToday.add(userId)
+      return
+    }
+    try {
+      // Grant the daily reward
+      await grantDailyReward(user)
 
-      const dailyRewards = [100, 200, 300, 400, 500, 600, 700]
-      const rewardIndex = (user.daily_streak - 1) % dailyRewards.length
-      const dailyReward = dailyRewards[rewardIndex]
+      async function replyWithRewardsStatus(interaction, user) {
+        const rewards = [
+          '5000 coins',
+          'Exclusive Rare Card',
+          '30 qubits',
+          '10000 coins',
+          'Exclusive Epic Card',
+          '15000 coins',
+          '60 qubits',
+        ]
 
-      // Increment the daily_streak and update in database
-      let newStreak = user.daily_streak + 1
-      if (newStreak > 7 || newStreak < 1) newStreak = 1 // Reset streak after day 7
+        let description = rewards
+          .map((reward, index) => {
+            // If the index (day number - 1) is less than the daily_streak, it means the reward has been claimed
+            let claimedStatus =
+              index + 1 <= user.daily_streak ? ' (claimed)' : ''
+            return `Day ${index + 1}: ${reward}${claimedStatus}`
+          })
+          .join('\n')
 
-      user.daily_streak = newStreak
-      await user.save()
+        await interaction.reply({
+          embeds: [
+            new EmbedBuilder()
+              .setColor('#00FF00')
+              .setTitle('Daily Rewards Overview')
+              .setDescription(description),
+          ],
+          ephemeral: true,
+        })
+      }
 
-      const embed = new EmbedBuilder()
-        .setColor(0x0099ff)
-        .setTitle('Daily Reward')
-        .setDescription(
-          `You've successfully claimed your daily reward of ${dailyReward} coins!`
-        )
-
-      await interaction.reply({ embeds: [embed] })
+      // After granting the daily reward...
+      await replyWithRewardsStatus(interaction, user)
+    } catch (error) {
+      console.error('Error granting daily reward:', error)
+      // Reply to the user that an error occurred
+      await interaction.reply({
+        content:
+          'An error occurred while trying to claim your daily reward. Please try again later.',
+        ephemeral: true,
+      })
     }
   },
 }

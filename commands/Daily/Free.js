@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders')
 const { User } = require('../../Models/model.js')
-const {
-  setupFreeRewardCollector,
-} = require('../../helpers/freeRewardCollector') // Adjust the path as necessary
+const { setupFreeRewardCollector } = require('./helpers/freeRewardCollector.js') // Adjust the path as necessary
 
 module.exports = {
   data: new SlashCommandBuilder()
