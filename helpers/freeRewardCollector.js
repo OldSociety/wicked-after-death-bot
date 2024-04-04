@@ -72,7 +72,6 @@ async function fetchCardByRarity(rarities) {
 }
 
 async function setupFreeRewardCollector(rewardMessage) {
-
   const rewards = [
     8000, // Gold value
     10000,
@@ -136,16 +135,14 @@ async function setupFreeRewardCollector(rewardMessage) {
         userData.balance += selectedReward
         await userData.save() // Save the updated user data to the database
       } else {
-       
-// Correct way to access the model based on your console.log output
-const UserCardCollection = sequelize.models.UserCardCollections;
-
+        // Correct way to access the model based on your console.log output
+        const UserCardCollection = sequelize.models.UserCardCollections
+        console.log(selectedReward)
         // Handle card reward
-        const [userCard, created] =
-          await UserCardCollection.findOrCreate({
-            where: { user_id: user.id, card_id: selectedReward.id },
-            defaults: { quantity: 1 }, // Starting quantity if creating
-          })
+        const [userCard, created] = await UserCardCollection.findOrCreate({
+          where: { user_id: user.id, card_id: selectedReward.id },
+          defaults: { quantity: 1 }, // Starting quantity if creating
+        })
 
         if (!created) {
           // If the record already existed, increment quantity
@@ -156,7 +153,6 @@ const UserCardCollection = sequelize.models.UserCardCollections;
     }
 
     console.log(`Selected Reward:`, selectedReward)
-
 
     const feedbackEmbed = new EmbedBuilder()
       .setColor('#00FF00')

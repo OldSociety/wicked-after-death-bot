@@ -21,12 +21,12 @@ module.exports = {
         return
       }
 
-      // Debugging: Check the current last_daily_claim value
-      console.log(`Last claim time from database: ${user.last_daily_claim}`)
+      // Debugging: Check the current last_free_claim value
+      console.log(`Last claim time from database: ${user.last_free_claim}`)
 
       const currentTime = new Date()
-      const lastClaimTime = user.last_daily_claim
-        ? new Date(user.last_daily_claim)
+      const lastClaimTime = user.last_free_claim
+        ? new Date(user.last_free_claim)
         : new Date(0)
       const timeSinceLastClaimMs = currentTime - lastClaimTime
       const hoursSinceLastClaim = timeSinceLastClaimMs / (1000 * 60 * 60)
@@ -34,18 +34,19 @@ module.exports = {
       // Debugging: Log the calculated hours since last claim
       console.log(`Hours since last claim: ${hoursSinceLastClaim}`)
 
-      if (hoursSinceLastClaim >= 0) {
-        const rewardMessage = await interaction.reply({ 
-            content: 'Your reward is hidden behind one of these doors. Choose wisely:', 
-            fetchReply: true
-        });
-      
+      if (hoursSinceLastClaim >= 8) {
+        const rewardMessage = await interaction.reply({
+          content:
+            'Your reward is hidden behind one of these doors. Choose wisely:',
+          fetchReply: true,
+        })
+
         // Call the setupFreeRewardCollector with the rewardMessage
-        setupFreeRewardCollector(rewardMessage);
-      
-        // Update the last_daily_claim field to the current time
-        user.last_daily_claim = currentTime;
-        await user.save();
+        setupFreeRewardCollector(rewardMessage)
+
+        // Update the last_free_claim field to the current time
+        user.last_free_claim = currentTime
+        await user.save()
       } else {
         // Calculate the remaining time until the next claim is available
         const timeRemaining = 8 - hoursSinceLastClaim

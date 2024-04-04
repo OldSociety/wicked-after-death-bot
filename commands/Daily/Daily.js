@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('@discordjs/builders')
 const moment = require('moment-timezone')
+const { User } = require('../../Models/model.js')
 
 const usersClaimedToday = new Set()
 
@@ -40,6 +41,8 @@ module.exports = {
   async execute(interaction) {
     const userId = interaction.user.id
 
+    const user = await User.findOne({ where: { user_id: userId } })
+
     if (usersClaimedToday.has(userId)) {
       const { hours, minutes } = calculateTimeUntilNextReset()
 
@@ -50,11 +53,17 @@ module.exports = {
     } else {
       usersClaimedToday.add(userId)
 
-      // Example reward amount (customize as needed)
-      const dailyReward = 100
+      const dailyRewards = [100, 200, 300, 400, 500, 600, 700]; // Define your daily rewards
+        const rewardIndex = (user.daily_streak - 1) % dailyRewards.length;
+        const dailyReward = dailyRewards[rewardIndex];
 
-      // Here, you would typically update the user's data in your database
-      // This is simulated with a reply in this example
+        // Increment the daily_streak and update in database
+        let newStreak = user.daily_streak + 1;
+        if (newStreak > 7 || newStreak < 1) newStreak = 1; // Reset streak after day 7
+
+        // await updateUserData(userId, { daily_streak: newStreak }); // Adjust this to your actual data updating logic
+        user.daily_streak = newStreak
+        await user.save()
 
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
