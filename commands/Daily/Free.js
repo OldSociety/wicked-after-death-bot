@@ -32,7 +32,7 @@ module.exports = {
       // Debugging: Log the calculated hours since last claim
       console.log(`Hours since last claim: ${hoursSinceLastClaim}`)
 
-      if (hoursSinceLastClaim >= 0) {
+      if (hoursSinceLastClaim >= 8) {
         try {
           const rewardMessage = await interaction.reply({
             content:
