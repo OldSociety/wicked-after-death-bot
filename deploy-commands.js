@@ -1,5 +1,8 @@
 const { REST, Routes } = require('discord.js')
-require('dotenv').config()
+console.log(`Environment: ${process.env.NODE_ENV}`);
+require('dotenv').config({
+  path: process.env.NODE_ENV === 'development' ? '.env.development' : '.env.production'
+});
 const fs = require('node:fs')
 const path = require('node:path')
 
@@ -49,6 +52,7 @@ const rest = new REST().setToken(process.env.TOKEN)
     console.log(
       `Successfully reloaded ${data.length} application (/) commands.`
     )
+    console.log(process.env.CLIENTID)
   } catch (error) {
     console.error(error)
   }
