@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest --verbose ./__tests__",
     "start": "nodemon app.js",
-    "start:dev": "cross-env NODE_ENV=development node app.js",
-    "start:prod": "cross-env NODE_ENV=production node app.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon app.js",
+    "start:prod": "cross-env NODE_ENV=production nodemon app.js",
     "deploy:dev": "cross-env NODE_ENV=development node deploy-commands.js",
     "deploy:prod": "cross-env NODE_ENV=production node deploy-commands.js"
   },

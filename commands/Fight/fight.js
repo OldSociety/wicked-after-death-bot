@@ -14,6 +14,7 @@ const { User, MasterCharacter } = require('../../Models/model.js')
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
 const { battleManager, userBattles } = require('./helpers/battle/battleManager')
+const { selectEnemy } = require('./helpers/enemySelection.js')
 // const { setupBattleLogic } = require('./helpers/battle/battleTest.js')
 const {
   setupBattleLogic,
@@ -59,9 +60,10 @@ module.exports = {
       // if (!selectedFight || !selectedFight.enemy) {
       //   return interaction.editReply('No fight selected.')
       // }
-
-      const enemyName = global.appearingCharacterName
-      // console.log(enemyName)
+      
+      const chosenEnemy = await selectEnemy()
+      console.log(chosenEnemy)
+      const enemyName = chosenEnemy.character_name;
       if (!enemyName) {
         await interaction.reply('No character has appeared to fight with.')
         return

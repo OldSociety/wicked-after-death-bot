@@ -1,10 +1,10 @@
 // enemySelection.js
 
-const { Character } = require('../../../Models/model') // Adjust the path as needed
+const { MasterCharacter } = require('../../../Models/model') // Adjust the path as needed
 
 async function selectEnemy() {
   try {
-    const enemies = await Character.findAll() // Retrieve all enemies
+    const enemies = await MasterCharacter.findAll() // Retrieve all enemies
     if (!enemies.length) {
       throw new Error('No enemies available')
     }
