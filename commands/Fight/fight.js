@@ -13,9 +13,9 @@ const { User, MasterCharacter } = require('../../Models/model.js')
 // HELPERS
 const { retrieveCharacters } = require('./helpers/characterRetrieval')
 const { initiateBattle } = require('./helpers/battle/initiateBattle')
-const { battleManager, userBattles } = require('./helpers/battle/battleManager')
+const { initializeDeck } = require('./helpers/battle/initializeDeck.js')
 const { selectEnemy } = require('./helpers/enemySelection.js')
-// const { setupBattleLogic } = require('./helpers/battle/battleTest.js')
+const { battleManager, userBattles } = require('./helpers/battle/battleManager')
 const {
   setupBattleLogic,
 } = require('./helpers/battle/battleLogic/battleLogic.js')
@@ -31,11 +31,9 @@ module.exports = {
       const userId = interaction.user.id
       const userName = interaction.user.username
 
-      // Verify user account
       const user = await User.findOne({
-        where: { user_id: interaction.user.id },
+        where: { user_id: userId },
       })
-
       if (!user) {
         await interaction.reply({
           content: "You don't have an account. Use `/account` to create one.",
@@ -44,26 +42,10 @@ module.exports = {
         return
       }
 
-      // await interaction.deferReply({ ephemeral: true })
-
-      // const selectedLevelId = await selectLevel(interaction)
-      // if (!selectedLevelId) {
-      //   return interaction.editReply('No level selected.')
-      // }
-
-      // const selectedRaidId = await selectRaid(interaction, selectedLevelId)
-      // if (!selectedRaidId) {
-      //   return interaction.editReply('No raid selected.')
-      // }
-
-      // const selectedFight = await selectFight(interaction, selectedRaidId)
-      // if (!selectedFight || !selectedFight.enemy) {
-      //   return interaction.editReply('No fight selected.')
-      // }
-      
       const chosenEnemy = await selectEnemy()
-      console.log(chosenEnemy)
-      const enemyName = chosenEnemy.character_name;
+
+      const enemyName = chosenEnemy.character_name
+      console.log('FIGHTING: ', enemyName)
       if (!enemyName) {
         await interaction.reply('No character has appeared to fight with.')
         return
@@ -83,17 +65,17 @@ module.exports = {
 
       const userCharacters = await retrieveCharacters(userId)
       if (!userCharacters.length) {
-        return interaction.editReply('You have no characters to select.')
+        await interaction.editReply('You have no characters to select.')
+        return
       }
 
       const options = userCharacters.map((char) => {
         const rarityColor =
           {
-            'rare': '🟩',
-            'epic': '🟦',
-            'legendary': '🟪',
+            rare: '🟩',
+            epic: '🟦',
+            legendary: '🟪',
           }[char.rarity] || '⬜'
-
         return new StringSelectMenuOptionBuilder()
           .setLabel(`${rarityColor} ${char.masterCharacter.character_name}`)
           .setValue(char.character_id.toString())
@@ -109,7 +91,9 @@ module.exports = {
         .setColor('#0099ff')
         .setTitle('Character Selection')
 
-      await interaction.reply({
+      await interaction.deferReply({ ephemeral: true })
+
+      await interaction.editReply({
         embeds: [characterEmbed],
         components: [actionRow],
         ephemeral: true,
@@ -126,141 +110,88 @@ module.exports = {
         time: 30000,
       })
 
-      let character
-      let characterId
-
       collector.on('collect', async (i) => {
         if (userBattles[userId]) {
-          console.log(
-            `User ${userId} attempted to start a new battle but is already marked as in a battle.`
-          )
           await interaction.followUp('You are already in an ongoing battle.')
-          console.log('Attempted start with userBattles:', userBattles)
           return
         }
 
-        if (!character && i.customId === 'characterSelect') {
-          characterId = i.values[0] // Capture the selected character ID
-          character = userCharacters.find(
-            (char) => char.dataValues.character_id.toString() === characterId
+        const characterId = i.values[0] // Capture the selected character ID
+        const character = userCharacters.find(
+          (char) => char.character_id.toString() === characterId
+        )
+
+        if (character) {
+          userBattles[userId] = true
+          const battleResult = await initiateBattle(
+            character.dataValues.character_id,
+            character.masterCharacter.master_character_id,
+            enemy.master_character_id,
+            userId
           )
 
-          // Proceed with battle setup if both characters are selected
-          if (character) {
-            userBattles[userId] = true
+          // Initialize the deck for the battle
+          const deck = initializeDeck()
+          const battleKey = `${character.dataValues.character_id}-${enemy.master_character_id}`
+          battleManager[battleKey] = battleResult
 
-            if (!enemy) {
-              await interaction.followUp('Enemy not found.')
-              return
-            }
-            console.log('enemy id', enemy.master_character_id)
-            // Initiate battle with selected characters and enemy
-            const battleResult = await initiateBattle(
-              character.dataValues.character_id,
-              character.masterCharacter.master_character_id,
-              enemy.master_character_id,
-              userId
+          // Create and send an embed summarizing the deck and ask for confirmation to start battle
+          const embed = new EmbedBuilder()
+            .setTitle(`⚡${userName} - Battle Deck Ready`)
+            .setColor('DarkRed')
+            .setDescription(
+              `Deck initialized with ${deck.length} cards. Ready to fight against ${enemy.character_name}?`
             )
 
-            const battleKey = `${character.dataValues.character_id}-${enemy.master_character_id}`
+          const confirmButton = new ButtonBuilder()
+            .setCustomId('confirm_fight')
+            .setLabel('Confirm')
+            .setStyle(ButtonStyle.Success)
 
-            battleManager[battleKey] = battleResult
+          const backButton = new ButtonBuilder()
+            .setCustomId('back_fight')
+            .setLabel('Cancel')
+            .setStyle(ButtonStyle.Danger)
 
-            // Create and send an embed summarizing the battle initiation
-            const embed = new EmbedBuilder()
-              .setTitle(
-                `⚡${userName}`
-              )
-              .setColor('DarkRed')
-              .setThumbnail(interaction.user.displayAvatarURL())
-              .setTimestamp()
-              .setDescription(
-                `is looking for a fight and has found the **${enemy.character_name}**!`
-              )
-              .addFields(
-                createCharacterField(character),
-                {
-                  name: '\u200B', // Zero-width space
-                  value: '\u200B', // Zero-width space
-                },
-                {
-                  name: `${enemy.character_name}`,
-                  value: `⚔️ Damage: ${enemy.effective_damage}, 🧡 Health: ${enemy.effective_health}`,
-                }
-              )
+          const buttonRow = new ActionRowBuilder().addComponents(
+            confirmButton,
+            backButton
+          )
 
-            // Create Confirm and Back buttons
-            const confirmButton = new ButtonBuilder()
-              .setCustomId('confirm_fight')
-              .setLabel('Confirm')
-              .setStyle(ButtonStyle.Success)
+          await interaction.editReply({
+            embeds: [embed],
+            components: [buttonRow],
+          })
 
-            const backButton = new ButtonBuilder()
-              .setCustomId('back_fight')
-              .setLabel('Back')
-              .setStyle(ButtonStyle.Danger)
-
-            // Add buttons to the action row
-            const actionRow = new ActionRowBuilder().addComponents(
-              confirmButton,
-              backButton
-            )
-
-            await interaction.followUp({
-              embeds: [embed],
-              components: [actionRow],
+          const buttonFilter = (i) => i.user.id === userId
+          const buttonCollector =
+            interaction.channel.createMessageComponentCollector({
+              filter: buttonFilter,
+              time: 15000,
             })
 
-            // Collector for button interaction
-            const buttonFilter = (i) => i.user.id === userId
-            const buttonCollector =
-              interaction.channel.createMessageComponentCollector({
-                filter: buttonFilter,
-                time: 30000,
+          buttonCollector.on('collect', async (i) => {
+            if (i.customId === 'confirm_fight') {
+              await i.deferReply({ ephemeral: true })
+              await setupBattleLogic(userId, userName, i, deck)
+              await i.editReply({
+                content: 'Battle initiated!',
               })
-
-            buttonCollector.on('collect', async (i) => {
-              if (i.customId === 'confirm_fight') {
-                // Initiate the battle
-                await i.deferReply({ ephemeral: true })
-                setupBattleLogic(userId, userName, i)
-              } else if (i.customId === 'back_fight') {
-                // Abort the battle and immediately respond
-                await i.reply({
-                  content: 'Battle aborted.',
-                  ephemeral: true,
-                })
-              }
-            })
-
-            buttonCollector.on('end', (collected) => {
-              if (collected.size === 0) {
-                interaction.followUp('No response, battle aborted.')
-              }
-            })
-
-            // Function to create a field for a character
-            function createCharacterField(character) {
-              const effectiveDamage =
-                character.effective_damage ||
-                character.masterCharacter.base_damage
-              const effectiveHealth =
-                character.effective_health ||
-                character.masterCharacter.base_health
-
-              return {
-                name:
-                  `${character.masterCharacter.character_name} | Level ` +
-                  '`' +
-                  character.level.toString() +
-                  '`',
-                value: `⚔️ Damage: ${effectiveDamage}, 🧡 Health: ${effectiveHealth}`,
-              }
+            } else if (i.customId === 'back_fight') {
+              await i.reply({
+                content: 'Battle aborted.',
+                ephemeral: true,
+              })
             }
-            // embed.setImage('https://cdn.discordapp.com/attachments/1149795132426694826/1199900841944031373/IMG_8846.webp?ex=65c439bd&is=65b1c4bd&hm=078c43059c889e84e9ed20cb97ddda4cf0c6c157780635bb2e542ab2b49ae647&')
+          })
 
-            collector.stop()
-          }
+          buttonCollector.on('end', (collected) => {
+            if (collected.size === 0) {
+              interaction.followUp('No response, battle aborted.')
+              delete userBattles[userId]
+            }
+          })
+          collector.stop()
         }
       })
 
@@ -269,7 +200,6 @@ module.exports = {
           interaction.followUp('Time has run out, no character selected.')
         }
       })
-      global.appearingCharacterName = null
     } catch (error) {
       console.error('Error in execute:', error)
       if (!interaction.replied && !interaction.deferred) {

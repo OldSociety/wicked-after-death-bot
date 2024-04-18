@@ -5,9 +5,7 @@ const {
   ButtonStyle,
 } = require('discord.js')
 
-// Function to create a round embed that can be edited to update with new information
-const createRoundEmbed = (actions, character, enemy, battleKey) => {
-  // Check if character names are defined
+const createRoundEmbed = (actions, character, enemy, battleKey, deck) => {
   const combatDescription =
     character.character_name && enemy.character_name
       ? `Combat: ${character.character_name} vs. ${enemy.character_name}`
@@ -18,7 +16,6 @@ const createRoundEmbed = (actions, character, enemy, battleKey) => {
     .setColor('DarkRed')
     .setFooter({ text: `In combat with ${enemy.character_name}` })
 
-  // // If actions are provided, add them to the embed
   if (actions && actions.length > 0) {
     actions.forEach((action) => {
       let actionDesc = action.didMiss
@@ -30,14 +27,16 @@ const createRoundEmbed = (actions, character, enemy, battleKey) => {
       embed.addFields({
         name: '\u200B', // Zero-width space
         value: '```' + `${actionDesc}` + '```',
-        // value: '```' + `${actionDesc}\n\n\n\u200B` + '```',
       })
     })
   } else {
+    // If there are no actions, assume it's preparation time
     embed.addFields({
       name: 'Prepare for Battle',
       value: 'Choose your action and fight!',
-    })
+    });
+
+    
   }
 
   const actionRow = new ActionRowBuilder().addComponents(

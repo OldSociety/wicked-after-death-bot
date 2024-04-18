@@ -4,7 +4,7 @@ const { initializeCharacterFlagsAndCounters } = require('./battleUtils')
 const { createRoundEmbed } = require('../roundEmbed')
 // const { SetupPlayerReactions } = require('./reactionListener')
 
-const setupBattleLogic = async (userId, userName, i) => {
+const setupBattleLogic = async (userId, userName, i, deck) => {
 
   const validBattleKeys = Object.keys(battleManager).filter(
     (key) => key !== 'battleManager' && key !== 'userBattles'
@@ -36,7 +36,8 @@ const setupBattleLogic = async (userId, userName, i) => {
       actions,
       characterInstance,
       enemyInstance,
-      battleKey
+      battleKey,
+      deck
     )
     await i.editReply(roundEmbed)
   }
