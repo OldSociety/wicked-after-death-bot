@@ -81,7 +81,7 @@ module.exports = {
         return
       }
 
-      if (actionType === 'battle') {
+      if (actionType === 'card') {
         const battle = battleManager[battleKey]
         if (!battle) {
           await interaction.reply({
@@ -91,46 +91,41 @@ module.exports = {
           return
         }
 
-        if (battleAction === 'light') {
-          console.log('Light attack initiated')
-          await applyRound(
-            battle.characterInstance,
-            battle.enemyInstance,
-            interaction,
-            battleKey
-          )
-        } else if (battleAction === 'heavy') {
-          console.log('Heavy attack initiated')
-          await applyRound(
-            battle.characterInstance,
-            battle.enemyInstance,
-            interaction,
-            battleKey
-          )
-        } else if (battleAction === 'block') {
-          console.log('Block initiated')
-          await applyRound(
-            battle.characterInstance,
-            battle.enemyInstance,
-            interaction,
-            battleKey
-          )
+        const card = battle.deck[cardIndex] // Fetch the card based on the index
+        if (!card) {
+          await interaction.reply({
+            content: 'Card not found or has already been played.',
+            ephemeral: true,
+          })
+          return
         }
 
-        // Check if enemy is defeated and handle battle end if necessary
-        if (battle.enemyInstance.current_health <= 0) {
-          handleBattleEnd(battleKey, interaction)
-        }
+        // Apply the card effect here
+        // Example: await applyCardEffect(card, battle, interaction);
+        await interaction.update({
+          content: `Played card: ${card.name}`,
+          components: [], // Clear buttons after action or update as needed
+          embeds: [],
+        })
+
+        console.log(`Played card: ${card.name}`)
+
+        // Add logic for other battle actions if needed
+      } else if (customId.startsWith('delete_account_yes')) {
+        await deleteUserAccount(userId)
+        await interaction.reply(
+          `Successfully deleted account for user ID ${userId}`
+        )
+      } else if (customId.startsWith('delete_account_no')) {
+        await interaction.reply(
+          `Canceled account deletion for user ID ${userId}`
+        )
       }
-
-      // Add logic for other battle actions if needed
-    } else if (customId.startsWith('delete_account_yes')) {
-      await deleteUserAccount(userId)
-      await interaction.reply(
-        `Successfully deleted account for user ID ${userId}`
-      )
-    } else if (customId.startsWith('delete_account_no')) {
-      await interaction.reply(`Canceled account deletion for user ID ${userId}`)
     }
   },
+}
+// Assume applyCardEffect is a function that modifies the game state
+async function applyCardEffect(card, battle, interaction) {
+  console.log(`Applying effect of card: ${card.name}`)
+  // Implement your card logic here
 }
